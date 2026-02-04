@@ -29,7 +29,7 @@ public class PlaceCandidate extends BaseEntity {
     private Meeting meeting;
 
     @Column(nullable = false)
-    private String displayName;
+    private String name;
 
     @Column(nullable = false)
     private String address;
@@ -42,6 +42,9 @@ public class PlaceCandidate extends BaseEntity {
 
     @Column(nullable = false)
     private double avgTravelTime;
+
+    @Column(nullable = false)
+    private double maxTravelTime;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

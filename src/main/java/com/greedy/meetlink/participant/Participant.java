@@ -30,5 +30,5 @@ public class Participant extends BaseEntity {
     private String nickname;
 
     @Column(nullable = false, unique = true)
-    private String key;
+    private String token;
 }

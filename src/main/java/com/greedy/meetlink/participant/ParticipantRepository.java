@@ -2,5 +2,4 @@ package com.greedy.meetlink.participant;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ParticipantRepository extends JpaRepository<Participant, Long> {
-}
+public interface ParticipantRepository extends JpaRepository<Participant, Long> {}

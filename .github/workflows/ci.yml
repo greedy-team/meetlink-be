@@ -13,7 +13,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "21"
-      - name: Gradle cache
+      - name: Setup Gradle Cache
         uses: actions/cache@v4
         with:
           path: |

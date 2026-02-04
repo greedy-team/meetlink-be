@@ -20,7 +20,7 @@ public class StartPoint {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", nullable = false, unique = true)
+    @JoinColumn(nullable = false, unique = true)
     private Participant participant;
 
     private String address;

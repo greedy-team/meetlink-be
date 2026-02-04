@@ -25,7 +25,7 @@ public class TimeCandidate extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Meeting meeting;
 
     private LocalDate date;

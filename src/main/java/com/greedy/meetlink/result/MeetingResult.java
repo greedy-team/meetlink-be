@@ -22,14 +22,14 @@ public class MeetingResult extends BaseEntity {
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_id")
+    @JoinColumn
     private Meeting meeting;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_candidate_id")
+    @JoinColumn
     private TimeCandidate timeCandidate;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "place_candidate_id")
+    @JoinColumn
     private PlaceCandidate placeCandidate;
 }

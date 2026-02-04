@@ -23,12 +23,12 @@ public class Participant extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_id", nullable = false)
+    @JoinColumn(nullable = false)
     private Meeting meeting;
 
     @Column(nullable = false)
     private String nickname;
 
     @Column(nullable = false, unique = true)
-    private String participantToken;
+    private String key;
 }

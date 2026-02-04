@@ -35,6 +35,9 @@ public class TimeCandidate extends BaseEntity {
     private LocalTime startTime;
 
     @Column(nullable = false)
+    private LocalTime endTime;
+
+    @Column(nullable = false)
     private int availableCount;
 
     @Column(nullable = false)

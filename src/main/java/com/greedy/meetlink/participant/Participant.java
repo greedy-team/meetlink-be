@@ -1,5 +1,6 @@
 package com.greedy.meetlink.participant;
 
+import com.greedy.meetlink.availability.TimeAvailability;
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.meeting.Meeting;
 import jakarta.persistence.Column;
@@ -10,9 +11,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,4 +37,25 @@ public class Participant extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String token;
+
+    @OneToMany(mappedBy = "participant")
+    private List<TimeAvailability> availableTimes = new ArrayList<>();
+
+    @OneToOne(mappedBy = "participant", fetch = FetchType.LAZY)
+    private StartPoint startPoint;
+
+    public boolean hasEnteredTime() {
+        if (!this.meeting.isEnableTimeRecommendation()) {
+            return true;
+        }
+
+        return !this.availableTimes.isEmpty();
+    }
+
+    public boolean hasEnteredPlace() {
+        if (!this.meeting.isEnablePlaceRecommendation()) {
+            return true;
+        }
+        return this.startPoint != null;
+    }
 }

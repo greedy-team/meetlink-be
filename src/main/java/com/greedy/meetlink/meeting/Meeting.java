@@ -1,17 +1,25 @@
 package com.greedy.meetlink.meeting;
 
 import com.greedy.meetlink.common.entity.BaseEntity;
+import com.greedy.meetlink.participant.Participant;
+import com.greedy.meetlink.result.MeetingResult;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalTime;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,4 +43,28 @@ public class Meeting extends BaseEntity {
 
     private LocalTime timeRangeStart;
     private LocalTime timeRangeEnd;
+
+    @OneToMany(mappedBy = "meeting")
+    private List<Participant> participants = new ArrayList<>();
+
+    @OneToOne(mappedBy = "meeting", fetch = FetchType.LAZY)
+    private MeetingResult meetingResult;
+
+    private Meeting(String name, String code, LocalTime start, LocalTime end) {
+        this.name = name;
+        this.code = code;
+        this.timeRangeStart = start;
+        this.timeRangeEnd = end;
+    }
+
+    public static Meeting create(String name, String code, LocalTime start, LocalTime end) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("이름은 필수입니다.");
+        }
+        return new Meeting(name, code, start, end);
+    }
+
+    public boolean isRecommendationCompleted() {
+        return this.meetingResult != null;
+    }
 }

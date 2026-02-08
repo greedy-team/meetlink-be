@@ -1,6 +1,7 @@
 package com.greedy.meetlink.meeting.dto;
 
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
+import com.greedy.meetlink.meeting.validation.ValidTimeRecommendationSettings;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@ValidTimeRecommendationSettings
 public class MeetingUpdateRequest {
     
     @NotBlank(message = "모임 이름은 필수입니다.")

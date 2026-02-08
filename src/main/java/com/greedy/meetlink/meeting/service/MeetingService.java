@@ -1,11 +1,11 @@
 package com.greedy.meetlink.meeting.service;
 
-import com.greedy.meetlink.meeting.entity.Meeting;
-import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.meeting.dto.MeetingCreateRequest;
 import com.greedy.meetlink.meeting.dto.MeetingResponse;
 import com.greedy.meetlink.meeting.dto.MeetingUpdateRequest;
+import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.exception.MeetingNotFoundException;
+import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.meeting.util.MeetingCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,21 +21,14 @@ public class MeetingService {
 
     /**
      * 모임 생성
-     * @param request 모임 생성 요청 DTO
+     * @param request 모임 생성 요청 DTO (유효성 검증은 DTO 레벨에서 완료됨)
      * @return 생성된 모임 응답 DTO
      */
     @Transactional
     public MeetingResponse createMeeting(MeetingCreateRequest request) {
-        // 시간 추천 사용 시 필수 필드 검증
-        validateTimeRecommendationFields(request.getEnableTimeRecommendation(),
-                request.getTimeAvailabilityType(),
-                request.getTimeRangeStart(),
-                request.getTimeRangeEnd());
 
-        // 고유한 모임 코드 생성
         String code = generateUniqueCode();
 
-        // 모임 엔티티 생성
         Meeting meeting = Meeting.builder()
                 .name(request.getName())
                 .code(code)
@@ -54,7 +47,7 @@ public class MeetingService {
     /**
      * 모임 수정
      * @param id 모임 ID
-     * @param request 모임 수정 요청 DTO
+     * @param request 모임 수정 요청 DTO (유효성 검증은 DTO 레벨에서 완료됨)
      * @return 수정된 모임 응답 DTO
      */
     @Transactional
@@ -62,13 +55,6 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(id)
                 .orElseThrow(() -> new MeetingNotFoundException(id));
 
-        // 시간 추천 사용 시 필수 필드 검증
-        validateTimeRecommendationFields(request.getEnableTimeRecommendation(),
-                request.getTimeAvailabilityType(),
-                request.getTimeRangeStart(),
-                request.getTimeRangeEnd());
-
-        // 모임 정보 업데이트
         meeting.update(
                 request.getName(),
                 request.getEnableTimeRecommendation(),
@@ -77,6 +63,18 @@ public class MeetingService {
                 request.getTimeRangeStart(),
                 request.getTimeRangeEnd()
         );
+
+        return MeetingResponse.from(meeting);
+    }
+
+    /**
+     * 모임 ID로 조회
+     * @param id 모임 ID
+     * @return 모임 응답 DTO
+     */
+    public MeetingResponse getMeetingById(Long id) {
+        Meeting meeting = meetingRepository.findById(id)
+                .orElseThrow(() -> new MeetingNotFoundException(id));
 
         return MeetingResponse.from(meeting);
     }
@@ -105,26 +103,5 @@ public class MeetingService {
             }
         }
         throw new IllegalStateException("고유한 모임 코드 생성에 실패했습니다.");
-    }
-
-    /**
-     * 시간 추천 관련 필드 검증
-     * @param enableTimeRecommendation 시간 추천 사용 여부
-     * @param timeAvailabilityType 시간 입력 유형
-     * @param timeRangeStart 시간 범위 시작
-     * @param timeRangeEnd 시간 범위 끝
-     */
-    private void validateTimeRecommendationFields(Boolean enableTimeRecommendation,
-                                                  Object timeAvailabilityType,
-                                                  Object timeRangeStart,
-                                                  Object timeRangeEnd) {
-        if (Boolean.TRUE.equals(enableTimeRecommendation)) {
-            if (timeAvailabilityType == null) {
-                throw new IllegalArgumentException("시간 추천을 사용하는 경우 시간 입력 유형은 필수입니다.");
-            }
-            if (timeRangeStart == null || timeRangeEnd == null) {
-                throw new IllegalArgumentException("시간 추천을 사용하는 경우 시간 범위는 필수입니다.");
-            }
-        }
     }
 }

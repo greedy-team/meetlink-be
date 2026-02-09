@@ -1,7 +1,6 @@
 package com.greedy.meetlink.common.exception;
 
 import com.greedy.meetlink.common.dto.response.ErrorResponse;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +69,6 @@ public class GlobalExceptionHandler {
         ErrorResponse response = ErrorResponse.builder()
                 .status(status.value())
                 .message(message)
-                .timestamp(LocalDateTime.now())
                 .errors(errors)
                 .build();
         return ResponseEntity.status(status).body(response);

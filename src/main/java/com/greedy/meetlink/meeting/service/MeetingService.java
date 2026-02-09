@@ -50,14 +50,16 @@ public class MeetingService {
     /**
      * 모임 수정
      *
-     * @param id 모임 ID
-     * @param request 모임 수정 요청 DTO (유효성 검증은 DTO 레벨에서 완료됨)
+     * @param code 모임 code
+     * @param request 모임 수정 요청 DTO
      * @return 수정된 모임 응답 DTO
      */
     @Transactional
-    public MeetingResponse update(Long id, MeetingUpdateRequest request) {
+    public MeetingResponse update(String code, MeetingUpdateRequest request) {
         Meeting meeting =
-                meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
+                meetingRepository
+                        .findByCode(code)
+                        .orElseThrow(() -> new MeetingNotFoundException(code));
 
         meeting.update(
                 request.getName(),
@@ -71,28 +73,17 @@ public class MeetingService {
     }
 
     /**
-     * 모임 ID로 조회
-     *
-     * @param id 모임 ID
-     * @return 모임 응답 DTO
-     */
-    public MeetingResponse getById(Long id) {
-        Meeting meeting =
-                meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
-
-        return MeetingResponse.from(meeting);
-    }
-
-    /**
      * 모임 삭제
      *
-     * @param id 모임 ID
+     * @param code 모임 code
      */
     @Transactional
-    public void delete(Long id) {
+    public void delete(String code) {
         Meeting meeting =
-                meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
-        meetingRepository.deleteById(id);
+                meetingRepository
+                        .findByCode(code)
+                        .orElseThrow(() -> new MeetingNotFoundException(code));
+        meetingRepository.deleteById(meeting.getId());
     }
 
     /**

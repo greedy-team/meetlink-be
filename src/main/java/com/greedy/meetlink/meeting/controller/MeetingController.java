@@ -39,26 +39,26 @@ public class MeetingController {
     /**
      * 모임 수정
      *
-     * @param id 모임 ID
+     * @param code 모임 code
      * @param request 모임 수정 요청
      * @return 수정된 모임 정보
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{code}")
     public ResponseEntity<MeetingResponse> updateMeeting(
-            @PathVariable Long id, @Valid @RequestBody MeetingUpdateRequest request) {
-        MeetingResponse response = meetingService.update(id, request);
+            @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request) {
+        MeetingResponse response = meetingService.update(code, request);
         return ResponseEntity.ok(response);
     }
 
     /**
      * 모임 삭제
      *
-     * @param id 모임 ID
+     * @param code 모임 code
      * @return 204 No Content
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMeeting(@PathVariable Long id) {
-        meetingService.delete(id);
+    @DeleteMapping("/{code}")
+    public ResponseEntity<Void> deleteMeeting(@PathVariable String code) {
+        meetingService.delete(code);
         return ResponseEntity.noContent().build();
     }
 }

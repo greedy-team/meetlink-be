@@ -73,7 +73,7 @@ public class MeetingService {
      * @param id 모임 ID
      * @return 모임 응답 DTO
      */
-    public MeetingResponse getMeetingById(Long id) {
+    public MeetingResponse getById(Long id) {
         Meeting meeting = meetingRepository.findById(id)
                 .orElseThrow(() -> new MeetingNotFoundException(id));
 

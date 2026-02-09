@@ -1,5 +1,6 @@
 package com.greedy.meetlink.meeting.dto.request;
 
+import com.greedy.meetlink.common.validation.TimeRangeProvider;
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.validation.ValidTimeRange;
 import com.greedy.meetlink.meeting.validation.ValidTimeRecommendationSettings;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @ValidTimeRecommendationSettings
 @ValidTimeRange
-public class MeetingUpdateRequest {
+public class MeetingUpdateRequest{
     
     @NotBlank(message = "모임 이름은 필수입니다.")
     private String name;
@@ -29,7 +30,7 @@ public class MeetingUpdateRequest {
     private LocalTime timeRangeStart;
     
     private LocalTime timeRangeEnd;
-    
+
     public MeetingUpdateRequest(String name, Boolean enableTimeRecommendation,
                                Boolean enablePlaceRecommendation,
                                TimeAvailabilityType timeAvailabilityType,

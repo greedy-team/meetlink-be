@@ -1,5 +1,6 @@
 package com.greedy.meetlink.meeting.validation;
 
+import com.greedy.meetlink.common.validation.TimeRangeProvider;
 import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
 import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import jakarta.validation.ConstraintValidator;
@@ -12,24 +13,16 @@ import java.time.LocalTime;
  * - timeRangeStart < timeRangeEnd 확인
  * - null인 경우는 통과 (존재 여부는 다른 Validator가 검증)
  */
-public class ValidTimeRangeValidator implements ConstraintValidator<ValidTimeRange, Object> {
+public class ValidTimeRangeValidator implements ConstraintValidator<ValidTimeRange, TimeRangeProvider> {
 
     @Override
-    public boolean isValid(Object value, ConstraintValidatorContext context) {
+    public boolean isValid(TimeRangeProvider value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
 
-        LocalTime startTime = null;
-        LocalTime endTime = null;
-
-        if (value instanceof MeetingCreateRequest request) {
-            startTime = request.getTimeRangeStart();
-            endTime = request.getTimeRangeEnd();
-        } else if (value instanceof MeetingUpdateRequest request) {
-            startTime = request.getTimeRangeStart();
-            endTime = request.getTimeRangeEnd();
-        }
+        LocalTime startTime = value.getTimeRangeStart();
+        LocalTime endTime = value.getTimeRangeEnd();
 
         // 둘 다 null이면 검증 통과 (다른 Validator가 처리)
         if (startTime == null || endTime == null) {

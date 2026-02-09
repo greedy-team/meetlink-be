@@ -26,7 +26,7 @@ public class MeetingService {
      * @return 생성된 모임 응답 DTO
      */
     @Transactional
-    public MeetingResponse createMeeting(MeetingCreateRequest request) {
+    public MeetingResponse create(MeetingCreateRequest request) {
 
         String code = generateUniqueCode();
 
@@ -52,7 +52,7 @@ public class MeetingService {
      * @return 수정된 모임 응답 DTO
      */
     @Transactional
-    public MeetingResponse updateMeeting(Long id, MeetingUpdateRequest request) {
+    public MeetingResponse update(Long id, MeetingUpdateRequest request) {
         Meeting meeting = meetingRepository.findById(id)
                 .orElseThrow(() -> new MeetingNotFoundException(id));
 
@@ -85,7 +85,7 @@ public class MeetingService {
      * @param id 모임 ID
      */
     @Transactional
-    public void deleteMeeting(Long id) {
+    public void delete(Long id) {
         Meeting meeting = meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
         meetingRepository.deleteById(id);
     }

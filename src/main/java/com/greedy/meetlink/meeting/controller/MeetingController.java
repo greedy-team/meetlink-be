@@ -31,7 +31,7 @@ public class MeetingController {
     @PostMapping
     public ResponseEntity<MeetingResponse> createMeeting(
             @Valid @RequestBody MeetingCreateRequest request) {
-        MeetingResponse response = meetingService.createMeeting(request);
+        MeetingResponse response = meetingService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -45,7 +45,7 @@ public class MeetingController {
     public ResponseEntity<MeetingResponse> updateMeeting(
             @PathVariable Long id,
             @Valid @RequestBody MeetingUpdateRequest request) {
-        MeetingResponse response = meetingService.updateMeeting(id, request);
+        MeetingResponse response = meetingService.update(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -56,7 +56,7 @@ public class MeetingController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMeeting(@PathVariable Long id) {
-        meetingService.deleteMeeting(id);
+        meetingService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

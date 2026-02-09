@@ -8,10 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * 시간 범위의 논리적 유효성 검증
- * - timeRangeStart < timeRangeEnd (자정 넘김 불가)
- */
+/** 시간 범위의 논리적 유효성 검증 - timeRangeStart < timeRangeEnd (자정 넘김 불가) */
 @Documented
 @Constraint(validatedBy = ValidTimeRangeValidator.class)
 @Target({ElementType.TYPE})

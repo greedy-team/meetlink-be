@@ -4,5 +4,6 @@ import java.time.LocalTime;
 
 public interface TimeRangeProvider {
     LocalTime getTimeRangeStart();
+
     LocalTime getTimeRangeEnd();
 }

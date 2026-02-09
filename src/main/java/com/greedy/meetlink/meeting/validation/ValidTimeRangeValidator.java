@@ -1,19 +1,13 @@
 package com.greedy.meetlink.meeting.validation;
 
 import com.greedy.meetlink.common.validation.TimeRangeProvider;
-import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
-import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
 import java.time.LocalTime;
 
-/**
- * 시간 범위 논리 검증
- * - timeRangeStart < timeRangeEnd 확인
- * - null인 경우는 통과 (존재 여부는 다른 Validator가 검증)
- */
-public class ValidTimeRangeValidator implements ConstraintValidator<ValidTimeRange, TimeRangeProvider> {
+/** 시간 범위 논리 검증 - timeRangeStart < timeRangeEnd 확인 - null인 경우는 통과 (존재 여부는 다른 Validator가 검증) */
+public class ValidTimeRangeValidator
+        implements ConstraintValidator<ValidTimeRange, TimeRangeProvider> {
 
     @Override
     public boolean isValid(TimeRangeProvider value, ConstraintValidatorContext context) {
@@ -33,8 +27,7 @@ public class ValidTimeRangeValidator implements ConstraintValidator<ValidTimeRan
         if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                            "시작 시간(" + startTime + ")은 종료 시간(" + endTime + ")보다 빨라야 합니다."
-                    )
+                            "시작 시간(" + startTime + ")은 종료 시간(" + endTime + ")보다 빨라야 합니다.")
                     .addPropertyNode("timeRangeStart")
                     .addConstraintViolation();
             return false;

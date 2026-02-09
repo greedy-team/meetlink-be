@@ -3,8 +3,9 @@ package com.greedy.meetlink.meeting.util;
 import java.security.SecureRandom;
 
 public class MeetingCodeGenerator {
-    
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    private static final String CHARACTERS =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int CODE_LENGTH = 8;
     private static final SecureRandom random = new SecureRandom();
 

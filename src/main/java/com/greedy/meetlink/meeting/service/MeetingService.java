@@ -1,11 +1,11 @@
 package com.greedy.meetlink.meeting.service;
 
 import com.greedy.meetlink.common.exception.MeetingCodeGenerationException;
-import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
-import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
-import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
-import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
+import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
+import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
+import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.meeting.util.MeetingCodeGenerator;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,7 @@ public class MeetingService {
 
     /**
      * 모임 생성
+     *
      * @param request 모임 생성 요청 DTO (유효성 검증은 DTO 레벨에서 완료됨)
      * @return 생성된 모임 응답 DTO
      */
@@ -30,15 +31,16 @@ public class MeetingService {
 
         String code = generateUniqueCode();
 
-        Meeting meeting = Meeting.builder()
-                .name(request.getName())
-                .code(code)
-                .enableTimeRecommendation(request.getEnableTimeRecommendation())
-                .enablePlaceRecommendation(request.getEnablePlaceRecommendation())
-                .timeAvailabilityType(request.getTimeAvailabilityType())
-                .timeRangeStart(request.getTimeRangeStart())
-                .timeRangeEnd(request.getTimeRangeEnd())
-                .build();
+        Meeting meeting =
+                Meeting.builder()
+                        .name(request.getName())
+                        .code(code)
+                        .enableTimeRecommendation(request.getEnableTimeRecommendation())
+                        .enablePlaceRecommendation(request.getEnablePlaceRecommendation())
+                        .timeAvailabilityType(request.getTimeAvailabilityType())
+                        .timeRangeStart(request.getTimeRangeStart())
+                        .timeRangeEnd(request.getTimeRangeEnd())
+                        .build();
 
         Meeting savedMeeting = meetingRepository.save(meeting);
 
@@ -47,14 +49,15 @@ public class MeetingService {
 
     /**
      * 모임 수정
+     *
      * @param id 모임 ID
      * @param request 모임 수정 요청 DTO (유효성 검증은 DTO 레벨에서 완료됨)
      * @return 수정된 모임 응답 DTO
      */
     @Transactional
     public MeetingResponse update(Long id, MeetingUpdateRequest request) {
-        Meeting meeting = meetingRepository.findById(id)
-                .orElseThrow(() -> new MeetingNotFoundException(id));
+        Meeting meeting =
+                meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
 
         meeting.update(
                 request.getName(),
@@ -62,36 +65,39 @@ public class MeetingService {
                 request.getEnablePlaceRecommendation(),
                 request.getTimeAvailabilityType(),
                 request.getTimeRangeStart(),
-                request.getTimeRangeEnd()
-        );
+                request.getTimeRangeEnd());
 
         return MeetingResponse.from(meeting);
     }
 
     /**
      * 모임 ID로 조회
+     *
      * @param id 모임 ID
      * @return 모임 응답 DTO
      */
     public MeetingResponse getById(Long id) {
-        Meeting meeting = meetingRepository.findById(id)
-                .orElseThrow(() -> new MeetingNotFoundException(id));
+        Meeting meeting =
+                meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
 
         return MeetingResponse.from(meeting);
     }
 
     /**
      * 모임 삭제
+     *
      * @param id 모임 ID
      */
     @Transactional
     public void delete(Long id) {
-        Meeting meeting = meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
+        Meeting meeting =
+                meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
         meetingRepository.deleteById(id);
     }
 
     /**
      * 중복되지 않는 고유한 모임 코드 생성
+     *
      * @return 생성된 코드
      */
     private String generateUniqueCode() {

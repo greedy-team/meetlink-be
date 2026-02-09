@@ -34,7 +34,9 @@ public class ValidTimeRecommendationValidator
         }
 
         if (!isValid) {
-            log.warn("Time recommendation settings validation failed for object: {}", value.getClass().getSimpleName());
+            log.warn(
+                    "Time recommendation settings validation failed for object: {}",
+                    value.getClass().getSimpleName());
         }
 
         return isValid;

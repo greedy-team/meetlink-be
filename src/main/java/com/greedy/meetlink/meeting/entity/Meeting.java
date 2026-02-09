@@ -38,9 +38,14 @@ public class Meeting extends BaseEntity {
     private LocalTime timeRangeEnd;
 
     @Builder
-    public Meeting(String name, String code, boolean enableTimeRecommendation,
-                   boolean enablePlaceRecommendation, TimeAvailabilityType timeAvailabilityType,
-                   LocalTime timeRangeStart, LocalTime timeRangeEnd) {
+    public Meeting(
+            String name,
+            String code,
+            boolean enableTimeRecommendation,
+            boolean enablePlaceRecommendation,
+            TimeAvailabilityType timeAvailabilityType,
+            LocalTime timeRangeStart,
+            LocalTime timeRangeEnd) {
         this.name = name;
         this.code = code;
         this.enableTimeRecommendation = enableTimeRecommendation;
@@ -50,9 +55,13 @@ public class Meeting extends BaseEntity {
         this.timeRangeEnd = timeRangeEnd;
     }
 
-    public void update(String name, boolean enableTimeRecommendation,
-                       boolean enablePlaceRecommendation, TimeAvailabilityType timeAvailabilityType,
-                       LocalTime timeRangeStart, LocalTime timeRangeEnd) {
+    public void update(
+            String name,
+            boolean enableTimeRecommendation,
+            boolean enablePlaceRecommendation,
+            TimeAvailabilityType timeAvailabilityType,
+            LocalTime timeRangeStart,
+            LocalTime timeRangeEnd) {
         this.name = name;
         this.enableTimeRecommendation = enableTimeRecommendation;
         this.enablePlaceRecommendation = enablePlaceRecommendation;

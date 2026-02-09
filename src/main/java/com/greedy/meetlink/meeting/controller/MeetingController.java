@@ -1,8 +1,8 @@
 package com.greedy.meetlink.meeting.controller;
 
 import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
-import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
 import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
+import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
 import com.greedy.meetlink.meeting.service.MeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ public class MeetingController {
 
     /**
      * 모임 생성
+     *
      * @param request 모임 생성 요청
      * @return 생성된 모임 정보
      */
@@ -37,20 +38,21 @@ public class MeetingController {
 
     /**
      * 모임 수정
+     *
      * @param id 모임 ID
      * @param request 모임 수정 요청
      * @return 수정된 모임 정보
      */
     @PutMapping("/{id}")
     public ResponseEntity<MeetingResponse> updateMeeting(
-            @PathVariable Long id,
-            @Valid @RequestBody MeetingUpdateRequest request) {
+            @PathVariable Long id, @Valid @RequestBody MeetingUpdateRequest request) {
         MeetingResponse response = meetingService.update(id, request);
         return ResponseEntity.ok(response);
     }
 
     /**
      * 모임 삭제
+     *
      * @param id 모임 ID
      * @return 204 No Content
      */

@@ -1,4 +1,4 @@
-package com.greedy.meetlink.meeting.dto;
+package com.greedy.meetlink.meeting.dto.request;
 
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.validation.ValidTimeRange;

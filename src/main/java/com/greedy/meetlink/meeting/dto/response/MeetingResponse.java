@@ -1,4 +1,4 @@
-package com.greedy.meetlink.meeting.dto;
+package com.greedy.meetlink.meeting.dto.response;
 
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;

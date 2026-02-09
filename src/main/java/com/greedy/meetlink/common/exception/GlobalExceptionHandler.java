@@ -1,5 +1,6 @@
-package com.greedy.meetlink.exception;
+package com.greedy.meetlink.common.exception;
 
+import com.greedy.meetlink.common.dto.response.ErrorResponse;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,8 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
@@ -30,7 +32,7 @@ public class GlobalExceptionHandler {
      * 유효성 검증 실패
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationException(
+    public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex) {
         
         Map<String, String> errors = new HashMap<>();
@@ -40,7 +42,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse(
+        ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "입력값 검증에 실패했습니다.",
                 LocalDateTime.now(),
@@ -58,7 +60,8 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -71,23 +74,9 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "서버 오류가 발생했습니다.",
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-    
-    // 에러 응답 클래스
-    public record ErrorResponse(
-            int status,
-            String message,
-            LocalDateTime timestamp
-    ) {}
-    
-    // 유효성 검증 에러 응답 클래스
-    public record ValidationErrorResponse(
-            int status,
-            String message,
-            LocalDateTime timestamp,
-            Map<String, String> errors
-    ) {}
 }

@@ -1,4 +1,4 @@
-package com.greedy.meetlink.exception;
+package com.greedy.meetlink.common.exception;
 
 public class MeetingNotFoundException extends RuntimeException {
     

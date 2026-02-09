@@ -1,10 +1,10 @@
 package com.greedy.meetlink.meeting.service;
 
-import com.greedy.meetlink.meeting.dto.MeetingCreateRequest;
-import com.greedy.meetlink.meeting.dto.MeetingResponse;
-import com.greedy.meetlink.meeting.dto.MeetingUpdateRequest;
+import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
+import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
+import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import com.greedy.meetlink.meeting.entity.Meeting;
-import com.greedy.meetlink.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.meeting.util.MeetingCodeGenerator;
 import lombok.RequiredArgsConstructor;

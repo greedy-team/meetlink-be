@@ -1,8 +1,8 @@
 package com.greedy.meetlink.meeting.controller;
 
-import com.greedy.meetlink.meeting.dto.MeetingCreateRequest;
-import com.greedy.meetlink.meeting.dto.MeetingResponse;
-import com.greedy.meetlink.meeting.dto.MeetingUpdateRequest;
+import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
+import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
+import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import com.greedy.meetlink.meeting.service.MeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

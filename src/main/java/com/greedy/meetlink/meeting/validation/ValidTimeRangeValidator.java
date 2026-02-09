@@ -1,7 +1,7 @@
 package com.greedy.meetlink.meeting.validation;
 
-import com.greedy.meetlink.meeting.dto.MeetingCreateRequest;
-import com.greedy.meetlink.meeting.dto.MeetingUpdateRequest;
+import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
+import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

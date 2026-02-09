@@ -1,5 +1,6 @@
 package com.greedy.meetlink.meeting.service;
 
+import com.greedy.meetlink.common.exception.MeetingCodeGenerationException;
 import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
 import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
 import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
@@ -100,6 +101,6 @@ public class MeetingService {
                 return code;
             }
         }
-        throw new IllegalStateException("고유한 모임 코드 생성에 실패했습니다.");
+        throw new MeetingCodeGenerationException();
     }
 }

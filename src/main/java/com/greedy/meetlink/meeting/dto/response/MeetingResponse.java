@@ -4,11 +4,16 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MeetingResponse {
-    
+
     private final Long id;
     private final String name;
     private final String code;
@@ -19,21 +24,19 @@ public class MeetingResponse {
     private final LocalTime timeRangeEnd;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
-    
-    public MeetingResponse(Meeting meeting) {
-        this.id = meeting.getId();
-        this.name = meeting.getName();
-        this.code = meeting.getCode();
-        this.enableTimeRecommendation = meeting.isEnableTimeRecommendation();
-        this.enablePlaceRecommendation = meeting.isEnablePlaceRecommendation();
-        this.timeAvailabilityType = meeting.getTimeAvailabilityType();
-        this.timeRangeStart = meeting.getTimeRangeStart();
-        this.timeRangeEnd = meeting.getTimeRangeEnd();
-        this.createdAt = meeting.getCreatedAt();
-        this.updatedAt = meeting.getUpdatedAt();
-    }
-    
+
     public static MeetingResponse from(Meeting meeting) {
-        return new MeetingResponse(meeting);
+        return MeetingResponse.builder()
+                .id(meeting.getId())
+                .name(meeting.getName())
+                .code(meeting.getCode())
+                .enableTimeRecommendation(meeting.isEnableTimeRecommendation())
+                .enablePlaceRecommendation(meeting.isEnablePlaceRecommendation())
+                .timeAvailabilityType(meeting.getTimeAvailabilityType())
+                .timeRangeStart(meeting.getTimeRangeStart())
+                .timeRangeEnd(meeting.getTimeRangeEnd())
+                .createdAt(meeting.getCreatedAt())
+                .updatedAt(meeting.getUpdatedAt())
+                .build();
     }
 }

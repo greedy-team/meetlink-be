@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
      * 모임을 찾을 수 없는 경우
      */
     @ExceptionHandler(MeetingNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleMeetingNotFound(MeetingNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleMeetingNotFoundException(MeetingNotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),

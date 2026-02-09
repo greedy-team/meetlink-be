@@ -1,4 +1,4 @@
-package com.greedy.meetlink.meeting.exception;
+package com.greedy.meetlink.exception;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

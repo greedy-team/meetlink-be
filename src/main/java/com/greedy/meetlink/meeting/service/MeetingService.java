@@ -85,9 +85,7 @@ public class MeetingService {
      */
     @Transactional
     public void deleteMeeting(Long id) {
-        if (!meetingRepository.existsById(id)) {
-            throw new MeetingNotFoundException(id);
-        }
+        Meeting meeting = meetingRepository.findById(id).orElseThrow(() -> new MeetingNotFoundException(id));
         meetingRepository.deleteById(id);
     }
 

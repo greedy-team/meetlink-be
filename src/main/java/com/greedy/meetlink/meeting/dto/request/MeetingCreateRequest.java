@@ -1,21 +1,18 @@
 package com.greedy.meetlink.meeting.dto.request;
 
-import com.greedy.meetlink.common.validation.TimeRangeProvider;
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.validation.ValidTimeRange;
-import com.greedy.meetlink.meeting.validation.ValidTimeRecommendationSettings;
+import com.greedy.meetlink.meeting.validation.ValidTimeRecommendation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@ValidTimeRecommendationSettings
+@ValidTimeRecommendation
 @ValidTimeRange
 public class MeetingCreateRequest{
 

@@ -6,8 +6,8 @@ import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ValidTimeRecommendationSettingsValidator
-        implements ConstraintValidator<ValidTimeRecommendationSettings, TimeRecommendationProvider> {
+public class ValidTimeRecommendationValidator
+        implements ConstraintValidator<ValidTimeRecommendation, TimeRecommendationProvider> {
 
     @Override
     public boolean isValid(TimeRecommendationProvider value, ConstraintValidatorContext context) {

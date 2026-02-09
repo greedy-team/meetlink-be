@@ -13,10 +13,10 @@ import java.lang.annotation.Target;
  * - enableTimeRecommendation이 true인 경우 timeAvailabilityType, timeRangeStart, timeRangeEnd 필수
  */
 @Documented
-@Constraint(validatedBy = ValidTimeRecommendationSettingsValidator.class)
+@Constraint(validatedBy = ValidTimeRecommendationValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidTimeRecommendationSettings {
+public @interface ValidTimeRecommendation {
 
     String message() default "시간 추천을 사용하는 경우 시간 설정은 필수입니다.";
 

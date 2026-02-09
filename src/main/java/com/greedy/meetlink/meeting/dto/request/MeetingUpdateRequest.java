@@ -1,9 +1,8 @@
 package com.greedy.meetlink.meeting.dto.request;
 
-import com.greedy.meetlink.common.validation.TimeRangeProvider;
 import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.validation.ValidTimeRange;
-import com.greedy.meetlink.meeting.validation.ValidTimeRecommendationSettings;
+import com.greedy.meetlink.meeting.validation.ValidTimeRecommendation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@ValidTimeRecommendationSettings
+@ValidTimeRecommendation
 @ValidTimeRange
 public class MeetingUpdateRequest{
     
@@ -30,16 +29,4 @@ public class MeetingUpdateRequest{
     private LocalTime timeRangeStart;
     
     private LocalTime timeRangeEnd;
-
-    public MeetingUpdateRequest(String name, Boolean enableTimeRecommendation,
-                               Boolean enablePlaceRecommendation,
-                               TimeAvailabilityType timeAvailabilityType,
-                               LocalTime timeRangeStart, LocalTime timeRangeEnd) {
-        this.name = name;
-        this.enableTimeRecommendation = enableTimeRecommendation;
-        this.enablePlaceRecommendation = enablePlaceRecommendation;
-        this.timeAvailabilityType = timeAvailabilityType;
-        this.timeRangeStart = timeRangeStart;
-        this.timeRangeEnd = timeRangeEnd;
-    }
 }

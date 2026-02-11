@@ -1,4 +1,4 @@
-package com.greedy.meetlink.meeting;
+package com.greedy.meetlink.meeting.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.greedy.meetlink.meeting;
+package com.greedy.meetlink.meeting.entity;
 
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.participant.Participant;
@@ -11,15 +11,16 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -50,18 +51,37 @@ public class Meeting extends BaseEntity {
     @OneToOne(mappedBy = "meeting", fetch = FetchType.LAZY)
     private MeetingResult meetingResult;
 
-    private Meeting(String name, String code, LocalTime start, LocalTime end) {
+    @Builder
+    public Meeting(
+            String name,
+            String code,
+            boolean enableTimeRecommendation,
+            boolean enablePlaceRecommendation,
+            TimeAvailabilityType timeAvailabilityType,
+            LocalTime timeRangeStart,
+            LocalTime timeRangeEnd) {
         this.name = name;
         this.code = code;
-        this.timeRangeStart = start;
-        this.timeRangeEnd = end;
+        this.enableTimeRecommendation = enableTimeRecommendation;
+        this.enablePlaceRecommendation = enablePlaceRecommendation;
+        this.timeAvailabilityType = timeAvailabilityType;
+        this.timeRangeStart = timeRangeStart;
+        this.timeRangeEnd = timeRangeEnd;
     }
 
-    public static Meeting create(String name, String code, LocalTime start, LocalTime end) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 필수입니다.");
-        }
-        return new Meeting(name, code, start, end);
+    public void update(
+            String name,
+            boolean enableTimeRecommendation,
+            boolean enablePlaceRecommendation,
+            TimeAvailabilityType timeAvailabilityType,
+            LocalTime timeRangeStart,
+            LocalTime timeRangeEnd) {
+        this.name = name;
+        this.enableTimeRecommendation = enableTimeRecommendation;
+        this.enablePlaceRecommendation = enablePlaceRecommendation;
+        this.timeAvailabilityType = timeAvailabilityType;
+        this.timeRangeStart = timeRangeStart;
+        this.timeRangeEnd = timeRangeEnd;
     }
 
     public boolean isRecommendationCompleted() {

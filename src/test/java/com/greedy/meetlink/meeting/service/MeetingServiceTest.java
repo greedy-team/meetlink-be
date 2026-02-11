@@ -1,5 +1,8 @@
-    package com.greedy.meetlink.meeting;
+    package com.greedy.meetlink.meeting.service;
 
+    import com.greedy.meetlink.meeting.dto.response.MeetingDetailResponse;
+    import com.greedy.meetlink.meeting.entity.Meeting;
+    import com.greedy.meetlink.meeting.repository.MeetingRepository;
     import com.greedy.meetlink.participant.Participant;
     import org.junit.jupiter.api.DisplayName;
     import org.junit.jupiter.api.Test;

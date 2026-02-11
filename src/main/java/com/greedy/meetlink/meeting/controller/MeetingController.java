@@ -1,6 +1,5 @@
 package com.greedy.meetlink.meeting.controller;
 
-import com.greedy.meetlink.meeting.dto.response.MeetingDetailResponse;
 import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
 import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
@@ -24,6 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class MeetingController {
 
     private final MeetingService meetingService;
+
+    @GetMapping("/{code}")
+    public ResponseEntity<MeetingResponse> getMeetingDetail(@PathVariable String code) {
+        MeetingResponse response = meetingService.getMeetingDetail(code);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * 모임 생성
@@ -49,12 +54,6 @@ public class MeetingController {
     public ResponseEntity<MeetingResponse> updateMeeting(
             @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request) {
         MeetingResponse response = meetingService.update(code, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/{code}")
-    public ResponseEntity<MeetingDetailResponse> getMeetingDetail(@PathVariable String code) {
-        MeetingDetailResponse response = meetingService.getMeetingDetail(code);
         return ResponseEntity.ok(response);
     }
 

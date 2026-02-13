@@ -2,6 +2,8 @@ package com.greedy.meetlink.candidate;
 
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.meeting.entity.Meeting;
+import com.greedy.meetlink.result.entity.PlaceTravelInfo;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,9 +14,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -45,6 +51,9 @@ public class PlaceCandidate extends BaseEntity {
 
     @Column(nullable = false)
     private double maxTravelTime;
+
+    @OneToMany(mappedBy = "placeCandidate", cascade = CascadeType.ALL)
+    private List<PlaceTravelInfo> travelInfos = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

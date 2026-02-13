@@ -3,6 +3,8 @@ package com.greedy.meetlink.common.exception;
 import com.greedy.meetlink.common.dto.response.ErrorResponse;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.greedy.meetlink.result.exception.MeetingResultNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +60,16 @@ public class GlobalExceptionHandler {
         log.error("Unexpected server error occurred: ", ex);
 
         return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", null);
+    }
+
+    @ExceptionHandler(MeetingResultNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMeetingResultNotFoundException(
+            MeetingResultNotFoundException ex) {
+
+        log.warn("Meeting result not found. Identifier: {}, Message: {}",
+                ex.getResourceIdentifier(), ex.getMessage());
+
+        return createErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 
     /** 중복 코드를 줄이기 위한 공통 응답 생성 메서드 */

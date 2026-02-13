@@ -1,4 +1,4 @@
-package com.greedy.meetlink.result;
+package com.greedy.meetlink.result.entity;
 
 import com.greedy.meetlink.candidate.PlaceCandidate;
 import com.greedy.meetlink.candidate.TimeCandidate;

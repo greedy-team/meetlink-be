@@ -1,14 +1,13 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:meetlink;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/meetlink
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: 1007
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+      ddl-auto: update # 테이블이 없으면 생성하고, 있으면 유지합니다.
+    show-sql: true

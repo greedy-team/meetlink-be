@@ -17,8 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MeetingService {
 
-    private final MeetingRepository meetingRepository;
     private static final int MAX_CODE_GENERATION_ATTEMPTS = 10;
+    private final MeetingRepository meetingRepository;
 
     /**
      * 모임 생성
@@ -99,5 +99,15 @@ public class MeetingService {
             }
         }
         throw new MeetingCodeGenerationException();
+    }
+
+    @Transactional
+    public MeetingResponse getMeetingDetail(String code) {
+        Meeting meeting =
+                meetingRepository
+                        .findByCode(code)
+                        .orElseThrow(() -> new MeetingNotFoundException(code));
+
+        return MeetingResponse.from(meeting);
     }
 }

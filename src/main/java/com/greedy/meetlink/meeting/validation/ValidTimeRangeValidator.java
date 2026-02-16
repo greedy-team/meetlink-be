@@ -5,25 +5,30 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalTime;
 
-/** 시간 범위 논리 검증 - timeRangeStart < timeRangeEnd 확인 - null인 경우는 통과 (존재 여부는 다른 Validator가 검증) */
 public class ValidTimeRangeValidator
         implements ConstraintValidator<ValidTimeRange, TimeRangeProvider> {
 
     @Override
     public boolean isValid(TimeRangeProvider value, ConstraintValidatorContext context) {
-        if (value == null) {
-            return true;
-        }
+        if (value == null) return true;
 
         LocalTime startTime = value.getTimeRangeStart();
         LocalTime endTime = value.getTimeRangeEnd();
 
-        // 둘 다 null이면 검증 통과 (다른 Validator가 처리)
+        // 둘 다 안 들어온 경우 skip
+        if (startTime == null && endTime == null) return true;
+
+        // 하나만 들어온 경우 잘못된 요청
         if (startTime == null || endTime == null) {
-            return true;
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(
+                            "timeRangeStart와 timeRangeEnd는 함께 제공되어야 합니다.")
+                    .addConstraintViolation();
+
+            return false;
         }
 
-        // 시작 시간이 종료 시간보다 늦으면 검증 실패
+        // 정상 범위 검증
         if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(

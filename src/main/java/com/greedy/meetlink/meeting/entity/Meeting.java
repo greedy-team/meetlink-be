@@ -57,16 +57,18 @@ public class Meeting extends BaseEntity {
 
     public void update(
             String name,
-            boolean enableTimeRecommendation,
-            boolean enablePlaceRecommendation,
+            Boolean enableTimeRecommendation,
+            Boolean enablePlaceRecommendation,
             TimeAvailabilityType timeAvailabilityType,
             LocalTime timeRangeStart,
             LocalTime timeRangeEnd) {
-        this.name = name;
-        this.enableTimeRecommendation = enableTimeRecommendation;
-        this.enablePlaceRecommendation = enablePlaceRecommendation;
-        this.timeAvailabilityType = timeAvailabilityType;
-        this.timeRangeStart = timeRangeStart;
-        this.timeRangeEnd = timeRangeEnd;
+        if (name != null) this.name = name;
+        if (enableTimeRecommendation != null)
+            this.enableTimeRecommendation = enableTimeRecommendation;
+        if (enablePlaceRecommendation != null)
+            this.enablePlaceRecommendation = enablePlaceRecommendation;
+        if (timeAvailabilityType != null) this.timeAvailabilityType = timeAvailabilityType;
+        if (timeRangeStart != null) this.timeRangeStart = timeRangeStart;
+        if (timeRangeEnd != null) this.timeRangeEnd = timeRangeEnd;
     }
 }

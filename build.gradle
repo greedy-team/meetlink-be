@@ -37,6 +37,19 @@ dependencies {
 	testAnnotationProcessor "org.projectlombok:lombok"
 }
 
+tasks.register("installGitHooks", Copy) {
+	from("${rootDir}/scripts/pre-commit")
+	into("${rootDir}/.git/hooks")
+
+	filePermissions {
+		unix("rwxrwxr-x") // 755
+	}
+}
+
+tasks.named("build") {
+	dependsOn(tasks.named("installGitHooks"))
+}
+
 tasks.named("test") {
 	useJUnitPlatform()
 }

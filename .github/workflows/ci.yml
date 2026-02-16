@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: ["main"]
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -20,7 +20,5 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
-      - name: Code Style Check
-        run: ./gradlew spotlessCheck
       - name: Run Tests
         run: ./gradlew test

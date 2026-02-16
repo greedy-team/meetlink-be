@@ -44,7 +44,7 @@ class MeetingServiceTest {
         given(meetingRepository.findByCode(code)).willReturn(Optional.of(mockMeeting));
 
         // when
-        MeetingResponse response = meetingService.getMeetingDetail(code);
+        MeetingResponse response = meetingService.get(code);
 
         // then
         // 기본 정보 검증
@@ -63,7 +63,7 @@ class MeetingServiceTest {
         given(meetingRepository.findByCode(wrongCode)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> meetingService.getMeetingDetail(wrongCode))
+        assertThatThrownBy(() -> meetingService.get(wrongCode))
                 .isInstanceOf(MeetingNotFoundException.class);
     }
 }

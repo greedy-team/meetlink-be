@@ -1,0 +1,7 @@
+services:
+  postgres:
+    container_name: meetlink-db-dev
+  app:
+    container_name: meetlink-app-dev
+    ports:
+      - "8080:8080"

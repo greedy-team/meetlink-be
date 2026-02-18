@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MeetingService {
-
     private static final int MAX_CODE_GENERATION_ATTEMPTS = 10;
     private final MeetingRepository meetingRepository;
 
@@ -29,7 +28,6 @@ public class MeetingService {
 
     @Transactional
     public MeetingResponse create(MeetingCreateRequest request) {
-
         String code = generateUniqueCode();
 
         Meeting meeting =

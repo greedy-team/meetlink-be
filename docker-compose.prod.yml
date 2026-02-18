@@ -2,8 +2,8 @@ services:
   postgres:
     container_name: meetlink-db-prod
     restart: unless-stopped
-  app:
-    container_name: meetlink-app-prod
+  backend:
+    container_name: meetlink-be-prod
     restart: unless-stopped
   nginx:
     restart: unless-stopped

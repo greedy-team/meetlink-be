@@ -36,7 +36,10 @@ out/
 ### VS Code ###
 .vscode/
 
-## Environment Variables ###
+### Environment Variables ###
 .env
 .env.*
 !.env.sample
+
+### macOS ###
+.DS_Store

@@ -1,6 +1,8 @@
 services:
   postgres:
     container_name: meetlink-db-dev
+    ports:
+      - "5432:5432"
   app:
     container_name: meetlink-app-dev
   nginx:

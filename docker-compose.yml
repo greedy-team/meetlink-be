@@ -29,6 +29,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     profiles: ["app"]
   nginx:
+    container_name: meetlink-nginx
     image: nginx:alpine
     restart: always
     ports:

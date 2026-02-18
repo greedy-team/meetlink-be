@@ -15,7 +15,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  app:
+  backend:
     image: ${APP_IMAGE}
     depends_on:
       postgres:
@@ -27,7 +27,7 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-    profiles: ["app"]
+    profiles: ["deploy"]
   nginx:
     container_name: meetlink-nginx
     image: nginx:alpine
@@ -37,7 +37,7 @@ services:
     volumes:
       - ${NGINX_CERTS_PATH}:/etc/nginx/certs
     depends_on:
-      - app
-    profiles: ["app"]
+      - backend
+    profiles: ["deploy"]
 volumes:
   postgres-data:

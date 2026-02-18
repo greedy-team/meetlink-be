@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @ValidTimeRecommendation
 @ValidTimeRange
 public class MeetingUpdateRequest implements TimeRangeProvider, TimeRecommendationProvider {
-
     private String name;
 
     private Boolean enableTimeRecommendation;

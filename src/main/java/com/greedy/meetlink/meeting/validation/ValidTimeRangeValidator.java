@@ -7,7 +7,6 @@ import java.time.LocalTime;
 
 public class ValidTimeRangeValidator
         implements ConstraintValidator<ValidTimeRange, TimeRangeProvider> {
-
     @Override
     public boolean isValid(TimeRangeProvider value, ConstraintValidatorContext context) {
         if (value == null) return true;

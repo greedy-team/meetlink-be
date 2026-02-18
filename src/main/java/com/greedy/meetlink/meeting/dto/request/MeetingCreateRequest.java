@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @ValidTimeRecommendation
 @ValidTimeRange
 public class MeetingCreateRequest implements TimeRangeProvider, TimeRecommendationProvider {
-
     @NotBlank(message = "모임 이름은 필수입니다.")
     private String name;
 

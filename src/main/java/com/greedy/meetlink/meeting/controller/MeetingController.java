@@ -19,31 +19,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/meetings")
 @RequiredArgsConstructor
-public class MeetingController {
+public class MeetingController implements MeetingControllerSpec {
     private final MeetingService meetingService;
 
     @GetMapping("/{code}")
-    public ApiResponse<MeetingResponse> getMeeting(@PathVariable String code) {
+    public ApiResponse<MeetingResponse> get(@PathVariable String code) {
         MeetingResponse response = meetingService.get(code);
         return ApiResponse.success(response);
     }
 
     @PostMapping
-    public ApiResponse<MeetingResponse> createMeeting(
-            @Valid @RequestBody MeetingCreateRequest request) {
+    public ApiResponse<MeetingResponse> create(@Valid @RequestBody MeetingCreateRequest request) {
         MeetingResponse response = meetingService.create(request);
         return ApiResponse.success(response);
     }
 
     @PatchMapping("/{code}")
-    public ApiResponse<MeetingResponse> updateMeeting(
+    public ApiResponse<MeetingResponse> update(
             @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request) {
         MeetingResponse response = meetingService.update(code, request);
         return ApiResponse.success(response);
     }
 
     @DeleteMapping("/{code}")
-    public ApiResponse<Void> deleteMeeting(@PathVariable String code) {
+    public ApiResponse<Void> delete(@PathVariable String code) {
         meetingService.delete(code);
         return ApiResponse.success();
     }

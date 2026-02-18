@@ -1,4 +1,4 @@
-name: CI
+name: CI - Test
 on:
   pull_request:
     branches: ["main"]
@@ -20,5 +20,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
       - name: Run Tests
-        run: ./gradlew test
+        run: ./gradlew test --no-daemon

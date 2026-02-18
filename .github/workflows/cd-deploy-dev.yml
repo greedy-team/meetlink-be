@@ -29,3 +29,4 @@ jobs:
           NGINX_CERTS_PATH: ${{ vars.NGINX_CERTS_PATH }}
         run: |
           docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile deploy up -d --pull always --remove-orphans
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml restart nginx

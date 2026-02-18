@@ -20,6 +20,9 @@ public enum ResponseCode {
     // 404
     NOT_FOUND("대상을 찾을 수 없습니다."),
 
+    // 405
+    METHOD_NOT_ALLOWED("해당 HTTP 메서드는 지원되지 않습니다."),
+
     // 500
     INTERNAL_ERROR("서버 내부 오류가 발생했습니다.");
 

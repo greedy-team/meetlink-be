@@ -6,7 +6,6 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class ValidTimeRecommendationValidator
         implements ConstraintValidator<ValidTimeRecommendation, TimeRecommendationProvider> {
-
     @Override
     public boolean isValid(TimeRecommendationProvider value, ConstraintValidatorContext context) {
         if (value == null) return true;

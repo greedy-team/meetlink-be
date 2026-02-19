@@ -13,3 +13,6 @@ spring:
         format_sql: true
 server:
   forward-headers-strategy: framework
+cors:
+  allowed-origins: >
+    http://localhost:5173

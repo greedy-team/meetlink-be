@@ -5,3 +5,7 @@ spring:
 logging:
   level:
     org.hibernate.SQL: info
+cors:
+  allowed-origins: >
+    http://localhost:5173,
+    https://dev.meetlink.now

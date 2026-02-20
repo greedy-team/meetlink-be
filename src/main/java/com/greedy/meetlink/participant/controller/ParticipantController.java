@@ -45,7 +45,7 @@ public class ParticipantController {
 
     // 모임 나가기
     @DeleteMapping("/me")
-    public ApiResponse<Void> leaveMeeting(
+    public ApiResponse<Void> leave(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         participantService.leave(code, token);
         return ApiResponse.success(null);

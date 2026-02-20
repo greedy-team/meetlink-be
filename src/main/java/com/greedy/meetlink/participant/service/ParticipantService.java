@@ -55,21 +55,14 @@ public class ParticipantService {
         Meeting meeting = requester.getMeeting();
 
         return participantRepository.findByMeeting(meeting).stream()
-                .map(
-                        participant -> {
-                            boolean isTimeSubmitted =
-                                    timeAvailabilityRepository.existsByParticipant(participant);
-                            boolean isPlaceSubmitted = false;
-                            return ParticipantInfoResponse.of(
-                                    participant, isTimeSubmitted, isPlaceSubmitted);
-                        })
+                .map(this::convertToInfoResponse)
                 .collect(Collectors.toList());
     }
 
     // 내 상태 조회
     public ParticipantInfoResponse getMyStatus(String meetingCode, String token) {
         Participant participant = findParticipantByToken(meetingCode, token);
-        return ParticipantInfoResponse.of(participant, false, false);
+        return convertToInfoResponse(participant);
     }
 
     // 모임 나가기
@@ -77,6 +70,14 @@ public class ParticipantService {
     public void leave(String meetingCode, String token) {
         Participant participant = findParticipantByToken(meetingCode, token);
         participantRepository.delete(participant);
+    }
+
+    private ParticipantInfoResponse convertToInfoResponse(Participant participant) {
+        boolean isTimeSubmitted = timeAvailabilityRepository.existsByParticipant(participant);
+
+        boolean isPlaceSubmitted = false;
+
+        return ParticipantInfoResponse.of(participant, isTimeSubmitted, isPlaceSubmitted);
     }
 
     // 토큰으로 참여자 찾기 검증 로직

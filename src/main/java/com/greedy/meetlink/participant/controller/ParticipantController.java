@@ -4,7 +4,6 @@ import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantInfoResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.service.ParticipantService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,8 +33,9 @@ public class ParticipantController {
     // 참여자 목록 조회
     @GetMapping
     public ResponseEntity<List<ParticipantInfoResponse>> getParticipants(
-            @PathVariable String code) {
-        return ResponseEntity.ok(participantService.getParticipants(code));
+            @PathVariable String code,
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(participantService.getParticipants(code, token));
     }
 
     // 내 참여 상태 확인

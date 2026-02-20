@@ -1,8 +1,5 @@
 package com.greedy.meetlink.participant.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
 import com.greedy.meetlink.common.exception.DuplicateNicknameException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
@@ -18,13 +15,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
 public class ParticipantServiceTest {
-    @Autowired ParticipantService participantService;
-    @Autowired ParticipantRepository participantRepository;
-    @Autowired MeetingRepository meetingRepository;
+    @Autowired
+    ParticipantService participantService;
+    @Autowired
+    ParticipantRepository participantRepository;
+    @Autowired
+    MeetingRepository meetingRepository;
 
     @Test
     @DisplayName("존재하는 모임에 정상적으로 참여하고 토큰을 발급받는다.")
@@ -43,7 +46,7 @@ public class ParticipantServiceTest {
 
         Participant savedParticipant =
                 participantRepository
-                        .findByMeeting_CodeAndToken("MEET123", response.getToken())
+                        .findByMeetingAndToken(meeting, response.getToken())
                         .orElseThrow();
         assertThat(savedParticipant.getNickname()).isEqualTo("테스트유저");
     }

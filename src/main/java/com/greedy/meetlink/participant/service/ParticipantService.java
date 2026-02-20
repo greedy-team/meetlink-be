@@ -10,11 +10,12 @@ import com.greedy.meetlink.participant.dto.response.ParticipantInfoResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,11 +48,10 @@ public class ParticipantService {
     }
 
     // 참여자 목록 조회
-    public List<ParticipantInfoResponse> getParticipants(String meetingCode) {
-        Meeting meeting =
-                meetingRepository
-                        .findByCode(meetingCode)
-                        .orElseThrow(() -> new MeetingNotFoundException());
+    public List<ParticipantInfoResponse> getParticipants(String meetingCode, String token) {
+        Participant requester = findParticipantByToken(meetingCode, token);
+
+        Meeting meeting = requester.getMeeting();
 
         return participantRepository.findByMeeting(meeting).stream()
                 .map(participant -> ParticipantInfoResponse.of(participant, false, false))
@@ -73,8 +73,10 @@ public class ParticipantService {
 
     // 토큰으로 참여자 찾기 검증 로직
     private Participant findParticipantByToken(String meetingCode, String token) {
-        return participantRepository
-                .findByMeeting_CodeAndToken(meetingCode, token)
+        Meeting meeting = meetingRepository.findByCode(meetingCode)
+                .orElseThrow(() -> new MeetingNotFoundException());
+
+        return participantRepository.findByMeetingAndToken(meeting, token)
                 .orElseThrow(() -> new ParticipantNotFoundException());
     }
 }

@@ -22,10 +22,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"meeting_id", "token"}),
-                @UniqueConstraint(columnNames = {"meeting_id", "nickname"})
-        }
-)
+            @UniqueConstraint(columnNames = {"meeting_id", "token"}),
+            @UniqueConstraint(columnNames = {"meeting_id", "nickname"})
+        })
 public class Participant extends BaseEntity {
 
     @Id
@@ -50,10 +49,6 @@ public class Participant extends BaseEntity {
     }
 
     public static Participant create(Meeting meeting, String nickname, String token) {
-        return Participant.builder()
-                .meeting(meeting)
-                .nickname(nickname)
-                .token(token)
-                .build();
+        return Participant.builder().meeting(meeting).nickname(nickname).token(token).build();
     }
 }

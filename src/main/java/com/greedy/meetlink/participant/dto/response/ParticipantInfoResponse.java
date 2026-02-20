@@ -12,8 +12,9 @@ public class ParticipantInfoResponse {
     private final boolean isTimeSubmitted;
     private final boolean isPlaceSubmitted;
 
-    public static ParticipantInfoResponse of(Participant participant, boolean isTimeSubmitted, boolean isPlaceSubmitted) {
-    return ParticipantInfoResponse.builder()
+    public static ParticipantInfoResponse of(
+            Participant participant, boolean isTimeSubmitted, boolean isPlaceSubmitted) {
+        return ParticipantInfoResponse.builder()
                 .participantId(participant.getId())
                 .nickname(participant.getNickname())
                 .isTimeSubmitted(isTimeSubmitted)

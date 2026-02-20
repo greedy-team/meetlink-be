@@ -1,91 +1,89 @@
 package com.greedy.meetlink.common.exception;
 
-import com.greedy.meetlink.common.dto.response.ErrorResponse;
-import java.util.HashMap;
-import java.util.Map;
+import com.greedy.meetlink.common.ApiResponse;
+import com.greedy.meetlink.common.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
-@Slf4j // 로깅을 위한 어노테이션 추가
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    /** 비즈니스 예외 (MeetingNotFoundException) */
     @ExceptionHandler(MeetingNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleMeetingNotFoundException(
-            MeetingNotFoundException ex) {
-        log.warn("Meeting not found: {}", ex.getMessage());
-
-        return createErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    public ResponseEntity<ApiResponse<?>> handleMeetingNotFoundException(
+            MeetingNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
     }
 
-    /** Bean Validation 유효성 검증 실패 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult()
-                .getAllErrors()
-                .forEach(
-                        error -> {
-                            String fieldName = ((FieldError) error).getField();
-                            String errorMessage = error.getDefaultMessage();
-                            errors.put(fieldName, errorMessage);
-                        });
 
-        log.warn("Validation failed: {}", errors);
+        e.getBindingResult()
+                .getFieldErrors()
+                .forEach((error) -> errors.put(error.getField(), error.getDefaultMessage()));
 
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "입력값 검증에 실패했습니다.", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ResponseCode.VALIDATION_FAILED, errors));
     }
 
-    /** 잘못된 인자 전달 */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-            IllegalArgumentException ex) {
-        log.warn("Illegal argument: {}", ex.getMessage());
-
-        return createErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<?>> handleHttpMessageNotReadableException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ResponseCode.INVALID_REQUEST_BODY));
     }
 
-    /** 서버 내부 오류 (예상치 못한 예외) */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleNoHandlerFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ResponseCode.NOT_FOUND));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<?>> handleHttpRequestMethodNotSupportedException() {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.error(ResponseCode.METHOD_NOT_ALLOWED));
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
-        log.error("Unexpected server error occurred: ", ex);
+    public ResponseEntity<ApiResponse<?>> handleFallbackException(Exception e) {
+        log.error("Unexpected server error occurred: ", e);
 
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", null);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
     }
 
-    /** 중복 코드를 줄이기 위한 공통 응답 생성 메서드 */
-    private ResponseEntity<ErrorResponse> createErrorResponse(
-            HttpStatus status, String message, Map<String, String> errors) {
-        ErrorResponse response =
-                ErrorResponse.builder()
-                        .status(status.value())
-                        .message(message)
-                        .errors(errors)
-                        .build();
-        return ResponseEntity.status(status).body(response);
-    }
-
-    /** 참여자 정보 없음 예외 */
+    /**
+     * 참여자 정보 없음 예외
+     */
     @ExceptionHandler(ParticipantNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleParticipantNotFoundException(
-            ParticipantNotFoundException ex) {
-        log.warn("Participant not found: {}", ex.getMessage());
-        return createErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    public ResponseEntity<ApiResponse<?>> handleParticipantNotFoundException(
+            ParticipantNotFoundException e) {
+        log.warn("Participant not found: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
     }
 
-    /** 닉네임 중복 예외 */
+    /**
+     * 닉네임 중복 예외
+     */
     @ExceptionHandler(DuplicateNicknameException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateNicknameException(
-            DuplicateNicknameException ex) {
-        log.warn("Duplicate nickname: {}", ex.getMessage());
+    public ResponseEntity<ApiResponse<?>> handleDuplicateNicknameException(
+            DuplicateNicknameException e) {
+        log.warn("Duplicate nickname: {}", e.getMessage());
 
-        return createErrorResponse(HttpStatus.CONFLICT, ex.getMessage(), null);
-    }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ResponseCode.CONFLICT, e.getMessage()));    }
 }

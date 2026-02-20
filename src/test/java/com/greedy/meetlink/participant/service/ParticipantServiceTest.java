@@ -15,10 +15,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 public class ParticipantServiceTest {
     @Autowired ParticipantService participantService;
     @Autowired ParticipantRepository participantRepository;
@@ -56,7 +58,7 @@ public class ParticipantServiceTest {
         // when & then
         assertThatThrownBy(() -> participantService.join(invalidCode, request))
                 .isInstanceOf(MeetingNotFoundException.class)
-                .hasMessage("모임을 찾을 수 없습니다: " + invalidCode);
+                .hasMessage("모임을 찾을 수 없습니다.");
     }
 
     @Test

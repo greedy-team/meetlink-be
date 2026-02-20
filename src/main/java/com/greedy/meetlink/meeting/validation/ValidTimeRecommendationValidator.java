@@ -3,17 +3,20 @@ package com.greedy.meetlink.meeting.validation;
 import com.greedy.meetlink.common.validation.TimeRecommendationProvider;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class ValidTimeRecommendationValidator
         implements ConstraintValidator<ValidTimeRecommendation, TimeRecommendationProvider> {
-
     @Override
     public boolean isValid(TimeRecommendationProvider value, ConstraintValidatorContext context) {
-        if (value == null || !Boolean.TRUE.equals(value.getEnableTimeRecommendation())) {
-            return true;
-        }
+        if (value == null) return true;
+
+        Boolean enable = value.getEnableTimeRecommendation();
+
+        // 필드가 안들어온 경우 skip
+        if (enable == null) return true;
+
+        // 시간 추천을 끄는 경우 skip
+        if (!enable) return true;
 
         context.disableDefaultConstraintViolation();
         boolean isValid = true;
@@ -31,12 +34,6 @@ public class ValidTimeRecommendationValidator
         if (value.getTimeRangeEnd() == null) {
             addViolation(context, "종료 시간은 필수입니다.", "timeRangeEnd");
             isValid = false;
-        }
-
-        if (!isValid) {
-            log.warn(
-                    "Time recommendation settings validation failed for object: {}",
-                    value.getClass().getSimpleName());
         }
 
         return isValid;

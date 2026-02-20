@@ -30,7 +30,7 @@ public class ParticipantService {
         Meeting meeting =
                 meetingRepository
                         .findByCode(meetingCode)
-                        .orElseThrow(() -> new MeetingNotFoundException(meetingCode));
+                        .orElseThrow(() -> new MeetingNotFoundException());
 
         if (participantRepository.existsByMeetingAndNickname(meeting, request.getNickname())) {
             throw new DuplicateNicknameException();
@@ -49,7 +49,7 @@ public class ParticipantService {
         Meeting meeting =
                 meetingRepository
                         .findByCode(meetingCode)
-                        .orElseThrow(() -> new MeetingNotFoundException(meetingCode));
+                        .orElseThrow(() -> new MeetingNotFoundException());
 
         return participantRepository.findWithDetailsByMeeting(meeting).stream()
                 .map(ParticipantInfoResponse::from)

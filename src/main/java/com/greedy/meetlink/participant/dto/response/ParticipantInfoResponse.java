@@ -16,7 +16,7 @@ public class ParticipantInfoResponse {
         return ParticipantInfoResponse.builder()
                 .participantId(participant.getId())
                 .nickname(participant.getNickname())
-                .isTimeSubmitted(!participant.getTimeAvailability().isEmpty())
+                .isTimeSubmitted(!participant.getAvailableTimes().isEmpty())
                 .isPlaceSubmitted(participant.getStartPoint() != null)
                 .build();
     }

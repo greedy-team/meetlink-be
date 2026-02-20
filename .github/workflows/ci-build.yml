@@ -1,0 +1,43 @@
+name: CI - Build
+on:
+  push:
+    branches: ["main", "release/*"]
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+      - name: Setup Gradle Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+      - name: Build Jar
+        run: ./gradlew bootJar --no-daemon
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & Push Docker Image
+        env:
+          IMAGE_TAG: ${{ startsWith(github.ref, 'refs/heads/main') && 'dev' || 'prod' }}
+        run: |
+          docker buildx build \
+            -t ghcr.io/${{ github.repository }}:${IMAGE_TAG}-latest \
+            -t ghcr.io/${{ github.repository }}:${IMAGE_TAG}-${{ github.sha }} \
+            --push .

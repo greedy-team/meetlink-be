@@ -45,12 +45,13 @@ public class Participant extends BaseEntity {
     @Column(nullable = false)
     private String token;
 
+    @Builder.Default
     @OneToMany(
             mappedBy = "participant",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<TimeAvailability> timeAvailability = new ArrayList<>();
+    private List<TimeAvailability> availableTimes = new ArrayList<>();
 
     @OneToOne(
             mappedBy = "participant",
@@ -61,5 +62,20 @@ public class Participant extends BaseEntity {
 
     public static Participant create(Meeting meeting, String nickname, String token) {
         return Participant.builder().meeting(meeting).nickname(nickname).token(token).build();
+    }
+
+    public boolean hasEnteredTime() {
+        if (!this.meeting.isEnableTimeRecommendation()) {
+            return true;
+        }
+
+        return !this.availableTimes.isEmpty();
+    }
+
+    public boolean hasEnteredPlace() {
+        if (!this.meeting.isEnablePlaceRecommendation()) {
+            return true;
+        }
+        return this.startPoint != null;
     }
 }

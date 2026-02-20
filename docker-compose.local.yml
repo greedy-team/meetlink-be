@@ -1,0 +1,5 @@
+services:
+  postgres:
+    container_name: meetlink-db-local
+    ports:
+      - "5432:5432"

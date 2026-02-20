@@ -17,7 +17,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
             """
         select p from Participant p
         left join fetch p.startPoint
-        left join fetch p.timeAvailability
+        left join fetch p.availableTimes
         where p.meeting = :meeting
     """)
     List<Participant> findWithDetailsByMeeting(@Param("meeting") Meeting meeting);

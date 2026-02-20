@@ -1,0 +1,21 @@
+#!/bin/sh
+
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+cd "$PROJECT_ROOT" || exit 1
+
+# Windows Support
+if [[ "$OS" == "Windows_NT" ]]; then
+  ./gradlew.bat spotlessApply
+else
+  ./gradlew spotlessApply
+fi
+
+if [ $? -ne 0 ]; then
+  echo "spotlessApply failed. Commit aborted."
+  exit 1
+fi
+
+git add -A
+echo "Successfully executed spotlessApply."
+exit 0

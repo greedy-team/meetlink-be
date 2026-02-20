@@ -36,12 +36,14 @@ public class ParticipantService {
             throw new DuplicateNicknameException();
         }
 
+        String generatedToken = java.util.UUID.randomUUID().toString();
+
         Participant participant =
-                Participant.create(meeting, request.getNickname(), request.getToken());
+                Participant.create(meeting, request.getNickname(), generatedToken);
 
         participantRepository.save(participant);
 
-        return new ParticipantJoinResponse(true);
+        return ParticipantJoinResponse.from(generatedToken);
     }
 
     // 참여자 목록 조회
@@ -51,15 +53,15 @@ public class ParticipantService {
                         .findByCode(meetingCode)
                         .orElseThrow(() -> new MeetingNotFoundException());
 
-        return participantRepository.findWithDetailsByMeeting(meeting).stream()
-                .map(ParticipantInfoResponse::from)
+        return participantRepository.findByMeeting(meeting).stream()
+                .map(participant -> ParticipantInfoResponse.of(participant, false, false))
                 .collect(Collectors.toList());
     }
 
     // 내 상태 조회
     public ParticipantInfoResponse getMyStatus(String meetingCode, String token) {
         Participant participant = findParticipantByToken(meetingCode, token);
-        return ParticipantInfoResponse.from(participant);
+        return ParticipantInfoResponse.of(participant, false, false);
     }
 
     // 모임 나가기

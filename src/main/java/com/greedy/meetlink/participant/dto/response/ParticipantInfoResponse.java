@@ -7,10 +7,10 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ParticipantInfoResponse {
-    private Long participantId;
-    private String nickname;
-    private boolean isTimeSubmitted;
-    private boolean isPlaceSubmitted;
+    private final Long participantId;
+    private final String nickname;
+    private final boolean isTimeSubmitted;
+    private final boolean isPlaceSubmitted;
 
     public static ParticipantInfoResponse of(Participant participant, boolean isTimeSubmitted, boolean isPlaceSubmitted) {
     return ParticipantInfoResponse.builder()

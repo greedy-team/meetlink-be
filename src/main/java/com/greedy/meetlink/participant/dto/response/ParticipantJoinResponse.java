@@ -1,14 +1,15 @@
 package com.greedy.meetlink.participant.dto.response;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ParticipantJoinResponse {
-    private boolean success;
+    private final String token;
 
-    public ParticipantJoinResponse(boolean success) {
-        this.success = success;
+    public static ParticipantJoinResponse from(String token) {
+        return new ParticipantJoinResponse(token);
     }
 }

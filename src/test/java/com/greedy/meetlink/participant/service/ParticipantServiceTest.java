@@ -33,17 +33,17 @@ public class ParticipantServiceTest {
         Meeting meeting =
                 meetingRepository.save(Meeting.builder().name("그리디").code("MEET123").build());
 
-        ParticipantJoinRequest request = new ParticipantJoinRequest("테스트유저", "Token-123");
+        ParticipantJoinRequest request = new ParticipantJoinRequest("테스트유저");
 
         // when
         ParticipantJoinResponse response = participantService.join("MEET123", request);
 
         // then
-        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getToken()).isNotNull();
 
         Participant savedParticipant =
                 participantRepository
-                        .findByMeeting_CodeAndToken("MEET123", "Token-123")
+                        .findByMeeting_CodeAndToken("MEET123", response.getToken())
                         .orElseThrow();
         assertThat(savedParticipant.getNickname()).isEqualTo("테스트유저");
     }
@@ -53,7 +53,7 @@ public class ParticipantServiceTest {
     void join_meeting_fail_invalid_code() {
         // given
         String invalidCode = "INVALID";
-        ParticipantJoinRequest request = new ParticipantJoinRequest("테스트유저", "Token-123");
+        ParticipantJoinRequest request = new ParticipantJoinRequest("테스트유저");
 
         // when & then
         assertThatThrownBy(() -> participantService.join(invalidCode, request))
@@ -68,9 +68,9 @@ public class ParticipantServiceTest {
         Meeting meeting =
                 meetingRepository.save(Meeting.builder().name("그리디").code("MEET123").build());
 
-        participantService.join("MEET123", new ParticipantJoinRequest("테스트유저", "Token-123"));
+        participantService.join("MEET123", new ParticipantJoinRequest("테스트유저"));
 
-        ParticipantJoinRequest duplicateRequest = new ParticipantJoinRequest("테스트유저", "Token-123");
+        ParticipantJoinRequest duplicateRequest = new ParticipantJoinRequest("테스트유저");
 
         // when & then
         assertThatThrownBy(() -> participantService.join("MEET123", duplicateRequest))

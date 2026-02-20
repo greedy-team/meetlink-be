@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ParticipantJoinRequest {
     private String nickname;
-    private String token;
 }

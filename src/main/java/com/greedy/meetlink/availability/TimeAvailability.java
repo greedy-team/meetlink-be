@@ -1,7 +1,7 @@
 package com.greedy.meetlink.availability;
 
 import com.greedy.meetlink.meeting.entity.Meeting;
-import com.greedy.meetlink.participant.Participant;
+import com.greedy.meetlink.participant.entity.Participant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

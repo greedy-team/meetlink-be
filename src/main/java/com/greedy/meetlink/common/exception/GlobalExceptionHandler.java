@@ -71,4 +71,21 @@ public class GlobalExceptionHandler {
                         .build();
         return ResponseEntity.status(status).body(response);
     }
+
+    /** 참여자 정보 없음 예외 */
+    @ExceptionHandler(ParticipantNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleParticipantNotFoundException(
+            ParticipantNotFoundException ex) {
+        log.warn("Participant not found: {}", ex.getMessage());
+        return createErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    }
+
+    /** 닉네임 중복 예외 */
+    @ExceptionHandler(DuplicateNicknameException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateNicknameException(
+            DuplicateNicknameException ex) {
+        log.warn("Duplicate nickname: {}", ex.getMessage());
+
+        return createErrorResponse(HttpStatus.CONFLICT, ex.getMessage(), null);
+    }
 }

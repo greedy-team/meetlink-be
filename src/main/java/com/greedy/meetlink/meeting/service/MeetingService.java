@@ -30,7 +30,15 @@ public class MeetingService {
     public MeetingResponse create(MeetingCreateRequest request) {
         String code = generateUniqueCode();
 
-        Meeting meeting = Meeting.create(request.getName(), code, request.getEnableTimeRecommendation(), request.getEnablePlaceRecommendation(), request.getTimeAvailabilityType(), request.getTimeRangeStart(), request.getTimeRangeEnd());
+        Meeting meeting =
+                Meeting.create(
+                        request.getName(),
+                        code,
+                        request.getEnableTimeRecommendation(),
+                        request.getEnablePlaceRecommendation(),
+                        request.getTimeAvailabilityType(),
+                        request.getTimeRangeStart(),
+                        request.getTimeRangeEnd());
 
         Meeting savedMeeting = meetingRepository.save(meeting);
 

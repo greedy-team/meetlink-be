@@ -56,7 +56,14 @@ public class Meeting extends BaseEntity {
         this.timeRangeEnd = timeRangeEnd;
     }
 
-    public static Meeting create(String name, String code, boolean enableTimeRecommendation, boolean enablePlaceRecommendation, TimeAvailabilityType timeAvailabilityType, LocalTime timeRangeStart, LocalTime timeRangeEnd) {
+    public static Meeting create(
+            String name,
+            String code,
+            boolean enableTimeRecommendation,
+            boolean enablePlaceRecommendation,
+            TimeAvailabilityType timeAvailabilityType,
+            LocalTime timeRangeStart,
+            LocalTime timeRangeEnd) {
         return Meeting.builder()
                 .name(name)
                 .code(code)

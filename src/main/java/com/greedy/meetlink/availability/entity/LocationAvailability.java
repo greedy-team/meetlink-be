@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,10 +22,35 @@ public class LocationAvailability {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, unique = true)
+    @JoinColumn(name = "participant_id", nullable = false, unique = true)
     private Participant participant;
 
     private String address;
     private double latitude;
     private double longitude;
+
+    @Builder
+    private LocationAvailability(
+            Participant participant, String address, double latitude, double longitude) {
+        this.participant = participant;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public static LocationAvailability create(
+            Participant participant, String address, double latitude, double longitude) {
+        return LocationAvailability.builder()
+                .participant(participant)
+                .address(address)
+                .latitude(latitude)
+                .longitude(longitude)
+                .build();
+    }
+
+    public void update(String address, double latitude, double longitude) {
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

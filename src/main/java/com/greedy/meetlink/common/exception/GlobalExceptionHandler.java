@@ -82,6 +82,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST));
     }
 
+    @ExceptionHandler(InvalidTimeAvailabilityException.class)
+    public ResponseEntity<ApiResponse<?>> handleInvalidTimeAvailabilityException(
+            InvalidTimeAvailabilityException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleFallbackException(Exception e) {
         log.error("Unexpected server error occurred: ", e);

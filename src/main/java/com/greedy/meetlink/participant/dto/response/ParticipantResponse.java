@@ -6,15 +6,15 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ParticipantInfoResponse {
+public class ParticipantResponse {
     private final Long participantId;
     private final String nickname;
     private final boolean isTimeSubmitted;
     private final boolean isPlaceSubmitted;
 
-    public static ParticipantInfoResponse of(
+    public static ParticipantResponse of(
             Participant participant, boolean isTimeSubmitted, boolean isPlaceSubmitted) {
-        return ParticipantInfoResponse.builder()
+        return ParticipantResponse.builder()
                 .participantId(participant.getId())
                 .nickname(participant.getNickname())
                 .isTimeSubmitted(isTimeSubmitted)

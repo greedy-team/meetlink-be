@@ -2,8 +2,8 @@ package com.greedy.meetlink.participant.controller;
 
 import com.greedy.meetlink.common.ApiResponse;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
-import com.greedy.meetlink.participant.dto.response.ParticipantInfoResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
+import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import com.greedy.meetlink.participant.service.ParticipantService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +31,16 @@ public class ParticipantController {
 
     // 참여자 목록 조회
     @GetMapping
-    public ApiResponse<List<ParticipantInfoResponse>> list(
-            @PathVariable String code, @RequestHeader("Authorization") String token) {
-        return ApiResponse.success(participantService.getParticipants(code, token));
+    public ApiResponse<List<ParticipantResponse>> list(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        return ApiResponse.success(participantService.list(code, token));
     }
 
     // 내 참여 상태 확인
     @GetMapping("/me")
-    public ApiResponse<ParticipantInfoResponse> getMyStatus(
+    public ApiResponse<ParticipantResponse> status(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
-        return ApiResponse.success(participantService.getMyStatus(code, token));
+        return ApiResponse.success(participantService.status(code, token));
     }
 
     // 모임 나가기
@@ -48,6 +48,6 @@ public class ParticipantController {
     public ApiResponse<Void> leave(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         participantService.leave(code, token);
-        return ApiResponse.success(null);
+        return ApiResponse.success();
     }
 }

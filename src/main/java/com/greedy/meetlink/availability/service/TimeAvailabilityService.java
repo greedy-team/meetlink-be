@@ -7,9 +7,7 @@ import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
-import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
-import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TimeAvailabilityService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
-    private final MeetingRepository meetingRepository;
-    private final ParticipantRepository participantRepository;
     private final ParticipantValidator participantValidator;
 
     @Transactional

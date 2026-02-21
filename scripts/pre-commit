@@ -4,6 +4,8 @@ PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
 cd "$PROJECT_ROOT" || exit 1
 
+echo "Running spotlessApply on staged files..."
+
 # Windows Support
 if [[ "$OS" == "Windows_NT" ]]; then
   ./gradlew.bat spotlessApply
@@ -16,6 +18,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-git add -A
-echo "Successfully executed spotlessApply."
+git diff --name-only --cached | xargs git add
+echo "Successfully executed spotlessApply on staged files."
 exit 0

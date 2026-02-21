@@ -1,4 +1,4 @@
-package com.greedy.meetlink.candidate;
+package com.greedy.meetlink.candidate.entity;
 
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.meeting.entity.Meeting;
@@ -13,11 +13,15 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TimeCandidate extends BaseEntity {
     @Id

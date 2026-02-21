@@ -1,6 +1,6 @@
 package com.greedy.meetlink.candidate.dto.response;
 
-import com.greedy.meetlink.candidate.TimeCandidate;
+import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;

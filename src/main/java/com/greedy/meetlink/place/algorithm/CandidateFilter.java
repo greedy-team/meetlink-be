@@ -88,6 +88,7 @@ public class CandidateFilter {
 
             // 단계 1: 샘플 참여자 이동시간 검증 및 저장
             for (Coordinate sample : sampleParticipants) {
+                try { Thread.sleep(1000); } catch (InterruptedException e) {}
                 Double travelTime = tMapTransitClient.getTravelTimeMinutes(sample, candidate);
                 
                 if (travelTime == null || travelTime > MAX_TRAVEL_TIME_MINUTES) {
@@ -107,6 +108,7 @@ public class CandidateFilter {
             for (Coordinate p : participants) {
                 if (sampleSet.contains(p)) continue; // 이미 계산한 샘플은 스킵
 
+                try { Thread.sleep(1000); } catch (InterruptedException e) {}
                 Double travelTime = tMapTransitClient.getTravelTimeMinutes(p, candidate);
                 if (travelTime == null) {
                     log.warn("이동시간 조회 실패: participant={}, candidate={}", p, candidate);

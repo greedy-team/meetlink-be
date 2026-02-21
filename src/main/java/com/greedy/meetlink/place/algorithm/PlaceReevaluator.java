@@ -53,6 +53,10 @@ public class PlaceReevaluator {
             // 1. 후보 좌표 주변 실제 장소 POI 검색
             List<PoiPlace> places = tMapPoiClient.searchNearby(coord);
 
+            if (places.size() > 1) {
+                places = places.subList(0, 1); // [비용 절감] 상위 1개만 평가
+            }
+
             if (places.isEmpty()) {
                 log.warn("[재평가] POI 검색 결과 없음: coord={}", coord);
                 continue;
@@ -109,6 +113,7 @@ public class PlaceReevaluator {
         List<Double> travelTimes = new ArrayList<>();
 
         for (Coordinate participant : participantCoords) {
+            try { Thread.sleep(1000); } catch (InterruptedException e) {}
             Double travelTime = tMapTransitClient.getTravelTimeMinutes(participant, placeCoord);
 
             if (travelTime == null) {

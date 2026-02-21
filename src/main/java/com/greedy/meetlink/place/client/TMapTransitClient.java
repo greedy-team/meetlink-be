@@ -27,9 +27,10 @@ public class TMapTransitClient {
 
     public TMapTransitClient(
             WebClient.Builder webClientBuilder,
+            @Value("${tmap.base-url:https://apis.openapi.sk.com}") String baseUrl,
             @Value("${tmap.app-key}") String appKey) {
         this.webClient = webClientBuilder
-                .baseUrl("https://apis.openapi.sk.com")
+                .baseUrl(baseUrl)
                 .defaultHeader("appKey", appKey)
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")
@@ -49,27 +50,42 @@ public class TMapTransitClient {
                 destination.latitude(), destination.longitude()
         );
 
-        try {
-            TransitRouteResponse response = webClient.post()
-                    .uri(TRANSIT_ROUTES_PATH)
-                    .bodyValue(request)
-                    .retrieve()
-                    .bodyToMono(TransitRouteResponse.class)
-                    .block();
+        int maxRetries = 3;
+        long retryDelayMs = 2000;
 
-            if (response == null) {
-                log.warn("TMap API 응답 없음: origin={}, destination={}", origin, destination);
+        for (int i = 0; i <= maxRetries; i++) {
+            try {
+                TransitRouteResponse response = webClient.post()
+                        .uri(TRANSIT_ROUTES_PATH)
+                        .bodyValue(request)
+                        .retrieve()
+                        .bodyToMono(TransitRouteResponse.class)
+                        .block();
+
+                if (response == null) {
+                    log.warn("TMap API 응답 없음: origin={}, destination={}", origin, destination);
+                    return null;
+                }
+
+                return response.extractMinTravelTimeMinutes();
+
+            } catch (WebClientResponseException e) {
+                if (e.getStatusCode().value() == 429) {
+                    if (i < maxRetries) {
+                        log.warn("TMap API 429 오류 (시도 {}/{}). {}ms 후 재시도...", i + 1, maxRetries + 1, retryDelayMs);
+                        try { Thread.sleep(retryDelayMs); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                        retryDelayMs *= 2; // 지수 백오프
+                        continue;
+                    }
+                }
+                log.error("TMap API 오류: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+                return null;
+            } catch (Exception e) {
+                log.error("TMap API 호출 중 예외 발생: {}", e.getMessage(), e);
                 return null;
             }
-
-            return response.extractMinTravelTimeMinutes();
-
-        } catch (WebClientResponseException e) {
-            log.error("TMap API 오류: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
-            return null;
-        } catch (Exception e) {
-            log.error("TMap API 호출 중 예외 발생: {}", e.getMessage(), e);
-            return null;
         }
+        return null;
     }
 }
+

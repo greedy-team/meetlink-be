@@ -97,6 +97,15 @@ public class PlaceRecommendationService {
                 candidateFilter.filterByDistance(rawCandidates, participantCoords, dMax);
         log.info("[장소추천] 1차 필터 후 후보 수={}", distanceFiltered.size());
 
+        // [비용 절감] TMap API 호출 전, 직선 거리 기준 상위 1개로 제한 (API 쿼터 고려)
+        if (distanceFiltered.size() > 1) {
+            distanceFiltered = distanceFiltered.stream()
+                    .sorted(java.util.Comparator.comparingDouble(center::distanceTo))
+                    .limit(1)
+                    .collect(Collectors.toList());
+            log.info("[장소추천] API 쿼터 절약을 위해 최우선 후보 1곳만 상세 조회 진행");
+        }
+
         // 5단계: 2차 필터링 (TMap 이동시간)
         List<FilteredCandidate> travelTimeFiltered =
                 candidateFilter.filterByTravelTime(distanceFiltered, participantCoords, center);

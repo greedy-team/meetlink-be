@@ -43,3 +43,6 @@ out/
 
 ### macOS ###
 .DS_Store
+
+# application-local.yml 처럼 별도의 로컬 설정 파일을 만듭니다.
+application-local.yml

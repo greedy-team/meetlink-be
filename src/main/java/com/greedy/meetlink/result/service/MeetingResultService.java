@@ -18,9 +18,15 @@ public class MeetingResultService {
     private final MeetingRepository meetingRepository;
 
     public MeetingResultResponse get(String meetingCode) {
-        Meeting meeting = meetingRepository.findByCode(meetingCode).orElseThrow(MeetingNotFoundException::new);
+        Meeting meeting =
+                meetingRepository
+                        .findByCode(meetingCode)
+                        .orElseThrow(MeetingNotFoundException::new);
 
-        MeetingResult result = meetingResultRepository.findByMeeting(meeting).orElseThrow(MeetingNotFoundException::new);
+        MeetingResult result =
+                meetingResultRepository
+                        .findByMeeting(meeting)
+                        .orElseThrow(MeetingNotFoundException::new);
 
         return MeetingResultResponse.from(result);
     }

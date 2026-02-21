@@ -2,10 +2,9 @@ package com.greedy.meetlink.result.dto;
 
 import com.greedy.meetlink.candidate.PlaceCandidate;
 import com.greedy.meetlink.result.entity.ParticipantDetail;
-import lombok.Builder;
-
 import java.util.Collections;
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 public record PlaceRecommendationResponse(
@@ -16,8 +15,7 @@ public record PlaceRecommendationResponse(
         int rank,
         double avgTravelTime,
         double maxTravelTime,
-        List<ParticipantDetail> participants
-) {
+        List<ParticipantDetail> participants) {
     public static PlaceRecommendationResponse from(PlaceCandidate candidate) {
         return new PlaceRecommendationResponse(
                 candidate.getName(),
@@ -27,16 +25,10 @@ public record PlaceRecommendationResponse(
                 candidate.getRank(),
                 candidate.getAvgTravelTime(),
                 candidate.getMaxTravelTime(),
-                candidate.getTravelInfos().stream()
-                        .map(ParticipantDetail::from)
-                        .toList()
-        );
+                candidate.getTravelInfos().stream().map(ParticipantDetail::from).toList());
     }
 
     public static PlaceRecommendationResponse empty() {
-        return new PlaceRecommendationResponse(
-                null, null, 0, 0, 0, 0, 0,
-                Collections.emptyList()
-        );
+        return new PlaceRecommendationResponse(null, null, 0, 0, 0, 0, 0, Collections.emptyList());
     }
 }

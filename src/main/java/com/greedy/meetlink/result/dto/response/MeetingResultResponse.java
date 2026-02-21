@@ -19,8 +19,14 @@ public class MeetingResultResponse {
     public static MeetingResultResponse from(MeetingResult result) {
         return MeetingResultResponse.builder()
                 .id(result.getId())
-                .timeCandidate(result.getTimeCandidate() != null ? TimeCandidateResponse.from(result.getTimeCandidate()) : null)
-                .placeCandidate(result.getPlaceCandidate() != null ? PlaceCandidateResponse.from(result.getPlaceCandidate()) : null)
+                .timeCandidate(
+                        result.getTimeCandidate() != null
+                                ? TimeCandidateResponse.from(result.getTimeCandidate())
+                                : null)
+                .placeCandidate(
+                        result.getPlaceCandidate() != null
+                                ? PlaceCandidateResponse.from(result.getPlaceCandidate())
+                                : null)
                 .build();
     }
 }

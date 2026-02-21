@@ -1,12 +1,10 @@
 package com.greedy.meetlink.result.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 @Builder

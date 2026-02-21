@@ -7,6 +7,10 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.place.algorithm.*;
+import com.greedy.meetlink.place.algorithm.CandidateFilter.FilteredCandidate;
+import com.greedy.meetlink.place.algorithm.CandidateFilter.ParticipantTravelTime;
+import com.greedy.meetlink.place.algorithm.CandidateScorer.ScoredCandidate;
+import com.greedy.meetlink.place.algorithm.PlaceReevaluator.ReevaluatedPlace;
 import com.greedy.meetlink.place.client.TMapPoiClient;
 import com.greedy.meetlink.place.client.TMapTransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
@@ -22,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -33,19 +38,28 @@ class PlaceRecommendationServiceTest {
     @Mock private LocationAvailabilityRepository locationAvailabilityRepository;
     @Mock private PlaceCandidateRepository placeCandidateRepository;
     @Mock private PlaceTravelInfoRepository placeTravelInfoRepository;
+
     @Mock private TMapTransitClient tMapTransitClient;
     @Mock private TMapPoiClient tMapPoiClient;
 
     private PlaceRecommendationService placeRecommendationService;
 
+    private GeometricMedianCalculator geometricMedianCalculator;
+    private PolarSamplingGenerator polarSamplingGenerator;
+    private CandidateFilter candidateFilter;
+    private CandidateScorer candidateScorer;
+    private PlaceReevaluator placeReevaluator;
+
     @BeforeEach
     void setUp() {
-        GeometricMedianCalculator geometricMedianCalculator = new GeometricMedianCalculator();
-        PolarSamplingGenerator polarSamplingGenerator = new PolarSamplingGenerator();
-        CandidateFilter candidateFilter = new CandidateFilter(tMapTransitClient);
-        ScoreCalculator scoreCalculator = new ScoreCalculator();
-        CandidateScorer candidateScorer = new CandidateScorer(scoreCalculator);
-        PlaceReevaluator placeReevaluator = new PlaceReevaluator(tMapPoiClient, tMapTransitClient, scoreCalculator);
+        geometricMedianCalculator = new GeometricMedianCalculator();
+        polarSamplingGenerator = new PolarSamplingGenerator();
+        candidateFilter = new CandidateFilter(tMapTransitClient);
+        
+        // [수정] CandidateScorer는 기본 생성자 사용 (ScoreCalculator 의존성 없음)
+        candidateScorer = new CandidateScorer();
+        
+        placeReevaluator = new PlaceReevaluator(tMapPoiClient);
 
         placeRecommendationService = new PlaceRecommendationService(
                 meetingRepository,
@@ -61,59 +75,125 @@ class PlaceRecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("참여자 3명(서울) 위치로 장소 추천 시나리오 검증")
-    void recommend_success() {
+    @DisplayName("[1. 기하중심] 참여자들의 중간 지점이 계산되어야 한다")
+    void calculateGeometricMedian() {
         // given
-        String meetingCode = "TEST-CODE";
-        // Meeting 생성 (Builder 사용)
-        Meeting meeting = Meeting.builder()
-                .code(meetingCode)
-                .name("Test Meeting")
-                .build();
+        List<Coordinate> coords = List.of(
+                new Coordinate(0, 0),
+                new Coordinate(10, 0),
+                new Coordinate(0, 10)
+        );
 
-        // 서울 시내 주요 지점 좌표
-        Coordinate c1 = new Coordinate(37.5665, 126.9780); // 시청
-        Coordinate c2 = new Coordinate(37.5116, 127.0592); // 코엑스
-        Coordinate c3 = new Coordinate(37.5545, 126.9707); // 서울역
+        // when
+        Coordinate center = geometricMedianCalculator.calculate(coords);
 
-        // Participant 생성
-        Participant p1 = Participant.builder().meeting(meeting).nickname("UserA").token("t1").build();
-        Participant p2 = Participant.builder().meeting(meeting).nickname("UserB").token("t2").build();
-        Participant p3 = Participant.builder().meeting(meeting).nickname("UserC").token("t3").build();
+        // then
+        assertThat(center.latitude()).isBetween(0.0, 10.0);
+        assertThat(center.longitude()).isBetween(0.0, 10.0);
+    }
 
-        // LocationAvailability 생성
+    @Test
+    @DisplayName("[2. 후보생성] 중심점을 기준으로 후보지가 생성되어야 한다")
+    void generateCandidates() {
+        // given
+        Coordinate center = new Coordinate(37.5, 127.0);
+        List<Coordinate> participants = List.of(new Coordinate(37.6, 127.1));
+
+        // when
+        List<Coordinate> candidates = polarSamplingGenerator.generate(center, participants);
+
+        // then
+        assertThat(candidates).isNotEmpty();
+        assertThat(candidates).contains(center);
+    }
+
+    @Test
+    @DisplayName("[3. 필터링] 2차 필터(시간)에서 이동 시간이 계산되어야 한다")
+    void filterByTravelTime() {
+        // given
+        Coordinate center = new Coordinate(37.5, 127.0);
+        List<Coordinate> participants = List.of(new Coordinate(37.6, 127.1));
+        
+        List<Coordinate> candidates = List.of(
+                new Coordinate(37.51, 127.01),
+                new Coordinate(37.52, 127.02)
+        );
+
+        given(tMapTransitClient.getTravelTimeMinutes(any(), any())).willReturn(30.0);
+
+        // when
+        List<FilteredCandidate> result = candidateFilter.filterByTravelTime(candidates, participants, center);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).participantTravelTimes().get(0).travelTimeMinutes()).isEqualTo(30.0);
+    }
+
+    @Test
+    @DisplayName("[4. 장소매핑] 점수가 매겨진 후보를 실제 POI와 매핑해야 한다 (재평가 X)")
+    void matchWithRealPlaces() {
+        // given
+        Coordinate coord = new Coordinate(37.5, 127.0);
+        FilteredCandidate filtered = new FilteredCandidate(coord, List.of(
+            new ParticipantTravelTime(new Coordinate(0,0), 30.0)
+        ));
+        // [수정] rank 인자(0) 추가
+        ScoredCandidate scored = new ScoredCandidate(filtered, 30.0, 40.0, 10.0, 80.0, 0);
+        
+        List<ScoredCandidate> candidates = List.of(scored);
+
+        given(tMapPoiClient.searchNearby(coord)).willReturn(List.of(
+                new PoiPlace("Test Cafe", "Test Address", 37.501, 127.001)
+        ));
+
+        // when
+        List<ReevaluatedPlace> result = placeReevaluator.matchWithRealPlaces(candidates);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).searchResult().name()).isEqualTo("Test Cafe");
+        assertThat(result.get(0).avgTravelTime()).isEqualTo(30.0);
+        assertThat(result.get(0).travelTimesMinutes()).contains(30.0);
+    }
+
+    @Test
+    @DisplayName("[통합] 전체 프로세스: 상위 3개 선정 및 저장 검증")
+    void recommend_fullProcess() {
+        // given
+        String meetingCode = "TEST";
+        Meeting meeting = Meeting.builder().code(meetingCode).name("M").build();
+        
         List<LocationAvailability> locations = List.of(
-                LocationAvailability.builder().participant(p1).latitude(c1.latitude()).longitude(c1.longitude()).address("시청").build(),
-                LocationAvailability.builder().participant(p2).latitude(c2.latitude()).longitude(c2.longitude()).address("코엑스").build(),
-                LocationAvailability.builder().participant(p3).latitude(c3.latitude()).longitude(c3.longitude()).address("서울역").build()
+            createLocation(new Coordinate(0, 0), "A"),
+            createLocation(new Coordinate(10, 0), "B"),
+            createLocation(new Coordinate(0, 10), "C")
         );
 
         given(meetingRepository.findByCode(meetingCode)).willReturn(Optional.of(meeting));
         given(locationAvailabilityRepository.findByMeetingCode(meetingCode)).willReturn(locations);
 
-        // Mock: 이동 시간 = 직선 거리(km) * 10분 (가상 로직)
-        // distanceTo()는 Haversine 공식 사용 가정
-        given(tMapTransitClient.getTravelTimeMinutes(any(Coordinate.class), any(Coordinate.class)))
-                .willAnswer(invocation -> {
-                    Coordinate start = invocation.getArgument(0);
-                    Coordinate end = invocation.getArgument(1);
-                    double dist = start.distanceTo(end);
-                    return dist * 10.0;
-                });
-
-        // Mock: POI 검색 (검색된 좌표 주변에 가상의 카페가 있다고 가정)
-        given(tMapPoiClient.searchNearby(any(Coordinate.class)))
-                .willAnswer(invocation -> {
-                    Coordinate center = invocation.getArgument(0);
-                    return List.of(new PoiPlace("추천 카페", "서울시 어딘가", center.latitude(), center.longitude()));
-                });
+        given(tMapTransitClient.getTravelTimeMinutes(any(), any())).willReturn(30.0);
+        
+        given(tMapPoiClient.searchNearby(any())).willReturn(List.of(
+                new PoiPlace("Cafe", "Addr", 0, 0)
+        ));
 
         // when
         placeRecommendationService.recommend(meetingCode);
 
         // then
-        // 최종적으로 후보지가 저장되었는지 검증 (최소 1번 이상 호출)
         verify(placeCandidateRepository, atLeastOnce()).save(any());
         verify(placeTravelInfoRepository, atLeastOnce()).save(any());
+        
+        verify(tMapTransitClient, atMost(9)).getTravelTimeMinutes(any(), any());
+    }
+
+    private LocationAvailability createLocation(Coordinate c, String name) {
+        Participant p = Participant.builder().nickname(name).build();
+        return LocationAvailability.builder()
+                .participant(p)
+                .latitude(c.latitude())
+                .longitude(c.longitude())
+                .build();
     }
 }

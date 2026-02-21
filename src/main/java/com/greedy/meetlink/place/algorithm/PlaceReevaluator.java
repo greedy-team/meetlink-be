@@ -1,9 +1,8 @@
 package com.greedy.meetlink.place.algorithm;
 
+import com.greedy.meetlink.place.algorithm.CandidateFilter.ParticipantTravelTime;
 import com.greedy.meetlink.place.algorithm.CandidateScorer.ScoredCandidate;
-import com.greedy.meetlink.place.algorithm.ScoreCalculator.ScoreResult;
 import com.greedy.meetlink.place.client.TMapPoiClient;
-import com.greedy.meetlink.place.client.TMapTransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
 import com.greedy.meetlink.place.domain.Coordinate;
 import com.greedy.meetlink.place.domain.PlaceSearchResult;
@@ -12,16 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * 실제 장소 기준 재평가 (8단계)
+ * 실제 장소 매핑 (리팩토링 버전)
  *
- * 후보 좌표 주변의 실제 장소(POI)를 검색하고,
- * 그 장소들을 기준으로 다시 이동 시간을 계산하여 최종 순위를 매깁니다.
+ * 기존 재평가(Re-evaluation) 로직을 제거하고,
+ * 이미 계산된 후보 좌표의 이동 시간을 그대로 사용하면서
+ * 주변의 실제 장소(POI) 정보(이름, 주소)만 매핑합니다.
  */
 @Slf4j
 @Component
@@ -29,116 +27,56 @@ import java.util.stream.Collectors;
 public class PlaceReevaluator {
 
     private final TMapPoiClient tMapPoiClient;
-    private final TMapTransitClient tMapTransitClient;
-    private final ScoreCalculator scoreCalculator;
 
     /**
-     * 상위 K개 후보 좌표 → 실제 장소 검색 → 재평가 → 최종 순위 반환
-     *
-     * @param topCandidates     점수 산정 상위 K개 후보 (좌표 기준)
-     * @param participantCoords 전체 참여자 출발지 좌표 목록
-     * @param finalTopK         최종 반환할 후보 수
-     * @return 실제 장소 기준으로 재평가된 최종 후보 목록
+     * 상위 후보 좌표를 실제 장소(POI)와 매핑
+     * API 재호출 없이 기존 이동 시간 정보를 재사용합니다.
      */
-    public List<ReevaluatedPlace> reevaluate(
-            List<ScoredCandidate> topCandidates,
-            List<Coordinate> participantCoords,
-            int finalTopK) {
-
-        List<ReevaluatedPlace> allReevaluated = new ArrayList<>();
+    public List<ReevaluatedPlace> matchWithRealPlaces(List<ScoredCandidate> topCandidates) {
+        List<ReevaluatedPlace> results = new ArrayList<>();
+        int rank = 1;
 
         for (ScoredCandidate candidate : topCandidates) {
             Coordinate coord = candidate.filteredCandidate().coordinate();
 
-            // 1. 후보 좌표 주변 실제 장소 POI 검색
+            // 1. POI 검색 (이름, 주소 획득용)
             List<PoiPlace> places = tMapPoiClient.searchNearby(coord);
-
-            if (places.size() > 1) {
-                places = places.subList(0, 1); // [비용 절감] 상위 1개만 평가
-            }
-
+            
+            PlaceSearchResult searchResult;
             if (places.isEmpty()) {
-                log.warn("[재평가] POI 검색 결과 없음: coord={}", coord);
-                continue;
+                // POI가 없으면 그냥 좌표 주소를 사용하거나 "추천 중간 지점"으로 명명
+                // 여기서는 간단하게 좌표값을 이름으로 사용하거나 임의의 이름 부여
+                searchResult = new PlaceSearchResult(
+                        "추천 중간 지점 " + rank,
+                        "상세 주소 없음 (" + coord.latitude() + ", " + coord.longitude() + ")",
+                        coord
+                );
+            } else {
+                // 가장 가까운 1개 장소 정보만 사용 (POI 좌표로 변경)
+                // 주의: 좌표가 바뀌지만 이동 시간은 원래 좌표 기준임 (근사치)
+                PoiPlace place = places.get(0);
+                searchResult = PlaceSearchResult.from(place);
             }
 
-            // 2. 각 실제 장소에 대해 전체 참여자 이동시간 재계산
-            for (PoiPlace place : places) {
-                // 이미 평가된 장소인지 확인하는 로직이 필요할 수 있음 (중복 장소 제거)
-                // 하지만 여기서는 리스트에 다 담고 나중에 정렬/제한으로 처리
-                
-                Optional<ReevaluatedPlace> reevaluated =
-                        evaluatePlace(place, participantCoords);
+            // 2. 이동 시간 정보 매핑 (API 호출 없이 기존 값 사용)
+            // ScoredCandidate -> FilteredCandidate -> List<ParticipantTravelTime>
+            List<Double> travelTimes = candidate.filteredCandidate().participantTravelTimes().stream()
+                    .map(ParticipantTravelTime::travelTimeMinutes)
+                    .collect(Collectors.toList());
 
-                reevaluated.ifPresent(allReevaluated::add);
-            }
+            results.add(new ReevaluatedPlace(
+                    searchResult,
+                    travelTimes,
+                    candidate.avgTravelTime(), // 이미 계산된 평균
+                    candidate.maxTravelTime(), // 이미 계산된 최대
+                    candidate.score(),         // 이미 계산된 점수
+                    rank++
+            ));
         }
 
-        if (allReevaluated.isEmpty()) {
-            return List.of();
-        }
-
-        // 3. 점수 기준 오름차순 정렬 → 중복 제거 (이름+주소 기준) → 최종 상위 K개 선정
-        List<ReevaluatedPlace> sorted = allReevaluated.stream()
-                .sorted(Comparator.comparingDouble(ReevaluatedPlace::score))
-                // 중복 제거: 같은 장소가 여러 후보 좌표에서 검색되었을 수 있음
-                .collect(Collectors.toMap(
-                        p -> p.searchResult().uniqueId(),
-                        p -> p,
-                        (existing, replacement) -> existing // 이미 존재하는(점수가 더 낮거나 같은) 것 유지
-                ))
-                .values().stream()
-                .sorted(Comparator.comparingDouble(ReevaluatedPlace::score))
-                .limit(finalTopK)
-                .collect(Collectors.toList());
-
-        // 4. 최종 순위 부여
-        for (int i = 0; i < sorted.size(); i++) {
-            sorted.set(i, sorted.get(i).withRank(i + 1));
-        }
-
-        log.info("[재평가] 최종 후보 {}개 확정", sorted.size());
-        return sorted;
+        return results;
     }
 
-    /**
-     * 단일 실제 장소에 대해 전체 참여자 이동시간 계산 및 점수 산정
-     */
-    private Optional<ReevaluatedPlace> evaluatePlace(
-            PoiPlace place,
-            List<Coordinate> participantCoords) {
-
-        PlaceSearchResult searchResult = PlaceSearchResult.from(place);
-        Coordinate placeCoord = searchResult.coordinate();
-        List<Double> travelTimes = new ArrayList<>();
-
-        for (Coordinate participant : participantCoords) {
-            try { Thread.sleep(1000); } catch (InterruptedException e) {}
-            Double travelTime = tMapTransitClient.getTravelTimeMinutes(participant, placeCoord);
-
-            if (travelTime == null) {
-                log.debug("[재평가] 이동시간 조회 실패: place={}, participant={}", place.name(), participant);
-                return Optional.empty();
-            }
-
-            travelTimes.add(travelTime);
-        }
-
-        ScoreResult scoreResult = scoreCalculator.calculate(travelTimes);
-
-        return Optional.of(new ReevaluatedPlace(
-                searchResult,
-                travelTimes,
-                scoreResult.avg(),
-                scoreResult.max(),
-                scoreResult.score(),
-                0   // 순위는 나중에 부여
-        ));
-    }
-
-    /**
-     * 실제 장소 기준으로 재평가된 결과
-     */
     public record ReevaluatedPlace(
             PlaceSearchResult searchResult,
             List<Double> travelTimesMinutes,
@@ -146,10 +84,5 @@ public class PlaceReevaluator {
             double maxTravelTime,
             double score,
             int rank
-    ) {
-        public ReevaluatedPlace withRank(int rank) {
-            return new ReevaluatedPlace(
-                    searchResult, travelTimesMinutes, avgTravelTime, maxTravelTime, score, rank);
-        }
-    }
+    ) {}
 }

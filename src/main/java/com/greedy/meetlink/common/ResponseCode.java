@@ -23,6 +23,9 @@ public enum ResponseCode {
     // 405
     METHOD_NOT_ALLOWED("해당 HTTP 메서드는 지원되지 않습니다."),
 
+    // 409
+    CONFLICT("이미 존재하는 데이터이거나 상태가 충돌합니다."),
+
     // 500
     INTERNAL_ERROR("서버 내부 오류가 발생했습니다.");
 

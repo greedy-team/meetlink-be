@@ -1,4 +1,4 @@
-package com.greedy.meetlink.availability;
+package com.greedy.meetlink.availability.entity;
 
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
@@ -19,6 +21,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        uniqueConstraints =
+                @UniqueConstraint(
+                        columnNames = {
+                            "meeting_id",
+                            "participant_id",
+                            "date",
+                            "day_of_week",
+                            "start_time"
+                        }))
 public class TimeAvailability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

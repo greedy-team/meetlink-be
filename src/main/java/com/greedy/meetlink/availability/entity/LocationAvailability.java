@@ -1,5 +1,6 @@
-package com.greedy.meetlink.participant.entity;
+package com.greedy.meetlink.availability.entity;
 
+import com.greedy.meetlink.participant.entity.Participant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StartPoint {
+public class LocationAvailability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

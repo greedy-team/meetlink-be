@@ -1,5 +1,6 @@
 package com.greedy.meetlink.meeting.entity;
 
+import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

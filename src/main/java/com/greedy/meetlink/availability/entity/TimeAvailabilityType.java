@@ -1,4 +1,4 @@
-package com.greedy.meetlink.meeting.entity;
+package com.greedy.meetlink.availability.entity;
 
 public enum TimeAvailabilityType {
     WEEKLY,

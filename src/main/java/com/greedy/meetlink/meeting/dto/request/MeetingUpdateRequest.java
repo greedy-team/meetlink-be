@@ -1,8 +1,8 @@
 package com.greedy.meetlink.meeting.dto.request;
 
+import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.common.validation.TimeRangeProvider;
 import com.greedy.meetlink.common.validation.TimeRecommendationProvider;
-import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.validation.ValidTimeRange;
 import com.greedy.meetlink.meeting.validation.ValidTimeRecommendation;
 import java.time.LocalTime;

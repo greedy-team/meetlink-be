@@ -32,7 +32,7 @@ public class MeetingResultController {
     }
 
     /**
-     * 모임 추천 만반 장소 조회
+     * 모임 추천  장소 조회
      * GET /meetings/{code}/place-recommendations
      *
      * @param code 모임 코드

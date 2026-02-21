@@ -4,6 +4,7 @@ import com.greedy.meetlink.candidate.PlaceCandidate;
 import com.greedy.meetlink.result.entity.ParticipantDetail;
 import lombok.Builder;
 
+import java.util.Collections;
 import java.util.List;
 
 @Builder
@@ -15,7 +16,7 @@ public record PlaceRecommendationResponse(
         int rank,
         double avgTravelTime,
         double maxTravelTime,
-        List<ParticipantDetail> participants // 참여자 소요 시간 리스트
+        List<ParticipantDetail> participants
 ) {
     public static PlaceRecommendationResponse from(PlaceCandidate candidate) {
         return new PlaceRecommendationResponse(
@@ -31,5 +32,11 @@ public record PlaceRecommendationResponse(
                         .toList()
         );
     }
-}
 
+    public static PlaceRecommendationResponse empty() {
+        return new PlaceRecommendationResponse(
+                null, null, 0, 0, 0, 0, 0,
+                Collections.emptyList()
+        );
+    }
+}

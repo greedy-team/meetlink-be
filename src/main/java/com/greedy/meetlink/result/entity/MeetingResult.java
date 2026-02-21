@@ -1,4 +1,4 @@
-package com.greedy.meetlink.result;
+package com.greedy.meetlink.result.entity;
 
 import com.greedy.meetlink.candidate.PlaceCandidate;
 import com.greedy.meetlink.candidate.TimeCandidate;
@@ -24,14 +24,14 @@ public class MeetingResult extends BaseEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn
+    @JoinColumn(name = "time_candidate_id")
     private TimeCandidate timeCandidate;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn
+    @JoinColumn(name = "place_candidate_id")
     private PlaceCandidate placeCandidate;
 }

@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/meetings")
 @RequiredArgsConstructor
+@RequestMapping("/meetings")
 public class MeetingController implements MeetingControllerSpec {
     private final MeetingService meetingService;
 

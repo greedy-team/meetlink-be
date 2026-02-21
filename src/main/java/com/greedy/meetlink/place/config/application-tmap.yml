@@ -1,0 +1,16 @@
+# application.yml 에 추가할 외부 API 설정 예시
+# 실제 키는 환경변수로 주입 권장
+
+tmap:
+  app-key: ${TMAP_APP_KEY}    # SK Open API 대시보드에서 발급
+                               # export TMAP_APP_KEY=your_key_here
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}   # 카카오 개발자 콘솔에서 발급
+                                         # export KAKAO_REST_API_KEY=your_key_here
+
+# 로컬 개발용 application-local.yml 예시:
+# tmap:
+#   app-key: your-tmap-app-key
+# kakao:
+#   rest-api-key: your-kakao-rest-api-key

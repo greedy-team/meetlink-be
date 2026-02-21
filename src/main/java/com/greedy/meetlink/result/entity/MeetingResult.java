@@ -34,4 +34,12 @@ public class MeetingResult extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_candidate_id")
     private PlaceCandidate placeCandidate;
+
+    public MeetingResult(Meeting meeting) {
+        this.meeting = meeting;
+    }
+
+    public void updatePlaceCandidate(PlaceCandidate placeCandidate) {
+        this.placeCandidate = placeCandidate;
+    }
 }

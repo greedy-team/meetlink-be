@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class PlaceRecommendationServiceFakeApiTest {
 
-    @Autowired private PlaceRecommendationService placeRecommendationService;
+    @Autowired private PlaceRecommendService placeRecommendationService;
     @Autowired private MeetingRepository meetingRepository;
     @Autowired private ParticipantRepository participantRepository;
     @Autowired private LocationAvailabilityRepository locationAvailabilityRepository;
@@ -48,7 +48,7 @@ class PlaceRecommendationServiceFakeApiTest {
 
         // when
         System.out.println(">>> [START] Fake Client 기반 추천 로직 실행 <<<");
-        placeRecommendationService.recommend(meeting.getCode());
+        placeRecommendationService.recommendAndSave(meeting);
         System.out.println(">>> [END] 추천 로직 완료 <<<");
 
         // then

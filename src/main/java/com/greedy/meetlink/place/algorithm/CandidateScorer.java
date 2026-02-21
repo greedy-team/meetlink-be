@@ -2,6 +2,8 @@ package com.greedy.meetlink.place.algorithm;
 
 import com.greedy.meetlink.place.algorithm.CandidateFilter.FilteredCandidate;
 import com.greedy.meetlink.place.algorithm.CandidateFilter.ParticipantTravelTime;
+import com.greedy.meetlink.place.algorithm.ScoreCalculator.ScoreResult;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -11,19 +13,23 @@ import java.util.stream.Collectors;
 /**
  * 후보 좌표 점수 산정
  *
- * score(P) = w1 × T_avg + w2 × T_max + w3 × T_stddev
- *   w1 = 0.4  (평균 이동시간)
- *   w2 = 0.4  (최대 이동시간)
- *   w3 = 0.2  (이동시간 표준편차)
+ * ✅ 리팩토링: 기존에 가중치(avg=0.4, max=0.4, stddev=0.2)를 이 클래스에서 직접 관리하던 방식에서
+ *    ScoreCalculator에 위임하는 방식으로 변경.
  *
+ * [변경 이유]
+ *   - CandidateScorer와 ScoreCalculator가 동일한 점수 계산 로직을 각자 다른 가중치로 갖고 있어
+ *     어떤 클래스가 실제 호출되느냐에 따라 결과가 달라지는 잠재적 버그가 있었음.
+ *   - 가중치는 ScoreCalculator 한 곳에서만 관리하도록 단일 책임 원칙(SRP) 적용.
+ *
+ * score(P) = W_AVG × T_avg + W_MAX × T_max + W_STDDEV × T_stddev  (가중치는 ScoreCalculator 참조)
  * 점수가 낮을수록 좋음 (이동시간 최소화 목표)
  */
 @Component
+@RequiredArgsConstructor
 public class CandidateScorer {
 
-    private static final double W1_AVG = 0.4;
-    private static final double W2_MAX = 0.4;
-    private static final double W3_STDDEV = 0.2;
+    // ✅ 리팩토링: 직접 계산 대신 ScoreCalculator에 위임
+    private final ScoreCalculator scoreCalculator;
 
     /**
      * 후보 목록을 점수 기준으로 정렬하여 반환
@@ -48,27 +54,24 @@ public class CandidateScorer {
         return scored;
     }
 
+    /**
+     * ✅ 리팩토링: ScoreCalculator.calculate()에 위임하여 가중치 이원화 문제 해소
+     */
     private ScoredCandidate calculateScore(FilteredCandidate candidate) {
         List<Double> times = candidate.participantTravelTimes().stream()
                 .map(ParticipantTravelTime::travelTimeMinutes)
                 .collect(Collectors.toList());
 
-        double avg = times.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        double max = times.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
-        double stddev = calculateStddev(times, avg);
+        ScoreResult result = scoreCalculator.calculate(times);
 
-        double score = W1_AVG * avg + W2_MAX * max + W3_STDDEV * stddev;
-
-        return new ScoredCandidate(candidate, avg, max, stddev, score, 0);
-    }
-
-    private double calculateStddev(List<Double> values, double avg) {
-        if (values.size() <= 1) return 0.0;
-        double variance = values.stream()
-                .mapToDouble(v -> Math.pow(v - avg, 2))
-                .average()
-                .orElse(0.0);
-        return Math.sqrt(variance);
+        return new ScoredCandidate(
+                candidate,
+                result.avg(),
+                result.max(),
+                result.stddev(),
+                result.score(),
+                0   // rank는 score() 호출 후 withRank()로 부여
+        );
     }
 
     /**

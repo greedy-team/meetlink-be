@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PlaceRecommendationServiceRealApiTest {
 
     @Autowired
-    private PlaceRecommendationService placeRecommendationService;
+    private PlaceRecommendService placeRecommendationService;
 
     @Autowired private MeetingRepository meetingRepository;
     @Autowired private ParticipantRepository participantRepository;
@@ -60,7 +60,7 @@ class PlaceRecommendationServiceRealApiTest {
         // when
         System.out.println(">>> [START] 실제 TMap API 호출 (약 5~10초 소요 예상) <<<");
         try {
-            placeRecommendationService.recommend(meeting.getCode());
+            placeRecommendationService.recommendAndSave(meeting);
         } catch (Exception e) {
             // API 호출 실패 시 로그 출력 (429, 403 등)
             System.err.println("!!! API 호출 중 오류 발생: " + e.getMessage());

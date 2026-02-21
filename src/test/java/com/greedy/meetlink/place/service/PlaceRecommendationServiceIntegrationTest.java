@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PlaceRecommendationServiceIntegrationTest {
 
     @Autowired
-    private PlaceRecommendationService placeRecommendationService;
+    private PlaceRecommendService placeRecommendationService;
 
     @Autowired private MeetingRepository meetingRepository;
     @Autowired private ParticipantRepository participantRepository;
@@ -79,7 +79,7 @@ class PlaceRecommendationServiceIntegrationTest {
 
         // when
         System.out.println(">>> [START] Mock API 기반 추천 로직 실행 <<<");
-        placeRecommendationService.recommend(meeting.getCode());
+        placeRecommendationService.recommendAndSave(meeting);
         System.out.println(">>> [END] 추천 로직 완료 <<<");
 
         // then

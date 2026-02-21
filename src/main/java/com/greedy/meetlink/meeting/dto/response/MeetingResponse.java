@@ -1,7 +1,7 @@
 package com.greedy.meetlink.meeting.dto.response;
 
+import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.entity.Meeting;
-import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.AccessLevel;
@@ -13,7 +13,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MeetingResponse {
-
     private final Long id;
     private final String name;
     private final String code;

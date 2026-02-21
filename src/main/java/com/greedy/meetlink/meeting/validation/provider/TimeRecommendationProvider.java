@@ -1,4 +1,4 @@
-package com.greedy.meetlink.common.validation;
+package com.greedy.meetlink.meeting.validation.provider;
 
 import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 

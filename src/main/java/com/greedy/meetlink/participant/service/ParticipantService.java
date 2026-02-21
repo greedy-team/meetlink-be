@@ -3,8 +3,8 @@ package com.greedy.meetlink.participant.service;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.common.exception.DuplicateNicknameException;
-import com.greedy.meetlink.common.exception.InvalidParticipantTokenException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
@@ -27,6 +27,7 @@ public class ParticipantService {
     private final MeetingRepository meetingRepository;
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
+    private final ParticipantValidator participantValidator;
 
     // 모임 참여
     @Transactional
@@ -52,7 +53,8 @@ public class ParticipantService {
 
     // 참여자 목록 조회
     public List<ParticipantResponse> list(String meetingCode, String token) {
-        Participant participant = findParticipantByToken(meetingCode, token);
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
         Meeting meeting = participant.getMeeting();
 
         boolean timeEnabled = meeting.isEnableTimeRecommendation();
@@ -77,7 +79,8 @@ public class ParticipantService {
 
     // 내 상태 조회
     public ParticipantResponse status(String meetingCode, String token) {
-        Participant participant = findParticipantByToken(meetingCode, token);
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
         Meeting meeting = participant.getMeeting();
 
         boolean isTimeSubmitted =
@@ -94,19 +97,8 @@ public class ParticipantService {
     // 모임 나가기
     @Transactional
     public void leave(String meetingCode, String token) {
-        Participant participant = findParticipantByToken(meetingCode, token);
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
         participantRepository.delete(participant);
-    }
-
-    // 토큰으로 참여자 찾기 검증 로직
-    private Participant findParticipantByToken(String meetingCode, String token) {
-        Meeting meeting =
-                meetingRepository
-                        .findByCode(meetingCode)
-                        .orElseThrow(MeetingNotFoundException::new);
-
-        return participantRepository
-                .findByMeetingAndToken(meeting, token)
-                .orElseThrow(InvalidParticipantTokenException::new);
     }
 }

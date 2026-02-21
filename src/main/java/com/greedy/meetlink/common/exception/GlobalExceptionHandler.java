@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -55,27 +56,37 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.METHOD_NOT_ALLOWED));
     }
 
+    @ExceptionHandler(DuplicateNicknameException.class)
+    public ResponseEntity<ApiResponse<?>> handleDuplicateNicknameException(
+            DuplicateNicknameException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ResponseCode.CONFLICT, e.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidParticipantTokenException.class)
+    public ResponseEntity<ApiResponse<?>> handleInvalidParticipantTokenException(
+            InvalidParticipantTokenException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ResponseCode.FORBIDDEN, e.getMessage()));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiResponse<?>> handleMissingRequestHeaderException(
+            MissingRequestHeaderException e) {
+        if ("X-Participant-Token".equals(e.getHeaderName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(ResponseCode.FORBIDDEN));
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ResponseCode.INVALID_REQUEST));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleFallbackException(Exception e) {
         log.error("Unexpected server error occurred: ", e);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
-    }
-
-    /** 참여자 정보 없음 예외 */
-    @ExceptionHandler(ParticipantNotFoundException.class)
-    public ResponseEntity<ApiResponse<?>> handleParticipantNotFoundException(
-            ParticipantNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
-    }
-
-    /** 닉네임 중복 예외 */
-    @ExceptionHandler(DuplicateNicknameException.class)
-    public ResponseEntity<ApiResponse<?>> handleDuplicateNicknameException(
-            DuplicateNicknameException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(ResponseCode.CONFLICT, e.getMessage()));
     }
 }

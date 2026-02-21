@@ -3,8 +3,8 @@ package com.greedy.meetlink.participant.service;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.common.exception.DuplicateNicknameException;
+import com.greedy.meetlink.common.exception.InvalidParticipantTokenException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
-import com.greedy.meetlink.common.exception.ParticipantNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
@@ -107,6 +107,6 @@ public class ParticipantService {
 
         return participantRepository
                 .findByMeetingAndToken(meeting, token)
-                .orElseThrow(ParticipantNotFoundException::new);
+                .orElseThrow(InvalidParticipantTokenException::new);
     }
 }

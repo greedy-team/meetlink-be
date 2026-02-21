@@ -5,6 +5,7 @@ import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import com.greedy.meetlink.participant.service.ParticipantService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,13 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/meetings/{code}/participants")
-public class ParticipantController {
+public class ParticipantController implements ParticipantControllerSpec {
     private final ParticipantService participantService;
 
     // 모임 참여
     @PostMapping
     public ApiResponse<ParticipantJoinResponse> join(
-            @PathVariable String code, @RequestBody ParticipantJoinRequest request) {
+            @PathVariable String code, @Valid @RequestBody ParticipantJoinRequest request) {
         return ApiResponse.success(participantService.join(code, request));
     }
 

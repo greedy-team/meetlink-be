@@ -62,4 +62,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
     }
+
+    /** 참여자 정보 없음 예외 */
+    @ExceptionHandler(ParticipantNotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleParticipantNotFoundException(
+            ParticipantNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
+    }
+
+    /** 닉네임 중복 예외 */
+    @ExceptionHandler(DuplicateNicknameException.class)
+    public ResponseEntity<ApiResponse<?>> handleDuplicateNicknameException(
+            DuplicateNicknameException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ResponseCode.CONFLICT, e.getMessage()));
+    }
 }

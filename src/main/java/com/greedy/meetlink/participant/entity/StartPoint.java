@@ -1,4 +1,4 @@
-package com.greedy.meetlink.participant;
+package com.greedy.meetlink.participant.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

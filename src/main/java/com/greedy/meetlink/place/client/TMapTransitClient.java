@@ -19,7 +19,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
  */
 @Slf4j
 @Component
-public class TMapTransitClient {
+@org.springframework.context.annotation.Profile("!test")
+public class TMapTransitClient implements TransitClient {
 
     private static final String TRANSIT_ROUTES_PATH = "/transit/routes";
 

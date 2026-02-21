@@ -23,7 +23,8 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class TMapPoiClient {
+@org.springframework.context.annotation.Profile("!test")
+public class TMapPoiClient implements PoiClient {
 
     private static final String POI_SEARCH_PATH = "/tmap/pois";
 

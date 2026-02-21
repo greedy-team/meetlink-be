@@ -3,6 +3,7 @@ package com.greedy.meetlink.result.dto.response;
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.result.entity.MeetingResult;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,8 @@ public class MeetingResultResponse {
     private final Long id;
     private final TimeCandidateResponse timeCandidate;
     private final PlaceCandidateResponse placeCandidate;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     public static MeetingResultResponse from(MeetingResult result) {
         return MeetingResultResponse.builder()
@@ -27,6 +30,8 @@ public class MeetingResultResponse {
                         result.getPlaceCandidate() != null
                                 ? PlaceCandidateResponse.from(result.getPlaceCandidate())
                                 : null)
+                .createdAt(result.getCreatedAt())
+                .updatedAt(result.getUpdatedAt())
                 .build();
     }
 }

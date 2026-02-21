@@ -8,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
+        indexes = {@Index(name = "idx_participant_meeting", columnList = "meeting_id")},
         uniqueConstraints = {
             @UniqueConstraint(columnNames = {"meeting_id", "token"}),
             @UniqueConstraint(columnNames = {"meeting_id", "nickname"})

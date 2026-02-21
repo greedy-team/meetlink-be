@@ -1,6 +1,6 @@
-package com.greedy.meetlink.common.validation;
+package com.greedy.meetlink.meeting.validation.provider;
 
-import com.greedy.meetlink.meeting.entity.TimeAvailabilityType;
+import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 
 public interface TimeRecommendationProvider extends TimeRangeProvider {
     Boolean getEnableTimeRecommendation();

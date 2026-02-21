@@ -1,6 +1,6 @@
 package com.greedy.meetlink.meeting.validation;
 
-import com.greedy.meetlink.common.validation.TimeRecommendationProvider;
+import com.greedy.meetlink.meeting.validation.provider.TimeRecommendationProvider;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

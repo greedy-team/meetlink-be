@@ -31,15 +31,14 @@ public class MeetingService {
         String code = generateUniqueCode();
 
         Meeting meeting =
-                Meeting.builder()
-                        .name(request.getName())
-                        .code(code)
-                        .enableTimeRecommendation(request.getEnableTimeRecommendation())
-                        .enablePlaceRecommendation(request.getEnablePlaceRecommendation())
-                        .timeAvailabilityType(request.getTimeAvailabilityType())
-                        .timeRangeStart(request.getTimeRangeStart())
-                        .timeRangeEnd(request.getTimeRangeEnd())
-                        .build();
+                Meeting.create(
+                        request.getName(),
+                        code,
+                        request.getEnableTimeRecommendation(),
+                        request.getEnablePlaceRecommendation(),
+                        request.getTimeAvailabilityType(),
+                        request.getTimeRangeStart(),
+                        request.getTimeRangeEnd());
 
         Meeting savedMeeting = meetingRepository.save(meeting);
 

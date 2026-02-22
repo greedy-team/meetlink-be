@@ -46,6 +46,9 @@ public class TimeAvailabilityService {
                         .toList();
 
         timeAvailabilityRepository.saveAll(entities);
+
+        // 시간 제출 여부 체크
+        participant.markTimeSubmitted();
     }
 
     private void validateByMeetingType(Meeting meeting, TimeAvailabilityRequest request) {

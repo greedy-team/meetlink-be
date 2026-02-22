@@ -41,5 +41,8 @@ public class LocationAvailabilityService {
                                                 request.getLongitude()));
 
         locationAvailabilityRepository.save(location);
+
+        // 장소 제출 여부 체크
+        participant.markLocationSubmitted();
     }
 }

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
-import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -79,26 +78,19 @@ class TimeCandidateServiceTest {
                                 .build()));
 
         // when
-        TimeCandidatesResponse response = timeCandidateService.calculate(meetingCode);
+        List<TimeCandidateResponse> response = timeCandidateService.calculate(meetingCode);
 
         // then
-        assertThat(response).isNotNull();
-        assertThat(response.heatmaps()).hasSize(1);
-
-        List<TimeCandidatesResponse.TimeSlot> slots = response.heatmaps().getFirst().slots();
-        assertThat(slots).hasSize(2); // 10:00 ~ 10:30, 10:30 ~ 11:00 묶임
-
-        List<TimeCandidateResponse> candidates = response.candidates();
-        assertThat(candidates).hasSize(2);
+        assertThat(response).hasSize(2);
 
         // 첫 번째 후보
-        TimeCandidateResponse first = candidates.getFirst();
+        TimeCandidateResponse first = response.getFirst();
         assertThat(first.getStartTime()).isEqualTo(LocalTime.of(10, 0));
         assertThat(first.getEndTime()).isEqualTo(LocalTime.of(10, 30)); // 묶인 상태
         assertThat(first.getAvailableCount()).isEqualTo(2);
 
         // 두 번째 후보
-        TimeCandidateResponse second = candidates.get(1);
+        TimeCandidateResponse second = response.get(1);
         assertThat(second.getStartTime()).isEqualTo(LocalTime.of(10, 30));
         assertThat(second.getEndTime()).isEqualTo(LocalTime.of(11, 0)); // 묶인 상태
         assertThat(second.getAvailableCount()).isEqualTo(1);

@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +29,6 @@ import lombok.NoArgsConstructor;
             @UniqueConstraint(columnNames = {"meeting_id", "nickname"})
         })
 public class Participant extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,6 +43,9 @@ public class Participant extends BaseEntity {
     @Column(nullable = false)
     private String token;
 
+    private LocalDateTime timeSubmittedAt;
+    private LocalDateTime locationSubmittedAt;
+
     @Builder
     private Participant(Meeting meeting, String nickname, String token) {
         this.meeting = meeting;
@@ -52,5 +55,13 @@ public class Participant extends BaseEntity {
 
     public static Participant create(Meeting meeting, String nickname, String token) {
         return Participant.builder().meeting(meeting).nickname(nickname).token(token).build();
+    }
+
+    public void markTimeSubmitted() {
+        this.timeSubmittedAt = LocalDateTime.now();
+    }
+
+    public void markLocationSubmitted() {
+        this.locationSubmittedAt = LocalDateTime.now();
     }
 }

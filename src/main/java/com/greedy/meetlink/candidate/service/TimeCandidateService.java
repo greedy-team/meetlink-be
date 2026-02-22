@@ -7,6 +7,7 @@ import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.meeting.entity.Meeting;
+import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,6 +28,7 @@ public class TimeCandidateService {
 
     private final TimeCandidateRepository timeCandidateRepository;
     private final TimeAvailabilityRepository timeAvailabilityRepository;
+    private final ParticipantRepository participantRepository;
 
     /** 모임 코드를 기반으로 추천 시간 후보를 계산, 저장 */
     @Transactional
@@ -71,21 +73,18 @@ public class TimeCandidateService {
 
     /** 재계산 필요 여부 판단 */
     private boolean isCalculationRequired(String code) {
-        Optional<LocalDateTime> lastAvailabilityUpdated =
-                timeAvailabilityRepository.findLatestModifiedAtByMeetingCode(code);
+        Optional<LocalDateTime> lastSubmission = participantRepository.findLastTimeSubmission(code);
 
-        if (lastAvailabilityUpdated.isEmpty()) {
+        if (lastSubmission.isEmpty()) {
             return false;
         }
 
-        Optional<LocalDateTime> lastCandidateCalculated =
+        Optional<LocalDateTime> lastCalculated =
                 timeCandidateRepository.findLatestCreatedAtByMeetingCode(code);
 
-        if (lastCandidateCalculated.isEmpty()) {
-            return true;
-        }
-
-        return lastAvailabilityUpdated.get().isAfter(lastCandidateCalculated.get());
+        return lastCalculated
+                .map((calculated) -> lastSubmission.get().isAfter(calculated))
+                .orElse(true);
     }
 
     /** 히트맵 응답용 리스트로 변환 */

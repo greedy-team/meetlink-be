@@ -3,7 +3,6 @@ package com.greedy.meetlink.candidate.service;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
-import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
 import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
@@ -16,9 +15,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,8 +32,8 @@ public class TimeCandidateService {
     private final MeetingRepository meetingRepository;
 
     @Transactional
-    public TimeCandidatesResponse calculate(String code) {
-        if (!isCalculationRequired(code)) return get(code);
+    public List<TimeCandidateResponse> calculate(String code) {
+        if (!isCalculationRequired(code)) return list(code);
 
         // DB에서 이미 집계 완료된 결과만 가져옴
         List<TimeAvailabilityHeatmapRow> rows =
@@ -45,7 +42,7 @@ public class TimeCandidateService {
         // 데이터 없으면 후보 제거 후 빈 응답
         if (rows.isEmpty()) {
             timeCandidateRepository.deleteByMeetingCode(code);
-            return new TimeCandidatesResponse(List.of(), List.of());
+            return List.of();
         }
 
         Meeting meeting =
@@ -59,19 +56,14 @@ public class TimeCandidateService {
 
         timeCandidateRepository.saveAll(candidates);
 
-        return new TimeCandidatesResponse(
-                toHeatmap(rows), candidates.stream().map(TimeCandidateResponse::from).toList());
+        return candidates.stream().map(TimeCandidateResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
-    public TimeCandidatesResponse get(String code) {
-        List<TimeCandidate> candidates =
-                timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code);
-        List<TimeAvailabilityHeatmapRow> rows =
-                timeAvailabilityRepository.findHeatmapByMeetingCode(code);
-
-        return new TimeCandidatesResponse(
-                toHeatmap(rows), candidates.stream().map(TimeCandidateResponse::from).toList());
+    public List<TimeCandidateResponse> list(String code) {
+        return timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code).stream()
+                .map(TimeCandidateResponse::from)
+                .toList();
     }
 
     /** 재계산 필요 여부 판단 */
@@ -160,52 +152,5 @@ public class TimeCandidateService {
                         .build());
 
         return merged;
-    }
-
-    /** DB aggregation 결과를 Heatmap 형태로 변환 */
-    private List<TimeCandidatesResponse.Heatmap> toHeatmap(List<TimeAvailabilityHeatmapRow> rows) {
-        Map<Object, List<TimeAvailabilityHeatmapRow>> grouped =
-                rows.stream()
-                        .collect(
-                                Collectors.groupingBy(
-                                        row ->
-                                                row.getDate() != null
-                                                        ? row.getDate()
-                                                        : row.getDayOfWeek()));
-
-        List<TimeCandidatesResponse.Heatmap> result =
-                grouped.values().stream()
-                        .map(
-                                (groupRows) -> {
-                                    LocalDate date = groupRows.getFirst().getDate();
-                                    Integer dayOfWeek = groupRows.getFirst().getDayOfWeek();
-                                    List<TimeCandidatesResponse.TimeSlot> slots =
-                                            groupRows.stream()
-                                                    .map(
-                                                            row ->
-                                                                    new TimeCandidatesResponse
-                                                                            .TimeSlot(
-                                                                            row.getStartTime(),
-                                                                            row
-                                                                                    .getAvailableCount()))
-                                                    .sorted(
-                                                            Comparator.comparing(
-                                                                    TimeCandidatesResponse.TimeSlot
-                                                                            ::startTime))
-                                                    .toList();
-                                    return new TimeCandidatesResponse.Heatmap(
-                                            date, dayOfWeek, slots);
-                                })
-                        .sorted(
-                                (a, b) -> {
-                                    if (a.date() != null && b.date() != null)
-                                        return a.date().compareTo(b.date());
-                                    if (a.dayOfWeek() != null && b.dayOfWeek() != null)
-                                        return Integer.compare(a.dayOfWeek(), b.dayOfWeek());
-                                    return 0;
-                                })
-                        .collect(Collectors.toCollection(ArrayList::new));
-
-        return result;
     }
 }

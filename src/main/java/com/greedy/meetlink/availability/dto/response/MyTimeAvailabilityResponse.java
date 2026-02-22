@@ -18,8 +18,8 @@ public class MyTimeAvailabilityResponse {
     @Builder
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class DailyAvailability {
-        private final LocalDate date;      // SPECIFIC_DATE
-        private final Integer dayOfWeek;   // WEEKLY
+        private final LocalDate date; // SPECIFIC_DATE
+        private final Integer dayOfWeek; // WEEKLY
         private final List<LocalTime> startTimes;
     }
 }

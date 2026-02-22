@@ -18,8 +18,8 @@ public class TimeAvailabilityResponse {
     @Builder
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class DailyHeatmap {
-        private final LocalDate date;      // SPECIFIC_DATE용
-        private final Integer dayOfWeek;   // WEEKLY용
+        private final LocalDate date; // SPECIFIC_DATE용
+        private final Integer dayOfWeek; // WEEKLY용
         private final List<Slot> slots;
     }
 

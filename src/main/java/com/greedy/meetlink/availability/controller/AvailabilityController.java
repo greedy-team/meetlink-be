@@ -40,7 +40,8 @@ public class AvailabilityController implements AvailabilityControllerSpec {
     }
 
     @GetMapping("/time/me")
-    public ApiResponse<MyTimeAvailabilityResponse> getMyAvailability(@PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+    public ApiResponse<MyTimeAvailabilityResponse> getMyAvailability(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         return ApiResponse.success(timeAvailabilityService.getMyAvailability(code, token));
     }
 

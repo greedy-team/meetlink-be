@@ -15,9 +15,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,8 +61,7 @@ public class TimeCandidateService {
 
     @Transactional(readOnly = true)
     public List<TimeCandidateResponse> list(String code) {
-        return timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code)
-                .stream()
+        return timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code).stream()
                 .map(TimeCandidateResponse::from)
                 .toList();
     }

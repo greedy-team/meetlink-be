@@ -72,41 +72,54 @@ public class TimeAvailabilityService {
 
         Map<Object, List<TimeAvailabilityHeatmapRow>> grouped =
                 rows.stream()
-                        .collect(Collectors.groupingBy(
-                                row -> row.getDate() != null
-                                        ? row.getDate()
-                                        : row.getDayOfWeek()
-                        ));
+                        .collect(
+                                Collectors.groupingBy(
+                                        row ->
+                                                row.getDate() != null
+                                                        ? row.getDate()
+                                                        : row.getDayOfWeek()));
 
         List<TimeAvailabilityResponse.DailyHeatmap> result =
                 grouped.values().stream()
-                        .map(groupRows -> {
-                            LocalDate date = groupRows.getFirst().getDate();
-                            Integer dayOfWeek = groupRows.getFirst().getDayOfWeek();
+                        .map(
+                                groupRows -> {
+                                    LocalDate date = groupRows.getFirst().getDate();
+                                    Integer dayOfWeek = groupRows.getFirst().getDayOfWeek();
 
-                            List<TimeAvailabilityResponse.Slot> slots =
-                                    groupRows.stream()
-                                            .map(row -> TimeAvailabilityResponse.Slot.builder()
-                                                    .startTime(row.getStartTime())
-                                                    .availableCount(Math.toIntExact(row.getAvailableCount()))
-                                                    .build())
-                                            .sorted(Comparator.comparing(
-                                                    TimeAvailabilityResponse.Slot::getStartTime))
-                                            .toList();
+                                    List<TimeAvailabilityResponse.Slot> slots =
+                                            groupRows.stream()
+                                                    .map(
+                                                            row ->
+                                                                    TimeAvailabilityResponse.Slot
+                                                                            .builder()
+                                                                            .startTime(
+                                                                                    row
+                                                                                            .getStartTime())
+                                                                            .availableCount(
+                                                                                    Math.toIntExact(
+                                                                                            row
+                                                                                                    .getAvailableCount()))
+                                                                            .build())
+                                                    .sorted(
+                                                            Comparator.comparing(
+                                                                    TimeAvailabilityResponse.Slot
+                                                                            ::getStartTime))
+                                                    .toList();
 
-                            return TimeAvailabilityResponse.DailyHeatmap.builder()
-                                    .date(date)
-                                    .dayOfWeek(dayOfWeek)
-                                    .slots(slots)
-                                    .build();
-                        })
-                        .sorted((a, b) -> {
-                            if (a.getDate() != null && b.getDate() != null)
-                                return a.getDate().compareTo(b.getDate());
-                            if (a.getDayOfWeek() != null && b.getDayOfWeek() != null)
-                                return Integer.compare(a.getDayOfWeek(), b.getDayOfWeek());
-                            return 0;
-                        })
+                                    return TimeAvailabilityResponse.DailyHeatmap.builder()
+                                            .date(date)
+                                            .dayOfWeek(dayOfWeek)
+                                            .slots(slots)
+                                            .build();
+                                })
+                        .sorted(
+                                (a, b) -> {
+                                    if (a.getDate() != null && b.getDate() != null)
+                                        return a.getDate().compareTo(b.getDate());
+                                    if (a.getDayOfWeek() != null && b.getDayOfWeek() != null)
+                                        return Integer.compare(a.getDayOfWeek(), b.getDayOfWeek());
+                                    return 0;
+                                })
                         .toList();
 
         return TimeAvailabilityResponse.builder().heatmaps(result).build();
@@ -119,46 +132,44 @@ public class TimeAvailabilityService {
                 participantValidator.validateAndGetParticipant(meetingCode, token);
 
         List<TimeAvailability> rows =
-                timeAvailabilityRepository.findByMeetingAndParticipant(participant.getMeeting(), participant);
+                timeAvailabilityRepository.findByMeetingAndParticipant(
+                        participant.getMeeting(), participant);
 
         if (rows.isEmpty()) {
-            return MyTimeAvailabilityResponse.builder()
-                    .availabilities(List.of())
-                    .build();
+            return MyTimeAvailabilityResponse.builder().availabilities(List.of()).build();
         }
 
         Map<Object, List<TimeAvailability>> grouped =
                 rows.stream()
-                        .collect(Collectors.groupingBy(
-                                row -> row.getDate() != null
-                                        ? row.getDate()
-                                        : row.getDayOfWeek()
-                        ));
+                        .collect(
+                                Collectors.groupingBy(
+                                        row ->
+                                                row.getDate() != null
+                                                        ? row.getDate()
+                                                        : row.getDayOfWeek()));
 
         List<MyTimeAvailabilityResponse.DailyAvailability> result =
                 grouped.values().stream()
-                        .map(group -> {
+                        .map(
+                                group -> {
+                                    LocalDate date = group.getFirst().getDate();
+                                    Integer dayOfWeek = group.getFirst().getDayOfWeek();
 
-                            LocalDate date = group.getFirst().getDate();
-                            Integer dayOfWeek = group.getFirst().getDayOfWeek();
+                                    List<LocalTime> times =
+                                            group.stream()
+                                                    .map(TimeAvailability::getStartTime)
+                                                    .sorted()
+                                                    .toList();
 
-                            List<LocalTime> times =
-                                    group.stream()
-                                            .map(TimeAvailability::getStartTime)
-                                            .sorted()
-                                            .toList();
-
-                            return MyTimeAvailabilityResponse.DailyAvailability.builder()
-                                    .date(date)
-                                    .dayOfWeek(dayOfWeek)
-                                    .startTimes(times)
-                                    .build();
-                        })
+                                    return MyTimeAvailabilityResponse.DailyAvailability.builder()
+                                            .date(date)
+                                            .dayOfWeek(dayOfWeek)
+                                            .startTimes(times)
+                                            .build();
+                                })
                         .toList();
 
-        return MyTimeAvailabilityResponse.builder()
-                .availabilities(result)
-                .build();
+        return MyTimeAvailabilityResponse.builder().availabilities(result).build();
     }
 
     private void validateByMeetingType(Meeting meeting, TimeAvailabilityRequest request) {

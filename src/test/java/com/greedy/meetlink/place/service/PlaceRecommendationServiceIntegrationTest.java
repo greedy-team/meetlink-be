@@ -11,7 +11,7 @@ import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import com.greedy.meetlink.place.client.TMapPoiClient;
 import com.greedy.meetlink.place.client.TMapTransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
-import com.greedy.meetlink.result.PlaceTravelInfoRepository;
+import com.greedy.meetlink.place.repository.PlaceTravelInfoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;

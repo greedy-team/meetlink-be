@@ -9,4 +9,6 @@ public interface PlaceCandidateRepository extends JpaRepository<PlaceCandidate, 
     void deleteByMeeting(Meeting meeting);
 
     List<PlaceCandidate> findByMeeting(Meeting meeting);
+
+    List<PlaceCandidate> findByMeetingOrderByRankAsc(Meeting meeting);
 }

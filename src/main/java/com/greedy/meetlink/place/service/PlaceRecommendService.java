@@ -14,8 +14,7 @@ import com.greedy.meetlink.place.algorithm.PlaceMapper.MatchedPlace;
 import com.greedy.meetlink.place.algorithm.PolarSamplingGenerator;
 import com.greedy.meetlink.place.domain.Coordinate;
 import com.greedy.meetlink.place.domain.PlaceTravelInfo;
-
-import com.greedy.meetlink.result.PlaceTravelInfoRepository;
+import com.greedy.meetlink.place.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import lombok.RequiredArgsConstructor;

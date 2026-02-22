@@ -9,7 +9,7 @@ import com.greedy.meetlink.place.algorithm.*;
 import com.greedy.meetlink.place.client.PoiClient;
 import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
-import com.greedy.meetlink.result.PlaceTravelInfoRepository;
+import com.greedy.meetlink.place.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import org.junit.jupiter.api.BeforeEach;

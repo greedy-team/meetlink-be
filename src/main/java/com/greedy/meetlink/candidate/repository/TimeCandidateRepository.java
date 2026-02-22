@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TimeCandidateRepository extends JpaRepository<TimeCandidate, Long> {
-    @Query("""
+    @Query(
+            """
         SELECT MAX(tc.createdAt)
         FROM TimeCandidate tc
         WHERE tc.meeting.code = :code

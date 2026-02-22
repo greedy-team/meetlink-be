@@ -21,7 +21,8 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
 
     void deleteByMeetingAndParticipant(Meeting meeting, Participant participant);
 
-    @Query("""
+    @Query(
+            """
         SELECT
             ta.date AS date,
             ta.dayOfWeek AS dayOfWeek,

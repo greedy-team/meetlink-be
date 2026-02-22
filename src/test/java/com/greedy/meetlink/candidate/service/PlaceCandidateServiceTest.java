@@ -15,7 +15,7 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
-import com.greedy.meetlink.place.algorithm.*;
+import com.greedy.meetlink.candidate.algorithm.*;
 import com.greedy.meetlink.place.client.PoiClient;
 import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;

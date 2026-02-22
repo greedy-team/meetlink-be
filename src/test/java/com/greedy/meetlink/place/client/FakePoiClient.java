@@ -1,8 +1,7 @@
-package com.greedy.meetlink.place.client.fake;
+package com.greedy.meetlink.place.client;
 
-import com.greedy.meetlink.place.client.PoiClient;
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
-import com.greedy.meetlink.place.domain.Coordinate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -18,7 +17,6 @@ public class FakePoiClient implements PoiClient {
     public List<PoiPlace> searchNearby(Coordinate center) {
         log.info("[FakePoi] 주변 장소 검색 요청: lat={}, lon={}", center.latitude(), center.longitude());
 
-        // 검색된 좌표 바로 그 자리에 "Fake Cafe"가 있다고 가정
         return List.of(
                 new PoiPlace(
                         "Fake Cafe at " + String.format("%.4f", center.latitude()),

@@ -10,13 +10,13 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
-import com.greedy.meetlink.place.algorithm.CandidateFilter;
-import com.greedy.meetlink.place.algorithm.CandidateScorer;
-import com.greedy.meetlink.place.algorithm.GeometricMedianCalculator;
-import com.greedy.meetlink.place.algorithm.PlaceMapper;
-import com.greedy.meetlink.place.algorithm.PlaceMapper.MatchedPlace;
-import com.greedy.meetlink.place.algorithm.PolarSamplingGenerator;
-import com.greedy.meetlink.place.domain.Coordinate;
+import com.greedy.meetlink.candidate.algorithm.CandidateFilter;
+import com.greedy.meetlink.candidate.algorithm.CandidateScorer;
+import com.greedy.meetlink.candidate.algorithm.GeometricMedianCalculator;
+import com.greedy.meetlink.candidate.algorithm.PlaceMapper;
+import com.greedy.meetlink.candidate.algorithm.PlaceMapper.MatchedPlace;
+import com.greedy.meetlink.candidate.algorithm.PolarSamplingGenerator;
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.ArrayList;
@@ -135,17 +135,17 @@ public class PlaceCandidateService {
             PlaceCandidate candidate =
                     PlaceCandidate.builder()
                             .meeting(meeting)
-                            .name(mp.searchResult().name())
-                            .address(mp.searchResult().address())
-                            .latitude(mp.searchResult().coordinate().latitude())
-                            .longitude(mp.searchResult().coordinate().longitude())
+                            .name(mp.name())
+                            .address(mp.address())
+                            .latitude(mp.coordinate().latitude())
+                            .longitude(mp.coordinate().longitude())
                             .avgTravelTime(mp.avgTravelTime())
                             .maxTravelTime(mp.maxTravelTime())
                             .rank(mp.rank())
                             .build();
 
             saved.add(placeCandidateRepository.save(candidate));
-            log.info("PlaceCandidate 저장: rank={}, name={}", mp.rank(), mp.searchResult().name());
+            log.info("PlaceCandidate 저장: rank={}, name={}", mp.rank(), mp.name());
         }
 
         return saved;

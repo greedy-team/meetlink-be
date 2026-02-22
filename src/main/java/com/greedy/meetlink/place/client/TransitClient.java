@@ -1,6 +1,6 @@
 package com.greedy.meetlink.place.client;
 
-import com.greedy.meetlink.place.domain.Coordinate;
+import com.greedy.meetlink.place.Coordinate;
 
 /** 대중교통 경로 조회 클라이언트 인터페이스 - TMapTransitClient (Real) - FakeTransitClient (Test) */
 public interface TransitClient {

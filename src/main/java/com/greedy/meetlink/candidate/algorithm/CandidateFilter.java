@@ -1,7 +1,7 @@
-package com.greedy.meetlink.place.algorithm;
+package com.greedy.meetlink.candidate.algorithm;
 
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.place.client.TransitClient;
-import com.greedy.meetlink.place.domain.Coordinate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -57,17 +57,14 @@ public class CandidateFilter {
         for (Coordinate candidate : candidates) {
             Map<Coordinate, Double> travelTimeCache = new HashMap<>();
 
-            // 1단계: 샘플 참여자 이동시간 검증 (조기 탈락 최적화)
             if (isFailedOnSample(candidate, participants, sampleSet, travelTimeCache)) {
                 continue;
             }
 
-            // 2단계: 나머지 참여자 이동시간 검증
             if (isFailedOnRemainder(candidate, participants, sampleSet, travelTimeCache)) {
                 continue;
             }
 
-            // 참여자 순서를 보장하여 조립
             List<ParticipantTravelTime> travelTimes =
                     participants.stream()
                             .map(p -> new ParticipantTravelTime(p, travelTimeCache.get(p)))

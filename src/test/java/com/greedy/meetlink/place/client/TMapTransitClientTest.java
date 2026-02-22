@@ -2,7 +2,7 @@ package com.greedy.meetlink.place.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.greedy.meetlink.place.domain.Coordinate;
+import com.greedy.meetlink.place.Coordinate;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

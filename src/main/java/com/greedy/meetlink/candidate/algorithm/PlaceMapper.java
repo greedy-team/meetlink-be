@@ -1,13 +1,12 @@
-package com.greedy.meetlink.place.algorithm;
+package com.greedy.meetlink.candidate.algorithm;
 
-import com.greedy.meetlink.place.algorithm.CandidateFilter.ParticipantTravelTime;
-import com.greedy.meetlink.place.algorithm.CandidateScorer.ScoredCandidate;
-import com.greedy.meetlink.place.algorithm.ScoreCalculator.ScoreResult;
+import com.greedy.meetlink.candidate.algorithm.CandidateFilter.ParticipantTravelTime;
+import com.greedy.meetlink.candidate.algorithm.CandidateScorer.ScoredCandidate;
+import com.greedy.meetlink.candidate.algorithm.ScoreCalculator.ScoreResult;
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.place.client.PoiClient;
 import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
-import com.greedy.meetlink.place.domain.Coordinate;
-import com.greedy.meetlink.place.domain.PlaceSearchResult;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,16 +44,22 @@ public class PlaceMapper {
             // Step 7: POI 검색
             List<PoiPlace> places = poiClient.searchNearby(coord);
 
-            PlaceSearchResult searchResult;
+            String name;
+            String address;
+            Coordinate poiCoord;
             List<Double> travelTimes;
 
             if (places.isEmpty()) {
                 log.warn("POI 검색 결과 없음: coordinate={}", coord);
-                searchResult = fallbackSearchResult(coord, candidate.rank());
-                travelTimes = toTimeList(originalTimes); // 원래 이동시간 사용
+                name = "추천 중간 지점 " + candidate.rank();
+                address = String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
+                poiCoord = coord;
+                travelTimes = toTimeList(originalTimes);
             } else {
-                searchResult = PlaceSearchResult.from(places.get(0));
-                Coordinate poiCoord = searchResult.coordinate();
+                PoiPlace place = places.get(0);
+                name = place.name();
+                address = place.address();
+                poiCoord = new Coordinate(place.latitude(), place.longitude());
 
                 // Step 8: 실제 POI 좌표 기준 이동시간 재계산
                 travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
@@ -64,7 +69,9 @@ public class PlaceMapper {
 
             results.add(
                     new MatchedPlace(
-                            searchResult,
+                            name,
+                            address,
+                            poiCoord,
                             travelTimes,
                             scoreResult.avg(),
                             scoreResult.max(),
@@ -117,15 +124,10 @@ public class PlaceMapper {
         return transitClient.getTravelTimeMinutes(origin, destination);
     }
 
-    private PlaceSearchResult fallbackSearchResult(Coordinate coord, int rank) {
-        String name = "추천 중간 지점 " + rank;
-        String address =
-                String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
-        return new PlaceSearchResult(name, address, coord);
-    }
-
     public record MatchedPlace(
-            PlaceSearchResult searchResult,
+            String name,
+            String address,
+            Coordinate coordinate,
             List<Double> travelTimesMinutes,
             double avgTravelTime,
             double maxTravelTime,
@@ -133,7 +135,7 @@ public class PlaceMapper {
             int rank) {
         public MatchedPlace withRank(int rank) {
             return new MatchedPlace(
-                    searchResult, travelTimesMinutes, avgTravelTime, maxTravelTime, score, rank);
+                    name, address, coordinate, travelTimesMinutes, avgTravelTime, maxTravelTime, score, rank);
         }
     }
 }

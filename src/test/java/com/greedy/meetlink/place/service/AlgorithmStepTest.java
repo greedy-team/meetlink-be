@@ -2,11 +2,11 @@ package com.greedy.meetlink.place.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.greedy.meetlink.place.algorithm.*;
-import com.greedy.meetlink.place.algorithm.CandidateFilter.FilteredCandidate;
-import com.greedy.meetlink.place.algorithm.CandidateScorer.ScoredCandidate;
+import com.greedy.meetlink.candidate.algorithm.*;
+import com.greedy.meetlink.candidate.algorithm.CandidateFilter.FilteredCandidate;
+import com.greedy.meetlink.candidate.algorithm.CandidateScorer.ScoredCandidate;
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.place.client.TransitClient;
-import com.greedy.meetlink.place.domain.Coordinate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

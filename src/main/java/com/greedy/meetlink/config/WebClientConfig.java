@@ -1,4 +1,4 @@
-package com.greedy.meetlink.place.config;
+package com.greedy.meetlink.config;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;

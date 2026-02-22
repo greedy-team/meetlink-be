@@ -1,4 +1,4 @@
-package com.greedy.meetlink.place.domain;
+package com.greedy.meetlink.place;
 
 /**
  * 위경도 좌표 값 객체 - latitude: 위도 (Y축) - longitude: 경도 (X축)

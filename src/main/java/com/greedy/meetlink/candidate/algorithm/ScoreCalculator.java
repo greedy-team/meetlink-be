@@ -1,4 +1,4 @@
-package com.greedy.meetlink.place.algorithm;
+package com.greedy.meetlink.candidate.algorithm;
 
 import java.util.List;
 import org.springframework.stereotype.Component;

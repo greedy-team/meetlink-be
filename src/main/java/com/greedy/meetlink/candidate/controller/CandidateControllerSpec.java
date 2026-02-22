@@ -1,8 +1,9 @@
 package com.greedy.meetlink.candidate.controller;
 
-import com.greedy.meetlink.candidate.dto.response.PlaceCandidateListResponse;
+import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
 import com.greedy.meetlink.common.ApiResponse;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -74,7 +75,7 @@ public interface CandidateControllerSpec {
                         }
                         """)))
     })
-    ApiResponse<Void> calculatePlace(@PathVariable String code);
+    ApiResponse<List<PlaceCandidateResponse>> calculatePlace(@PathVariable String code);
 
     @Operation(summary = "추천 장소 조회", description = "해당 모임에 대해 계산된 추천 장소 후보 목록을 조회합니다.")
     @ApiResponses({
@@ -120,5 +121,5 @@ public interface CandidateControllerSpec {
                         }
                         """)))
     })
-    ApiResponse<PlaceCandidateListResponse> getPlace(@PathVariable String code);
+    ApiResponse<List<PlaceCandidateResponse>> getPlace(@PathVariable String code);
 }

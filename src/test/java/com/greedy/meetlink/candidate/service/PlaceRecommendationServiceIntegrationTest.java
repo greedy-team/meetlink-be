@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PlaceRecommendationServiceIntegrationTest {
 
-    @Autowired private PlaceRecommendService placeRecommendService;
+    @Autowired private PlaceCandidateService placeCandidateService;
 
     @Autowired private MeetingRepository meetingRepository;
     @Autowired private ParticipantRepository participantRepository;
@@ -67,7 +67,7 @@ class PlaceRecommendationServiceIntegrationTest {
                 .willReturn(List.of(new PoiPlace("Mock Cafe", "Seoul Mock Street", 37.55, 126.99)));
 
         // when
-        placeRecommendService.recommendAndSave("MOCK-TEST-CODE-001");
+        placeCandidateService.calculate("MOCK-TEST-CODE-001");
 
         // then
         List<PlaceCandidate> candidates = placeCandidateRepository.findByMeeting(meeting);

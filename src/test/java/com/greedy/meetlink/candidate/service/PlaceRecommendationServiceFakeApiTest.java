@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PlaceRecommendationServiceFakeApiTest {
 
-    @Autowired private PlaceRecommendService placeRecommendService;
+    @Autowired private PlaceCandidateService placeCandidateService;
     @Autowired private MeetingRepository meetingRepository;
     @Autowired private ParticipantRepository participantRepository;
     @Autowired private LocationAvailabilityRepository locationAvailabilityRepository;
@@ -50,7 +50,7 @@ class PlaceRecommendationServiceFakeApiTest {
         createParticipant(meeting, "UserC", "token3", 37.5574, 126.9240);
 
         // when
-        placeRecommendService.recommendAndSave("FAKE-CODE-002");
+        placeCandidateService.calculate("FAKE-CODE-002");
 
         // then
         List<PlaceCandidate> candidates = placeCandidateRepository.findByMeeting(meeting);

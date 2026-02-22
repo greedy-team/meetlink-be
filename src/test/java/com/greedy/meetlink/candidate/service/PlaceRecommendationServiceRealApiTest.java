@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class PlaceRecommendationServiceRealApiTest {
 
-    @Autowired private PlaceRecommendService placeRecommendService;
+    @Autowired private PlaceCandidateService placeCandidateService;
 
     @Autowired private MeetingRepository meetingRepository;
     @Autowired private ParticipantRepository participantRepository;
@@ -52,7 +52,7 @@ class PlaceRecommendationServiceRealApiTest {
 
         // when
         System.out.println(">>> [START] 실제 TMap API 호출 <<<");
-        placeRecommendService.recommendAndSave("REAL-API-CODE-001");
+        placeCandidateService.calculate("REAL-API-CODE-001");
         System.out.println(">>> [END] 추천 로직 완료 <<<");
 
         // then

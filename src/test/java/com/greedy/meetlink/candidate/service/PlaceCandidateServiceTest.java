@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
+import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
 import com.greedy.meetlink.meeting.entity.Meeting;
@@ -31,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-class PlaceRecommendServiceTest {
+class PlaceCandidateServiceTest {
 
     @Mock private MeetingRepository meetingRepository;
     @Mock private PlaceCandidateRepository placeCandidateRepository;
@@ -42,7 +43,7 @@ class PlaceRecommendServiceTest {
     @Mock private TransitClient transitClient;
     @Mock private PoiClient poiClient;
 
-    private PlaceRecommendService placeRecommendService;
+    private PlaceCandidateService placeCandidateService;
 
     @BeforeEach
     void setUp() {
@@ -56,8 +57,8 @@ class PlaceRecommendServiceTest {
         CandidateScorer candidateScorer = new CandidateScorer(scoreCalculator);
         PlaceMapper placeMapper = new PlaceMapper(poiClient);
 
-        placeRecommendService =
-                new PlaceRecommendService(
+        placeCandidateService =
+                new PlaceCandidateService(
                         geometricMedianCalculator,
                         polarSamplingGenerator,
                         candidateFilter,
@@ -72,7 +73,7 @@ class PlaceRecommendServiceTest {
 
     @Test
     @DisplayName("장소 추천 및 저장 전체 프로세스 검증")
-    void recommendAndSave_Success() {
+    void calculate_Success() {
         // given
         Meeting meeting = createMeeting(1L, "TEST-CODE");
         Participant p1 = createParticipant(1L, meeting, "UserA");
@@ -96,9 +97,10 @@ class PlaceRecommendServiceTest {
                 .willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        placeRecommendService.recommendAndSave("TEST-CODE");
+        List<PlaceCandidateResponse> response = placeCandidateService.calculate("TEST-CODE");
 
         // then
+        assertThat(response).isNotEmpty();
         verify(placeCandidateRepository, atLeastOnce()).save(any(PlaceCandidate.class));
         verify(meetingResultRepository, times(1)).findByMeeting(meeting);
         verify(meetingResultRepository, atLeastOnce()).save(any(MeetingResult.class));
@@ -106,7 +108,7 @@ class PlaceRecommendServiceTest {
 
     @Test
     @DisplayName("참여자가 2명 미만인 경우 예외 발생")
-    void recommendAndSave_TooFewParticipants() {
+    void calculate_TooFewParticipants() {
         // given
         Meeting meeting = createMeeting(1L, "CODE");
         given(meetingRepository.findByCode("CODE")).willReturn(Optional.of(meeting));
@@ -117,13 +119,13 @@ class PlaceRecommendServiceTest {
         assertThat(
                         org.junit.jupiter.api.Assertions.assertThrows(
                                 IllegalArgumentException.class,
-                                () -> placeRecommendService.recommendAndSave("CODE")))
+                                () -> placeCandidateService.calculate("CODE")))
                 .hasMessageContaining("참여자가 2명 이상 필요합니다.");
     }
 
     @Test
     @DisplayName("출발지를 등록하지 않은 참여자가 있는 경우 예외 발생")
-    void recommendAndSave_MissingLocation() {
+    void calculate_MissingLocation() {
         // given
         Meeting meeting = createMeeting(1L, "CODE");
         Participant p1 = createParticipant(1L, meeting, "A");
@@ -138,7 +140,7 @@ class PlaceRecommendServiceTest {
         assertThat(
                         org.junit.jupiter.api.Assertions.assertThrows(
                                 IllegalStateException.class,
-                                () -> placeRecommendService.recommendAndSave("CODE")))
+                                () -> placeCandidateService.calculate("CODE")))
                 .hasMessageContaining("출발지를 등록하지 않은 참여자가 있습니다");
     }
 

@@ -2,7 +2,7 @@ package com.greedy.meetlink.candidate.service;
 
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
-import com.greedy.meetlink.candidate.PlaceCalculationType;
+import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PlaceRecommendService {
+public class PlaceCandidateService {
 
     private static final int TOP_K = 3;
 
@@ -48,7 +48,7 @@ public class PlaceRecommendService {
     private final LocationAvailabilityRepository locationAvailabilityRepository;
 
     @Transactional
-    public void recommendAndSave(String code) {
+    public List<PlaceCandidateResponse> calculate(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
@@ -68,7 +68,21 @@ public class PlaceRecommendService {
                     "meetingId=" + meeting.getId() + " : 추천 가능한 장소를 찾지 못했습니다.");
         }
 
-        saveResults(meeting, matchedPlaces);
+        List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
+        linkToMeetingResult(meeting, savedCandidates.get(0));
+
+        return savedCandidates.stream().map(PlaceCandidateResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlaceCandidateResponse> get(String code) {
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+
+        List<PlaceCandidate> candidates =
+                placeCandidateRepository.findByMeetingOrderByRankAsc(meeting);
+
+        return candidates.stream().map(PlaceCandidateResponse::from).toList();
     }
 
     private Map<Long, LocationAvailability> loadLocationMap(List<Participant> participants) {
@@ -78,14 +92,14 @@ public class PlaceRecommendService {
 
     private void validateLocations(
             List<Participant> participants, Map<Long, LocationAvailability> locationMap) {
-        List<String> missingLocations =
+        List<String> missing =
                 participants.stream()
                         .filter(p -> !locationMap.containsKey(p.getId()))
                         .map(Participant::getNickname)
                         .toList();
 
-        if (!missingLocations.isEmpty()) {
-            throw new IllegalStateException("출발지를 등록하지 않은 참여자가 있습니다: " + missingLocations);
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException("출발지를 등록하지 않은 참여자가 있습니다: " + missing);
         }
     }
 
@@ -114,13 +128,7 @@ public class PlaceRecommendService {
         return placeMapper.match(scored);
     }
 
-    private void saveResults(Meeting meeting, List<MatchedPlace> matchedPlaces) {
-        List<PlaceCandidate> savedCandidates = savePlaceCandidates(meeting, matchedPlaces);
-        linkToMeetingResult(meeting, savedCandidates.get(0));
-    }
-
-    private List<PlaceCandidate> savePlaceCandidates(
-            Meeting meeting, List<MatchedPlace> matchedPlaces) {
+    private List<PlaceCandidate> saveCandidates(Meeting meeting, List<MatchedPlace> matchedPlaces) {
         List<PlaceCandidate> saved = new ArrayList<>();
 
         for (MatchedPlace mp : matchedPlaces) {
@@ -134,7 +142,6 @@ public class PlaceRecommendService {
                             .avgTravelTime(mp.avgTravelTime())
                             .maxTravelTime(mp.maxTravelTime())
                             .rank(mp.rank())
-                            .calculationType(PlaceCalculationType.FAIR)
                             .build();
 
             saved.add(placeCandidateRepository.save(candidate));

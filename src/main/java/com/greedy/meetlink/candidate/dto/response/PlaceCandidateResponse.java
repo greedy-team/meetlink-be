@@ -18,7 +18,6 @@ public class PlaceCandidateResponse {
     private final Double longitude;
     private final Double avgTravelTime;
     private final Double maxTravelTime;
-    private final PlaceCalculationType calculationType;
     private final Integer rank;
 
     public static PlaceCandidateResponse from(PlaceCandidate candidate) {
@@ -30,7 +29,6 @@ public class PlaceCandidateResponse {
                 .longitude(candidate.getLongitude())
                 .avgTravelTime(candidate.getAvgTravelTime())
                 .maxTravelTime(candidate.getMaxTravelTime())
-                .calculationType(candidate.getCalculationType())
                 .rank(candidate.getRank())
                 .build();
     }

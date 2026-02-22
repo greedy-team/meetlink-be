@@ -14,6 +14,7 @@ import com.greedy.meetlink.candidate.dto.response.PlaceCandidateListResponse;
 import com.greedy.meetlink.candidate.dto.response.RecommendedPlaceResponse;
 import com.greedy.meetlink.candidate.service.PlaceCandidateQueryService;
 import com.greedy.meetlink.candidate.service.PlaceRecommendService;
+import com.greedy.meetlink.candidate.service.TimeCandidateService;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +32,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@DisplayName("PlaceCandidateController 테스트")
-class PlaceCandidateControllerTest {
+@DisplayName("CandidateController 테스트")
+class CandidateControllerTest {
 
     MockMvc mockMvc;
 
@@ -43,8 +44,8 @@ class PlaceCandidateControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
+    @MockitoBean TimeCandidateService timeCandidateService;
     @MockitoBean PlaceRecommendService placeRecommendService;
-
     @MockitoBean PlaceCandidateQueryService placeCandidateQueryService;
 
     @Nested

@@ -1,6 +1,7 @@
 package com.greedy.meetlink.candidate.controller;
 
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateListResponse;
+import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
 import com.greedy.meetlink.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,8 +10,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Tag(name = "Place Candidate", description = "장소 후보 API")
-public interface PlaceCandidateControllerSpec {
+@Tag(name = "Candidate", description = "후보 API")
+public interface CandidateControllerSpec {
+    @Operation(summary = "시간 후보 계산", description = "참여자들의 시간 가용성을 기반으로 공통 시간 후보를 계산합니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200", description = "계산 성공")
+    })
+    ApiResponse<TimeCandidatesResponse> calculateTime(@PathVariable String code);
+
+    @Operation(summary = "시간 후보 조회", description = "해당 모임의 시간 후보 목록을 조회합니다.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200", description = "조회 성공")
+    })
+    ApiResponse<TimeCandidatesResponse> getTime(@PathVariable String code);
 
     @Operation(summary = "추천 장소 계산", description = "현재 참여자들의 위치 데이터를 기반으로 추천 장소 후보를 새로 계산하고 저장합니다.")
     @ApiResponses({
@@ -58,7 +72,7 @@ public interface PlaceCandidateControllerSpec {
                         }
                         """)))
     })
-    ApiResponse<Void> calculate(@PathVariable String code);
+    ApiResponse<Void> calculatePlace(@PathVariable String code);
 
     @Operation(summary = "추천 장소 조회", description = "해당 모임에 대해 계산된 추천 장소 후보 목록을 조회합니다.")
     @ApiResponses({
@@ -82,8 +96,7 @@ public interface PlaceCandidateControllerSpec {
                                         "longitude": 127.0276,
                                         "rank": 1,
                                         "averageDuration": 1530,
-                                        "maxDuration": 2400,
-                                        "participantDurations": []
+                                        "maxDuration": 2400
                                     }
                                 ]
                             }
@@ -105,5 +118,5 @@ public interface PlaceCandidateControllerSpec {
                         }
                         """)))
     })
-    ApiResponse<PlaceCandidateListResponse> getCandidates(@PathVariable String code);
+    ApiResponse<PlaceCandidateListResponse> getPlace(@PathVariable String code);
 }

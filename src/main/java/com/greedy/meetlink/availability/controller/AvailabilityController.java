@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/meetings/{code}")
+@RequestMapping("/meetings/{code}/availabilities")
 public class AvailabilityController implements AvailabilityControllerSpec {
     private final TimeAvailabilityService timeAvailabilityService;
     private final LocationAvailabilityService locationAvailabilityService;
 
     // 시간 입력
-    @PostMapping("/time-availabilities")
+    @PostMapping("/time")
     public ApiResponse<Void> submitTime(
             @PathVariable String code,
             @RequestHeader("X-Participant-Token") String token,
@@ -33,7 +33,7 @@ public class AvailabilityController implements AvailabilityControllerSpec {
     }
 
     // 위치 입력
-    @PostMapping("/location-availabilities")
+    @PostMapping("/location")
     public ApiResponse<Void> submitLocation(
             @PathVariable String code,
             @RequestHeader("X-Participant-Token") String token,

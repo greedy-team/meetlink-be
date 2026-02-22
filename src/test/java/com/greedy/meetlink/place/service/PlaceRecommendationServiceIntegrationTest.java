@@ -10,8 +10,8 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
-import com.greedy.meetlink.place.client.TMapPoiClient;
-import com.greedy.meetlink.place.client.TMapTransitClient;
+import com.greedy.meetlink.place.client.PoiClient;
+import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
 import com.greedy.meetlink.place.repository.PlaceTravelInfoRepository;
 import java.time.LocalTime;
@@ -40,8 +40,8 @@ class PlaceRecommendationServiceIntegrationTest {
     @Autowired private PlaceTravelInfoRepository placeTravelInfoRepository;
 
     // 실제 API 대신 가짜 빈(MockBean) 사용 -> 쿼터 소진 문제 해결
-    @MockitoBean private TMapTransitClient tMapTransitClient;
-    @MockitoBean private TMapPoiClient tMapPoiClient;
+    @MockitoBean private TransitClient transitClient;
+    @MockitoBean private PoiClient poiClient;
 
     @Test
     @DisplayName("[통합] Mock TMap API를 사용하여 장소 추천 로직 검증")
@@ -67,12 +67,12 @@ class PlaceRecommendationServiceIntegrationTest {
         // 3. Mock 설정 (가짜 응답)
         // 어떤 좌표 요청이 오든 30분 소요된다고 가정
         BDDMockito.given(
-                        tMapTransitClient.getTravelTimeMinutes(
+                        transitClient.getTravelTimeMinutes(
                                 ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .willReturn(30.0);
 
         // 어떤 좌표 검색이든 "Mock Cafe"가 있다고 가정
-        BDDMockito.given(tMapPoiClient.searchNearby(ArgumentMatchers.any()))
+        BDDMockito.given(poiClient.searchNearby(ArgumentMatchers.any()))
                 .willReturn(List.of(new PoiPlace("Mock Cafe", "Seoul Mock Street", 37.55, 126.99)));
 
         // when

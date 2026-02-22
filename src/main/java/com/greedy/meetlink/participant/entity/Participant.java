@@ -47,12 +47,6 @@ public class Participant extends BaseEntity {
     private LocalDateTime timeSubmittedAt;
     private LocalDateTime locationSubmittedAt;
 
-    // ✅ 추가: 장소 추천에 사용할 출발지 좌표
-    // nullable = true: 참여자 생성 시점에는 좌표 미입력, 이후 출발지 등록 시 업데이트
-    @Column private Double latitude;
-
-    @Column private Double longitude;
-
     @Builder
     private Participant(
             Meeting meeting,
@@ -77,16 +71,5 @@ public class Participant extends BaseEntity {
 
     public void markLocationSubmitted() {
         this.locationSubmittedAt = LocalDateTime.now();
-    }
-
-    /** 출발지 좌표 등록/수정 장소 추천 요청 전 참여자가 자신의 출발지를 입력할 때 호출 */
-    public void updateLocation(double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    /** 좌표가 등록된 참여자인지 확인 장소 추천 실행 전 유효성 검사에 사용 */
-    public boolean hasLocation() {
-        return latitude != null && longitude != null;
     }
 }

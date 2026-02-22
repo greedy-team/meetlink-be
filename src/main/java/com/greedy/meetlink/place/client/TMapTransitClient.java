@@ -1,8 +1,8 @@
 package com.greedy.meetlink.place.client;
 
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.place.client.dto.TransitRouteRequest;
 import com.greedy.meetlink.place.client.dto.TransitRouteResponse;
-import com.greedy.meetlink.place.Coordinate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

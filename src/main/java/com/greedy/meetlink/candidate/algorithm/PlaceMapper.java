@@ -52,7 +52,8 @@ public class PlaceMapper {
             if (places.isEmpty()) {
                 log.warn("POI 검색 결과 없음: coordinate={}", coord);
                 name = "추천 중간 지점 " + candidate.rank();
-                address = String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
+                address =
+                        String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
                 poiCoord = coord;
                 travelTimes = toTimeList(originalTimes);
             } else {
@@ -135,7 +136,14 @@ public class PlaceMapper {
             int rank) {
         public MatchedPlace withRank(int rank) {
             return new MatchedPlace(
-                    name, address, coordinate, travelTimesMinutes, avgTravelTime, maxTravelTime, score, rank);
+                    name,
+                    address,
+                    coordinate,
+                    travelTimesMinutes,
+                    avgTravelTime,
+                    maxTravelTime,
+                    score,
+                    rank);
         }
     }
 }

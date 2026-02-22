@@ -1,8 +1,8 @@
 package com.greedy.meetlink.place.client;
 
+import com.greedy.meetlink.place.Coordinate;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
-import com.greedy.meetlink.place.Coordinate;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /** 후보 좌표 필터링 (1차: 거리 기반 / 2차: 이동시간 기반) */
@@ -23,16 +22,6 @@ public class CandidateFilter {
     private static final double DISTANCE_THRESHOLD_FACTOR = 1.2;
     private static final double MAX_TRAVEL_TIME_MINUTES = 60.0;
     private static final int SAMPLE_PARTICIPANT_COUNT = 3;
-
-    /**
-     * ✅ 리팩토링: 하드코딩 1000ms → application.yml 외부화
-     *
-     * <p>application.yml 예시: tmap: call-delay-ms: 1000 # 무료 플랜 # call-delay-ms: 0 # 유료 플랜
-     *
-     * <p>FakeTransitClient 사용 시 0으로 설정하면 테스트 속도 향상.
-     */
-    @Value("${tmap.call-delay-ms:1000}")
-    private long tmapCallDelayMs;
 
     private final TransitClient transitClient;
 
@@ -113,7 +102,7 @@ public class CandidateFilter {
         for (Coordinate p : participants) {
             if (!sampleSet.contains(p)) continue;
 
-            Double travelTime = callWithDelay(p, candidate);
+            Double travelTime = callTransit(p, candidate);
             if (isInvalidTravelTime(travelTime)) {
                 log.debug(
                         "샘플 필터 탈락: candidate={}, participant={}, time={}",
@@ -141,7 +130,7 @@ public class CandidateFilter {
         for (Coordinate p : participants) {
             if (sampleSet.contains(p)) continue;
 
-            Double travelTime = callWithDelay(p, candidate);
+            Double travelTime = callTransit(p, candidate);
             if (isInvalidTravelTime(travelTime)) {
                 log.warn(
                         "나머지 참여자 필터 탈락: candidate={}, participant={}, time={}",
@@ -160,19 +149,8 @@ public class CandidateFilter {
         return travelTime == null || travelTime > MAX_TRAVEL_TIME_MINUTES;
     }
 
-    /** TMap API 호출 + 딜레이 ✅ 리팩토링: 딜레이값을 @Value로 주입받아 환경별 조정 가능 */
-    private Double callWithDelay(Coordinate origin, Coordinate destination) {
-        Double result = transitClient.getTravelTimeMinutes(origin, destination);
-        if (tmapCallDelayMs > 0) {
-            try {
-                Thread.sleep(tmapCallDelayMs);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("TMap API 딜레이 중 인터럽트. 해당 후보 처리를 중단합니다.");
-                return null;
-            }
-        }
-        return result;
+    private Double callTransit(Coordinate origin, Coordinate destination) {
+        return transitClient.getTravelTimeMinutes(origin, destination);
     }
 
     // -------------------------------------------------------------------------

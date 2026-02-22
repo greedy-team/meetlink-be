@@ -2,11 +2,14 @@ package com.greedy.meetlink.place.algorithm;
 
 import com.greedy.meetlink.place.algorithm.CandidateFilter.ParticipantTravelTime;
 import com.greedy.meetlink.place.algorithm.CandidateScorer.ScoredCandidate;
+import com.greedy.meetlink.place.algorithm.ScoreCalculator.ScoreResult;
 import com.greedy.meetlink.place.client.PoiClient;
+import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
 import com.greedy.meetlink.place.domain.Coordinate;
 import com.greedy.meetlink.place.domain.PlaceSearchResult;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 좌표-장소 매핑 (Place Mapper) 후보 좌표를 실제 장소(POI) 정보와 매칭합니다.
+ * 좌표-장소 매핑 (Place Mapper)
  *
- * <p>✅ 리팩토링: PlaceMapper 내부에서 rank++ 카운터를 별도 관리하던 방식 제거. CandidateScorer에서 이미 rank가 부여된
- * ScoredCandidate.rank()를 그대로 사용.
+ * <p>후보 좌표를 실제 장소(POI) 정보와 매칭하고, 실제 POI 좌표 기준으로 이동시간을 재계산하여 최종 순위를 확정합니다.
  *
- * <p>[변경 이유] - rank가 두 곳(CandidateScorer, PlaceMapper)에서 관리되면 topCandidates 리스트 순서가 바뀌거나 필터링이 추가될
- * 경우 rank 불일치 버그 발생 가능. - 단일 출처(Single Source of Truth) 원칙: rank는 CandidateScorer에서만 결정.
+ * <p>[Step 7] 상위 K개 좌표에 대해 POI 검색
+ *
+ * <p>[Step 8] 실제 POI 좌표 기준으로 이동시간 재계산 → 재정렬 및 rank 재부여
  */
 @Slf4j
 @Component
@@ -28,45 +31,92 @@ import org.springframework.stereotype.Component;
 public class PlaceMapper {
 
     private final PoiClient poiClient;
+    private final TransitClient transitClient;
+    private final ScoreCalculator scoreCalculator;
 
     public List<MatchedPlace> match(List<ScoredCandidate> topCandidates) {
         List<MatchedPlace> results = new ArrayList<>();
 
         for (ScoredCandidate candidate : topCandidates) {
             Coordinate coord = candidate.filteredCandidate().coordinate();
+            List<ParticipantTravelTime> originalTimes =
+                    candidate.filteredCandidate().participantTravelTimes();
 
-            // 1. POI 검색
+            // Step 7: POI 검색
             List<PoiPlace> places = poiClient.searchNearby(coord);
 
             PlaceSearchResult searchResult;
+            List<Double> travelTimes;
+
             if (places.isEmpty()) {
                 log.warn("POI 검색 결과 없음: coordinate={}", coord);
                 searchResult = fallbackSearchResult(coord, candidate.rank());
+                travelTimes = toTimeList(originalTimes); // 원래 이동시간 사용
             } else {
                 searchResult = PlaceSearchResult.from(places.get(0));
+                Coordinate poiCoord = searchResult.coordinate();
+
+                // Step 8: 실제 POI 좌표 기준 이동시간 재계산
+                travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
             }
 
-            // 2. 이동 시간 정보 매핑
-            List<Double> travelTimes =
-                    candidate.filteredCandidate().participantTravelTimes().stream()
-                            .map(ParticipantTravelTime::travelTimeMinutes)
-                            .collect(Collectors.toList());
+            ScoreResult scoreResult = scoreCalculator.calculate(travelTimes);
 
             results.add(
                     new MatchedPlace(
                             searchResult,
                             travelTimes,
-                            candidate.avgTravelTime(),
-                            candidate.maxTravelTime(),
-                            candidate.score(),
-                            candidate.rank() // ✅ 리팩토링: rank++  → ScoredCandidate.rank() 직접 사용
-                            ));
+                            scoreResult.avg(),
+                            scoreResult.max(),
+                            scoreResult.score(),
+                            0)); // rank는 재정렬 후 부여
+        }
+
+        // Step 8: 재계산된 점수 기준 재정렬 및 rank 재부여
+        results.sort(Comparator.comparingDouble(MatchedPlace::score));
+        for (int i = 0; i < results.size(); i++) {
+            results.set(i, results.get(i).withRank(i + 1));
         }
 
         return results;
     }
 
-    /** POI 검색 실패 시 좌표 기반 폴백 장소 생성 */
+    /**
+     * 실제 POI 좌표 기준으로 각 참여자의 이동시간 재계산
+     *
+     * <p>API 호출 실패 시 원래 이동시간으로 fallback
+     */
+    private List<Double> recalculateTravelTimes(
+            List<ParticipantTravelTime> originalTimes, Coordinate poiCoord) {
+        List<Double> times = new ArrayList<>();
+
+        for (ParticipantTravelTime ptt : originalTimes) {
+            Double recalcTime = callTransit(ptt.participantCoordinate(), poiCoord);
+
+            if (recalcTime == null) {
+                log.warn(
+                        "POI 기준 이동시간 재계산 실패 → 원래 값 사용: participant={}, original={}",
+                        ptt.participantCoordinate(),
+                        ptt.travelTimeMinutes());
+                times.add(ptt.travelTimeMinutes());
+            } else {
+                times.add(recalcTime);
+            }
+        }
+
+        return times;
+    }
+
+    private List<Double> toTimeList(List<ParticipantTravelTime> participantTravelTimes) {
+        return participantTravelTimes.stream()
+                .map(ParticipantTravelTime::travelTimeMinutes)
+                .collect(Collectors.toList());
+    }
+
+    private Double callTransit(Coordinate origin, Coordinate destination) {
+        return transitClient.getTravelTimeMinutes(origin, destination);
+    }
+
     private PlaceSearchResult fallbackSearchResult(Coordinate coord, int rank) {
         String name = "추천 중간 지점 " + rank;
         String address =
@@ -80,5 +130,10 @@ public class PlaceMapper {
             double avgTravelTime,
             double maxTravelTime,
             double score,
-            int rank) {}
+            int rank) {
+        public MatchedPlace withRank(int rank) {
+            return new MatchedPlace(
+                    searchResult, travelTimesMinutes, avgTravelTime, maxTravelTime, score, rank);
+        }
+    }
 }

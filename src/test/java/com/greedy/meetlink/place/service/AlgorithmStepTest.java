@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AlgorithmStepTest {
@@ -31,7 +30,6 @@ class AlgorithmStepTest {
         geometricMedianCalculator = new GeometricMedianCalculator();
         polarSamplingGenerator = new PolarSamplingGenerator();
         candidateFilter = new CandidateFilter(transitClient);
-        ReflectionTestUtils.setField(candidateFilter, "tmapCallDelayMs", 0L);
 
         candidateScorer = new CandidateScorer(new ScoreCalculator());
     }

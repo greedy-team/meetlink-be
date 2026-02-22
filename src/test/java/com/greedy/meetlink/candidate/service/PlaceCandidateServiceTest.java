@@ -51,11 +51,10 @@ class PlaceCandidateServiceTest {
         PolarSamplingGenerator polarSamplingGenerator = new PolarSamplingGenerator();
 
         CandidateFilter candidateFilter = new CandidateFilter(transitClient);
-        ReflectionTestUtils.setField(candidateFilter, "tmapCallDelayMs", 0L);
 
         ScoreCalculator scoreCalculator = new ScoreCalculator();
         CandidateScorer candidateScorer = new CandidateScorer(scoreCalculator);
-        PlaceMapper placeMapper = new PlaceMapper(poiClient);
+        PlaceMapper placeMapper = new PlaceMapper(poiClient, transitClient, scoreCalculator);
 
         placeCandidateService =
                 new PlaceCandidateService(

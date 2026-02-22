@@ -1,6 +1,5 @@
 package com.greedy.meetlink.candidate.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
@@ -144,8 +143,7 @@ class PlaceCandidateControllerTest {
                     .andExpect(jsonPath("$.result.recommendedPlaces").isArray())
                     .andExpect(jsonPath("$.result.recommendedPlaces.length()").value(2))
                     .andExpect(
-                            jsonPath("$.result.recommendedPlaces[0].placeName")
-                                    .value("스타벅스 강남점"))
+                            jsonPath("$.result.recommendedPlaces[0].placeName").value("스타벅스 강남점"))
                     .andExpect(
                             jsonPath("$.result.recommendedPlaces[0].roadAddress")
                                     .value("서울 강남구 테헤란로 101"))
@@ -159,8 +157,7 @@ class PlaceCandidateControllerTest {
                             jsonPath("$.result.recommendedPlaces[0].participantDurations")
                                     .isArray())
                     .andExpect(
-                            jsonPath(
-                                            "$.result.recommendedPlaces[0].participantDurations.length()")
+                            jsonPath("$.result.recommendedPlaces[0].participantDurations.length()")
                                     .value(2))
                     .andExpect(
                             jsonPath(

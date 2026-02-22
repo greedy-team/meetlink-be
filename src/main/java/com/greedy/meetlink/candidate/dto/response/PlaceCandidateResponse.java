@@ -1,7 +1,7 @@
 package com.greedy.meetlink.candidate.dto.response;
 
 import com.greedy.meetlink.candidate.PlaceCalculationType;
-import com.greedy.meetlink.candidate.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

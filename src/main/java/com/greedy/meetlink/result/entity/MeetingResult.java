@@ -1,7 +1,7 @@
 package com.greedy.meetlink.result.entity;
 
-import com.greedy.meetlink.candidate.PlaceCandidate;
-import com.greedy.meetlink.candidate.TimeCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import jakarta.persistence.Entity;

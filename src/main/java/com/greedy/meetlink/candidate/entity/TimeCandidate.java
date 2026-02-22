@@ -1,4 +1,4 @@
-package com.greedy.meetlink.candidate;
+package com.greedy.meetlink.candidate.entity;
 
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.meeting.entity.Meeting;
@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -42,4 +43,25 @@ public class TimeCandidate extends BaseEntity {
 
     @Column(nullable = false)
     private int rank;
+
+    @Builder
+    private TimeCandidate(
+            Meeting meeting,
+            LocalDate date,
+            Integer dayOfWeek,
+            LocalTime startTime,
+            LocalTime endTime,
+            int availableCount) {
+        this.meeting = meeting;
+        this.date = date;
+        this.dayOfWeek = dayOfWeek;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.availableCount = availableCount;
+        this.rank = 0;
+    }
+
+    public void assignRank(int rank) {
+        this.rank = rank;
+    }
 }

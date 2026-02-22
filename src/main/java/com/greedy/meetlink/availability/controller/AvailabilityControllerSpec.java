@@ -26,21 +26,35 @@ public interface AvailabilityControllerSpec {
                                                         name = "특정 날짜 기반 모임",
                                                         value =
                                                                 """
-                                            {
-                                                "slots": [
-                                                    { "date": "2026-02-21", "startTime": "10:00" }
-                                                ]
-                                            }
+                                                                        {
+                                                                          "availabilities": [
+                                                                            {
+                                                                              "date": "2026-02-21",
+                                                                              "startTimes": ["10:00", "10:30", "11:00"]
+                                                                            },
+                                                                            {
+                                                                              "date": "2026-02-22",
+                                                                              "startTimes": ["14:00", "14:30"]
+                                                                            }
+                                                                          ]
+                                                                        }
                                             """),
                                                 @ExampleObject(
                                                         name = "매주 기반 모임",
                                                         value =
                                                                 """
-                                            {
-                                                "slots": [
-                                                    { "dayOfWeek": 0, "startTime": "10:00" }
-                                                ]
-                                            }
+                                                                        {
+                                                                          "availabilities": [
+                                                                            {
+                                                                              "dayOfWeek": 0,
+                                                                              "startTimes": ["10:00", "10:30", "11:00"]
+                                                                            },
+                                                                            {
+                                                                              "dayOfWeek": 1,
+                                                                              "startTimes": ["14:00", "14:30"]
+                                                                            }
+                                                                          ]
+                                                                        }
                                             """),
                                             })))
     @ApiResponses({
@@ -70,7 +84,7 @@ public interface AvailabilityControllerSpec {
                                         {
                                             "status": false,
                                             "code": "INVALID_REQUEST",
-                                            "message": "SPECIFIC_DATE 모임은 날짜 기반 입력만 가능합니다."
+                                            "message": "날짜 기반 모임은 날짜 기반 입력만 가능합니다."
                                         }
                                     """),
                                     @ExampleObject(

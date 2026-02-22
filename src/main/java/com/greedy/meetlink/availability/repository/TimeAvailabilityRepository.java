@@ -37,4 +37,6 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
                 ta.startTime ASC
     """)
     List<TimeAvailabilityHeatmapRow> findHeatmapByMeetingCode(String code);
+
+    List<TimeAvailability> findByMeetingAndParticipant(Meeting meeting, Participant participant);
 }

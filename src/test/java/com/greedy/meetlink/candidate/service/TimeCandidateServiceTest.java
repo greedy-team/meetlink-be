@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
-import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;

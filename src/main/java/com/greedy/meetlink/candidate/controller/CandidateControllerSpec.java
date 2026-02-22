@@ -15,14 +15,16 @@ public interface CandidateControllerSpec {
     @Operation(summary = "시간 후보 계산", description = "참여자들의 시간 가용성을 기반으로 공통 시간 후보를 계산합니다.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                responseCode = "200", description = "계산 성공")
+                responseCode = "200",
+                description = "계산 성공")
     })
     ApiResponse<TimeCandidatesResponse> calculateTime(@PathVariable String code);
 
     @Operation(summary = "시간 후보 조회", description = "해당 모임의 시간 후보 목록을 조회합니다.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                responseCode = "200", description = "조회 성공")
+                responseCode = "200",
+                description = "조회 성공")
     })
     ApiResponse<TimeCandidatesResponse> getTime(@PathVariable String code);
 

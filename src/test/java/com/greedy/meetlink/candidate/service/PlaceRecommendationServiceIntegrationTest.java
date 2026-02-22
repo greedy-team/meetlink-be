@@ -6,7 +6,6 @@ import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
-import com.greedy.meetlink.candidate.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -37,7 +36,6 @@ class PlaceRecommendationServiceIntegrationTest {
     @Autowired private ParticipantRepository participantRepository;
     @Autowired private LocationAvailabilityRepository locationAvailabilityRepository;
     @Autowired private PlaceCandidateRepository placeCandidateRepository;
-    @Autowired private PlaceTravelInfoRepository placeTravelInfoRepository;
 
     @MockitoBean private TransitClient transitClient;
     @MockitoBean private PoiClient poiClient;

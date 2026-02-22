@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.greedy.meetlink.candidate.dto.response.ParticipantDurationResponse;
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateListResponse;
 import com.greedy.meetlink.candidate.dto.response.RecommendedPlaceResponse;
 import com.greedy.meetlink.candidate.service.PlaceCandidateQueryService;
@@ -153,20 +152,6 @@ class PlaceCandidateControllerTest {
                     .andExpect(
                             jsonPath("$.result.recommendedPlaces[0].averageDuration").value(1530))
                     .andExpect(jsonPath("$.result.recommendedPlaces[0].maxDuration").value(2400))
-                    .andExpect(
-                            jsonPath("$.result.recommendedPlaces[0].participantDurations")
-                                    .isArray())
-                    .andExpect(
-                            jsonPath("$.result.recommendedPlaces[0].participantDurations.length()")
-                                    .value(2))
-                    .andExpect(
-                            jsonPath(
-                                            "$.result.recommendedPlaces[0].participantDurations[0].nickname")
-                                    .value("홍길동"))
-                    .andExpect(
-                            jsonPath(
-                                            "$.result.recommendedPlaces[0].participantDurations[0].duration")
-                                    .value(1500))
                     .andExpect(jsonPath("$.result.recommendedPlaces[1].rank").value(2));
         }
 
@@ -199,73 +184,16 @@ class PlaceCandidateControllerTest {
                     .andDo(print())
                     .andExpect(status().isNotFound());
         }
-
-        @Test
-        @DisplayName("participantDurations pathData null 허용")
-        void getCandidates_pathDataNull() throws Exception {
-            given(placeCandidateQueryService.getCandidates("ABC123"))
-                    .willReturn(fakePlaceCandidateListResponseWithNullPath());
-
-            mockMvc.perform(
-                            get("/meetings/ABC123/candidates/place")
-                                    .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(
-                            jsonPath(
-                                            "$.result.recommendedPlaces[0].participantDurations[0].pathData")
-                                    .doesNotExist());
-        }
     }
 
     private PlaceCandidateListResponse fakePlaceCandidateListResponse() {
-        List<ParticipantDurationResponse> participants1 =
-                List.of(
-                        new ParticipantDurationResponse("홍길동", 1500, "polyline_data_1"),
-                        new ParticipantDurationResponse("김철수", 1560, "polyline_data_2"));
-        List<ParticipantDurationResponse> participants2 =
-                List.of(
-                        new ParticipantDurationResponse("홍길동", 1800, "polyline_data_3"),
-                        new ParticipantDurationResponse("김철수", 1920, "polyline_data_4"));
-
         List<RecommendedPlaceResponse> places =
                 List.of(
                         new RecommendedPlaceResponse(
-                                "스타벅스 강남점",
-                                "서울 강남구 테헤란로 101",
-                                37.4979,
-                                127.0276,
-                                1,
-                                1530,
-                                2400,
-                                participants1),
+                                "스타벅스 강남점", "서울 강남구 테헤란로 101", 37.4979, 127.0276, 1, 1530, 2400),
                         new RecommendedPlaceResponse(
-                                "투썸플레이스 역삼점",
-                                "서울 강남구 역삼로 99",
-                                37.4985,
-                                127.0312,
-                                2,
-                                1860,
-                                2400,
-                                participants2));
+                                "투썸플레이스 역삼점", "서울 강남구 역삼로 99", 37.4985, 127.0312, 2, 1860, 2400));
 
-        return PlaceCandidateListResponse.of(places);
-    }
-
-    private PlaceCandidateListResponse fakePlaceCandidateListResponseWithNullPath() {
-        List<ParticipantDurationResponse> participants =
-                List.of(new ParticipantDurationResponse("홍길동", 1500, null));
-        List<RecommendedPlaceResponse> places =
-                List.of(
-                        new RecommendedPlaceResponse(
-                                "스타벅스 강남점",
-                                "서울 강남구 테헤란로 101",
-                                37.4979,
-                                127.0276,
-                                1,
-                                1530,
-                                2400,
-                                participants));
         return PlaceCandidateListResponse.of(places);
     }
 }

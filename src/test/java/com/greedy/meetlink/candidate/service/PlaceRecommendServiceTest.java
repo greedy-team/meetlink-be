@@ -10,7 +10,6 @@ import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
-import com.greedy.meetlink.candidate.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -36,7 +35,6 @@ class PlaceRecommendServiceTest {
 
     @Mock private MeetingRepository meetingRepository;
     @Mock private PlaceCandidateRepository placeCandidateRepository;
-    @Mock private PlaceTravelInfoRepository placeTravelInfoRepository;
     @Mock private MeetingResultRepository meetingResultRepository;
     @Mock private ParticipantRepository participantRepository;
     @Mock private LocationAvailabilityRepository locationAvailabilityRepository;
@@ -67,7 +65,6 @@ class PlaceRecommendServiceTest {
                         placeMapper,
                         meetingRepository,
                         placeCandidateRepository,
-                        placeTravelInfoRepository,
                         meetingResultRepository,
                         participantRepository,
                         locationAvailabilityRepository);
@@ -103,7 +100,6 @@ class PlaceRecommendServiceTest {
 
         // then
         verify(placeCandidateRepository, atLeastOnce()).save(any(PlaceCandidate.class));
-        verify(placeTravelInfoRepository, atLeastOnce()).save(any());
         verify(meetingResultRepository, times(1)).findByMeeting(meeting);
         verify(meetingResultRepository, atLeastOnce()).save(any(MeetingResult.class));
     }

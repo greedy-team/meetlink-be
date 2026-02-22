@@ -23,6 +23,11 @@ public interface LocationAvailabilityRepository extends JpaRepository<LocationAv
 
     Optional<LocationAvailability> findByParticipant(Participant participant);
 
+    @Query(
+            "SELECT la FROM LocationAvailability la JOIN FETCH la.participant WHERE la.participant IN :participants")
+    List<LocationAvailability> findByParticipantIn(
+            @Param("participants") List<Participant> participants);
+
     /**
      * 모임 코드로 해당 모임 참여자들의 출발지 정보 전체 조회
      *

@@ -4,9 +4,7 @@ import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.PlaceCalculationType;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
-import com.greedy.meetlink.candidate.entity.PlaceTravelInfo;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
-import com.greedy.meetlink.candidate.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
@@ -45,7 +43,6 @@ public class PlaceRecommendService {
 
     private final MeetingRepository meetingRepository;
     private final PlaceCandidateRepository placeCandidateRepository;
-    private final PlaceTravelInfoRepository placeTravelInfoRepository;
     private final MeetingResultRepository meetingResultRepository;
     private final ParticipantRepository participantRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
@@ -71,7 +68,7 @@ public class PlaceRecommendService {
                     "meetingId=" + meeting.getId() + " : 추천 가능한 장소를 찾지 못했습니다.");
         }
 
-        saveResults(meeting, participants, matchedPlaces);
+        saveResults(meeting, matchedPlaces);
     }
 
     private Map<Long, LocationAvailability> loadLocationMap(List<Participant> participants) {
@@ -117,10 +114,8 @@ public class PlaceRecommendService {
         return placeMapper.match(scored);
     }
 
-    private void saveResults(
-            Meeting meeting, List<Participant> participants, List<MatchedPlace> matchedPlaces) {
+    private void saveResults(Meeting meeting, List<MatchedPlace> matchedPlaces) {
         List<PlaceCandidate> savedCandidates = savePlaceCandidates(meeting, matchedPlaces);
-        savePlaceTravelInfos(savedCandidates, participants, matchedPlaces);
         linkToMeetingResult(meeting, savedCandidates.get(0));
     }
 
@@ -147,28 +142,6 @@ public class PlaceRecommendService {
         }
 
         return saved;
-    }
-
-    private void savePlaceTravelInfos(
-            List<PlaceCandidate> savedCandidates,
-            List<Participant> participants,
-            List<MatchedPlace> matchedPlaces) {
-
-        for (int i = 0; i < savedCandidates.size(); i++) {
-            PlaceCandidate candidate = savedCandidates.get(i);
-            List<Double> travelTimes = matchedPlaces.get(i).travelTimesMinutes();
-
-            for (int j = 0; j < participants.size(); j++) {
-                PlaceTravelInfo travelInfo =
-                        PlaceTravelInfo.builder()
-                                .placeCandidate(candidate)
-                                .participant(participants.get(j))
-                                .travelTime(travelTimes.get(j))
-                                .build();
-
-                placeTravelInfoRepository.save(travelInfo);
-            }
-        }
     }
 
     private void linkToMeetingResult(Meeting meeting, PlaceCandidate topCandidate) {

@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/meetings/{code}")
+@RequestMapping("/meetings/{code}/candidates/time")
 public class TimeCandidateController {
     private final TimeCandidateService timeCandidateService;
 
-    @PostMapping("/candidates/time")
+    @PostMapping()
     public ApiResponse<TimeCandidatesResponse> calculate(@PathVariable String code) {
         return ApiResponse.success(timeCandidateService.calculate(code));
     }
 
-    @GetMapping("/candidates/time")
+    @GetMapping()
     public ApiResponse<TimeCandidatesResponse> get(@PathVariable String code) {
         return ApiResponse.success(timeCandidateService.get(code));
     }

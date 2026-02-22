@@ -26,11 +26,11 @@ public interface LocationAvailabilityRepository extends JpaRepository<LocationAv
     /**
      * 모임 코드로 해당 모임 참여자들의 출발지 정보 전체 조회
      *
-     * LocationAvailability → Participant → Meeting 경로로 조인
-     * Participant를 Fetch Join하여 service에서 getParticipant() 호출 시 추가 쿼리 방지
-     * 장소 추천 알고리즘(PlaceRecommendationService)에서 사용
+     * <p>LocationAvailability → Participant → Meeting 경로로 조인 Participant를 Fetch Join하여 service에서
+     * getParticipant() 호출 시 추가 쿼리 방지 장소 추천 알고리즘(PlaceRecommendationService)에서 사용
      */
-    @Query("""
+    @Query(
+            """
         SELECT la FROM LocationAvailability la
         JOIN FETCH la.participant p
         JOIN p.meeting m

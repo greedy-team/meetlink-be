@@ -1,17 +1,16 @@
 package com.greedy.meetlink.place.algorithm;
 
 import com.greedy.meetlink.place.domain.Coordinate;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * Polar Sampling 방식으로 후보 좌표 생성
  *
- * 기준점(기하중심)으로부터 거리(r)와 각도(θ)를 조합하여 유한한 후보 집합 생성
+ * <p>기준점(기하중심)으로부터 거리(r)와 각도(θ)를 조합하여 유한한 후보 집합 생성
  *
- * 후보 수 목표: 30개 (최소 20 ~ 최대 50)
+ * <p>후보 수 목표: 30개 (최소 20 ~ 최대 50)
  */
 @Component
 public class PolarSamplingGenerator {
@@ -45,10 +44,7 @@ public class PolarSamplingGenerator {
     }
 
     public double calculateRadius(Coordinate center, List<Coordinate> coordinates) {
-        double dMax = coordinates.stream()
-                .mapToDouble(center::distanceTo)
-                .max()
-                .orElse(0.0);
+        double dMax = coordinates.stream().mapToDouble(center::distanceTo).max().orElse(0.0);
 
         return Math.max(dMax * ALPHA, R_MIN_KM);
     }
@@ -56,22 +52,16 @@ public class PolarSamplingGenerator {
     /**
      * 목표 후보 수(30개)를 맞추기 위한 각도 간격 계산
      *
-     * ✅ 수정: 기존 공식은 정수 나눗셈으로 인해 실제 후보 수가 목표치에 못 미치는 문제가 있었음.
+     * <p>✅ 수정: 기존 공식은 정수 나눗셈으로 인해 실제 후보 수가 목표치에 못 미치는 문제가 있었음.
      *
-     * [기존 버그]
-     *   angleStep = ceil(360 × 4 / 29) = 50
-     *   실제 생성 수 = 4 × (360 / 50) + 1 = 4 × 7 + 1 = 29  ← 정수 나눗셈 360/50=7.0 → 7 (소수점 버림)
-     *   두 번째 while: count=29 < 50 → 처음부터 false → dead code
+     * <p>[기존 버그] angleStep = ceil(360 × 4 / 29) = 50 실제 생성 수 = 4 × (360 / 50) + 1 = 4 × 7 + 1 = 29
+     * ← 정수 나눗셈 360/50=7.0 → 7 (소수점 버림) 두 번째 while: count=29 < 50 → 처음부터 false → dead code
      *
-     * [수정 방향]
-     *   angleStep을 직접 역산하는 대신,
-     *   angleStep을 1씩 줄여가면서 실제 생성 후보 수가 MIN~MAX 범위에 들어오는
-     *   가장 큰 angleStep을 선택 (= 후보 수를 최소화하되 MIN 이상 보장)
+     * <p>[수정 방향] angleStep을 직접 역산하는 대신, angleStep을 1씩 줄여가면서 실제 생성 후보 수가 MIN~MAX 범위에 들어오는 가장 큰
+     * angleStep을 선택 (= 후보 수를 최소화하되 MIN 이상 보장)
      *
-     * [결과]
-     *   angleStep=45 → 4×(360/45)+1 = 4×8+1 = 33개 (MIN=20 이상, MAX=50 이하 ✅)
-     *   angleStep=46 → 4×(360/46)+1 = 4×7+1 = 29개 (MIN=20 이상이지만 TARGET=30 미달)
-     *   → angleStep=45 선택
+     * <p>[결과] angleStep=45 → 4×(360/45)+1 = 4×8+1 = 33개 (MIN=20 이상, MAX=50 이하 ✅) angleStep=46 →
+     * 4×(360/46)+1 = 4×7+1 = 29개 (MIN=20 이상이지만 TARGET=30 미달) → angleStep=45 선택
      */
     private int calculateAngleStep() {
         int radiusDivisions = RADIUS_RATIOS.length;

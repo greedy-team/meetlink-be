@@ -1,9 +1,14 @@
 package com.greedy.meetlink.place.domain;
 
-import com.greedy.meetlink.candidate.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.participant.entity.Participant;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,8 +37,11 @@ public class PlaceTravelInfo extends BaseEntity {
     private String routeData;
 
     @Builder
-    public PlaceTravelInfo(PlaceCandidate placeCandidate, Participant participant,
-                            double travelTime, String routeData) {
+    public PlaceTravelInfo(
+            PlaceCandidate placeCandidate,
+            Participant participant,
+            double travelTime,
+            String routeData) {
         this.placeCandidate = placeCandidate;
         this.participant = participant;
         this.travelTime = travelTime;

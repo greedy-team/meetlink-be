@@ -14,28 +14,43 @@ public interface PlaceCandidateControllerSpec {
 
     @Operation(summary = "추천 장소 계산", description = "현재 참여자들의 위치 데이터를 기반으로 추천 장소 후보를 새로 계산하고 저장합니다.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "계산 성공",
-                    content = @Content(examples = @ExampleObject(value = """
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "계산 성공",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
                         {
                             "status": true
                         }
                         """))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "모임 없음",
-                    content = @Content(examples = @ExampleObject(value = """
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "모임 없음",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
                         {
                             "status": false,
                             "code": "NOT_FOUND",
                             "message": "모임을 찾을 수 없습니다."
                         }
                         """))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "400",
-                    description = "계산 불가 (참여자 부족 또는 좌표 미등록)",
-                    content = @Content(examples = @ExampleObject(value = """
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "400",
+                description = "계산 불가 (참여자 부족 또는 좌표 미등록)",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
                         {
                             "status": false,
                             "code": "ILLEGAL_STATE",
@@ -47,10 +62,15 @@ public interface PlaceCandidateControllerSpec {
 
     @Operation(summary = "추천 장소 조회", description = "해당 모임에 대해 계산된 추천 장소 후보 목록을 조회합니다.")
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200",
-                    description = "조회 성공",
-                    content = @Content(examples = @ExampleObject(value = """
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
                         {
                             "status": true,
                             "result": {
@@ -80,10 +100,15 @@ public interface PlaceCandidateControllerSpec {
                             }
                         }
                         """))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404",
-                    description = "모임 없음",
-                    content = @Content(examples = @ExampleObject(value = """
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "모임 없음",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
                         {
                             "status": false,
                             "code": "NOT_FOUND",

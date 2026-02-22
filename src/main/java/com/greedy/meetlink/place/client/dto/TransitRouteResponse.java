@@ -2,15 +2,13 @@ package com.greedy.meetlink.place.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.Getter;
 
-import java.util.List;
-
 /**
- * TMap 대중교통 경로 API 응답
- * POST https://apis.openapi.sk.com/transit/routes
+ * TMap 대중교통 경로 API 응답 POST https://apis.openapi.sk.com/transit/routes
  *
- * 응답에서 경로 총 소요 시간(totalTime, 단위: 초)만 추출해서 사용
+ * <p>응답에서 경로 총 소요 시간(totalTime, 단위: 초)만 추출해서 사용
  */
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,10 +17,7 @@ public class TransitRouteResponse {
     @JsonProperty("metaData")
     private MetaData metaData;
 
-    /**
-     * 응답에서 최단 경로의 소요 시간(분)을 추출
-     * 경로가 없거나 오류 시 null 반환
-     */
+    /** 응답에서 최단 경로의 소요 시간(분)을 추출 경로가 없거나 오류 시 null 반환 */
     public Double extractMinTravelTimeMinutes() {
         if (metaData == null || metaData.getPlan() == null) {
             return null;

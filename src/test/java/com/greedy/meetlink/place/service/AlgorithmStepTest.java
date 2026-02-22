@@ -1,10 +1,13 @@
 package com.greedy.meetlink.place.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.greedy.meetlink.place.algorithm.*;
 import com.greedy.meetlink.place.algorithm.CandidateFilter.FilteredCandidate;
 import com.greedy.meetlink.place.algorithm.CandidateScorer.ScoredCandidate;
 import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.domain.Coordinate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,10 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class AlgorithmStepTest {
@@ -33,18 +32,18 @@ class AlgorithmStepTest {
         polarSamplingGenerator = new PolarSamplingGenerator();
         candidateFilter = new CandidateFilter(transitClient);
         ReflectionTestUtils.setField(candidateFilter, "tmapCallDelayMs", 0L);
-        
+
         candidateScorer = new CandidateScorer(new ScoreCalculator());
     }
 
     @Test
     @DisplayName("Step 1: 기하중심(Geometric Median)은 참여자들 사이에 위치해야 한다")
     void step1_GeometricMedian() {
-        List<Coordinate> participants = List.of(
-                new Coordinate(37.5, 127.0),
-                new Coordinate(37.6, 127.1),
-                new Coordinate(37.4, 126.9)
-        );
+        List<Coordinate> participants =
+                List.of(
+                        new Coordinate(37.5, 127.0),
+                        new Coordinate(37.6, 127.1),
+                        new Coordinate(37.4, 126.9));
 
         Coordinate center = geometricMedianCalculator.calculate(participants);
 
@@ -84,9 +83,13 @@ class AlgorithmStepTest {
 
     private FilteredCandidate createFilteredCandidate(double lat, double lon, List<Double> times) {
         Coordinate coord = new Coordinate(lat, lon);
-        List<CandidateFilter.ParticipantTravelTime> pTimes = times.stream()
-                .map(t -> new CandidateFilter.ParticipantTravelTime(new Coordinate(0,0), t))
-                .toList();
+        List<CandidateFilter.ParticipantTravelTime> pTimes =
+                times.stream()
+                        .map(
+                                t ->
+                                        new CandidateFilter.ParticipantTravelTime(
+                                                new Coordinate(0, 0), t))
+                        .toList();
         return new FilteredCandidate(coord, pTimes);
     }
 }

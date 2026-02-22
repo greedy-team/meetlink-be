@@ -1,6 +1,9 @@
 package com.greedy.meetlink.place.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.greedy.meetlink.place.domain.Coordinate;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -9,10 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.io.IOException;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class TMapTransitClientTest {
 
@@ -42,7 +41,8 @@ class TMapTransitClientTest {
         Coordinate destination = new Coordinate(37.5512, 126.9882); // 남산타워
 
         // totalTime: 1200초 (20분)
-        String jsonResponse = """
+        String jsonResponse =
+                """
             {
                 "metaData": {
                     "plan": {
@@ -56,9 +56,10 @@ class TMapTransitClientTest {
             }
         """;
 
-        mockWebServer.enqueue(new MockResponse()
-                .setBody(jsonResponse)
-                .addHeader("Content-Type", "application/json"));
+        mockWebServer.enqueue(
+                new MockResponse()
+                        .setBody(jsonResponse)
+                        .addHeader("Content-Type", "application/json"));
 
         // when
         Double result = tMapTransitClient.getTravelTimeMinutes(origin, destination);
@@ -80,9 +81,8 @@ class TMapTransitClientTest {
         Coordinate origin = new Coordinate(37.5665, 126.9780);
         Coordinate destination = new Coordinate(37.5512, 126.9882);
 
-        mockWebServer.enqueue(new MockResponse()
-                .setResponseCode(500)
-                .setBody("Internal Server Error"));
+        mockWebServer.enqueue(
+                new MockResponse().setResponseCode(500).setBody("Internal Server Error"));
 
         // when
         Double result = tMapTransitClient.getTravelTimeMinutes(origin, destination);
@@ -99,9 +99,8 @@ class TMapTransitClientTest {
         Coordinate destination = new Coordinate(37.5512, 126.9882);
 
         // 비어있는 JSON -> extractMinTravelTimeMinutes()에서 null 반환 예상
-        mockWebServer.enqueue(new MockResponse()
-                .setBody("{}")
-                .addHeader("Content-Type", "application/json"));
+        mockWebServer.enqueue(
+                new MockResponse().setBody("{}").addHeader("Content-Type", "application/json"));
 
         // when
         Double result = tMapTransitClient.getTravelTimeMinutes(origin, destination);

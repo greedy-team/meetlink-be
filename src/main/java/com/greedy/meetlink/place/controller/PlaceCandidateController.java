@@ -26,8 +26,8 @@ public class PlaceCandidateController implements PlaceCandidateControllerSpec {
     @Override
     @PostMapping
     public ApiResponse<Void> calculate(@PathVariable String code) {
-        Meeting meeting = meetingRepository.findByCode(code)
-                .orElseThrow(MeetingNotFoundException::new);
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
         placeRecommendService.recommendAndSave(meeting);
         return ApiResponse.success();
@@ -36,8 +36,8 @@ public class PlaceCandidateController implements PlaceCandidateControllerSpec {
     @Override
     @GetMapping
     public ApiResponse<PlaceCandidateListResponse> getCandidates(@PathVariable String code) {
-        Meeting meeting = meetingRepository.findByCode(code)
-                .orElseThrow(MeetingNotFoundException::new);
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
         return ApiResponse.success(placeCandidateQueryService.getCandidates(meeting));
     }

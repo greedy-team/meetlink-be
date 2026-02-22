@@ -1,24 +1,23 @@
 package com.greedy.meetlink.place.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
-import com.greedy.meetlink.candidate.PlaceCandidate;
 import com.greedy.meetlink.candidate.PlaceCandidateRepository;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test") // test 프로파일 -> FakeTransitClient, FakePoiClient 사용
@@ -35,10 +34,15 @@ class PlaceRecommendationServiceFakeApiTest {
     @DisplayName("[FAKE-API] Fake Client(Transit/POI)를 사용하여 장소 추천 로직 통합 검증")
     void recommend_withFakeApi() {
         // given
-        Meeting meeting = Meeting.create(
-                "Fake API Test", "FAKE-CODE-002", true, true, null,
-                LocalTime.of(10, 0), LocalTime.of(12, 0)
-        );
+        Meeting meeting =
+                Meeting.create(
+                        "Fake API Test",
+                        "FAKE-CODE-002",
+                        true,
+                        true,
+                        null,
+                        LocalTime.of(10, 0),
+                        LocalTime.of(12, 0));
         meetingRepository.save(meeting);
 
         // 서울시청, 강남역, 홍대입구

@@ -1,9 +1,9 @@
 package com.greedy.meetlink.candidate;
 
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.meeting.entity.Meeting;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PlaceCandidateRepository extends JpaRepository<PlaceCandidate, Long> {
     void deleteByMeeting(Meeting meeting);

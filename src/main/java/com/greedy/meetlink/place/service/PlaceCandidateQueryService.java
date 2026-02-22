@@ -1,7 +1,7 @@
 package com.greedy.meetlink.place.service;
 
-import com.greedy.meetlink.candidate.PlaceCandidate;
 import com.greedy.meetlink.candidate.PlaceCandidateRepository;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.place.client.dto.PlaceCandidateListResponse;
 import com.greedy.meetlink.place.client.dto.RecommendedPlaceResponse;

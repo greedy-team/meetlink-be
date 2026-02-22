@@ -1,6 +1,6 @@
 package com.greedy.meetlink.place.repository;
 
-import com.greedy.meetlink.candidate.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.place.domain.PlaceTravelInfo;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
 package com.greedy.meetlink.place.client.dto;
 
-import com.greedy.meetlink.candidate.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.place.domain.PlaceTravelInfo;
 import java.util.List;
 

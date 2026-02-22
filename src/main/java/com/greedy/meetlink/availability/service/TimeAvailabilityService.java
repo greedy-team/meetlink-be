@@ -33,16 +33,18 @@ public class TimeAvailabilityService {
 
         // 새 데이터 저장
         List<TimeAvailability> entities =
-                request.getSlots().stream()
-                        .distinct()
-                        .map(
-                                (slot) ->
-                                        TimeAvailability.create(
-                                                meeting,
-                                                participant,
-                                                slot.getDate(),
-                                                slot.getDayOfWeek(),
-                                                slot.getStartTime()))
+                request.getAvailabilities().stream()
+                        .flatMap(
+                                (daily) ->
+                                        daily.getStartTimes().stream()
+                                                .map(
+                                                        (time) ->
+                                                                TimeAvailability.create(
+                                                                        meeting,
+                                                                        participant,
+                                                                        daily.getDate(),
+                                                                        daily.getDayOfWeek(),
+                                                                        time)))
                         .toList();
 
         timeAvailabilityRepository.saveAll(entities);
@@ -54,19 +56,13 @@ public class TimeAvailabilityService {
     private void validateByMeetingType(Meeting meeting, TimeAvailabilityRequest request) {
         TimeAvailabilityType type = meeting.getTimeAvailabilityType();
 
-        for (TimeAvailabilityRequest.TimeSlot slot : request.getSlots()) {
-            switch (type) {
-                case WEEKLY -> {
-                    if (slot.getDayOfWeek() == null || slot.getDate() != null) {
-                        throw new InvalidTimeAvailabilityException("WEEKLY 모임은 요일 기반 입력만 가능합니다.");
-                    }
-                }
-                case SPECIFIC_DATE -> {
-                    if (slot.getDate() == null || slot.getDayOfWeek() != null) {
-                        throw new InvalidTimeAvailabilityException(
-                                "SPECIFIC_DATE 모임은 날짜 기반 입력만 가능합니다.");
-                    }
-                }
+        for (TimeAvailabilityRequest.DailyAvailability daily : request.getAvailabilities()) {
+            if (type == TimeAvailabilityType.WEEKLY && daily.getDayOfWeek() == null) {
+                throw new InvalidTimeAvailabilityException("요일 기반 모임은 요일 기반 입력만 가능합니다.");
+            }
+
+            if (type == TimeAvailabilityType.SPECIFIC_DATE && daily.getDate() == null) {
+                throw new InvalidTimeAvailabilityException("날짜 기반 모임은 날짜 기반 입력만 가능합니다.");
             }
         }
     }

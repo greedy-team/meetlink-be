@@ -20,8 +20,6 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TimeCandidate extends BaseEntity {
     @Id
@@ -46,4 +44,25 @@ public class TimeCandidate extends BaseEntity {
 
     @Column(nullable = false)
     private int rank;
+
+    @Builder
+    private TimeCandidate(
+            Meeting meeting,
+            LocalDate date,
+            Integer dayOfWeek,
+            LocalTime startTime,
+            LocalTime endTime,
+            int availableCount) {
+        this.meeting = meeting;
+        this.date = date;
+        this.dayOfWeek = dayOfWeek;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.availableCount = availableCount;
+        this.rank = 0;
+    }
+
+    public void assignRank(int rank) {
+        this.rank = rank;
+    }
 }

@@ -1,12 +1,12 @@
 package com.greedy.meetlink.availability.repository;
 
 import com.greedy.meetlink.availability.entity.TimeAvailability;
+import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.participant.entity.Participant;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailability, Long> {
     boolean existsByMeetingAndParticipant(Meeting meeting, Participant participant);
@@ -21,11 +21,19 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
 
     void deleteByMeetingAndParticipant(Meeting meeting, Participant participant);
 
-    // 모든 가용 시간 데이터 조회
-    @Query(
-            "SELECT ta FROM TimeAvailability ta "
-                    + "JOIN FETCH ta.participant p "
-                    + "JOIN FETCH p.meeting m "
-                    + "WHERE m.code = :code")
-    List<TimeAvailability> findByMeetingCode(@Param("code") String code);
+    @Query("""
+        SELECT
+            ta.date AS date,
+            ta.dayOfWeek AS dayOfWeek,
+            ta.startTime AS startTime,
+            COUNT(ta) AS availableCount
+        FROM TimeAvailability ta
+        WHERE ta.meeting.code = :code
+        GROUP BY ta.date, ta.dayOfWeek, ta.startTime
+        ORDER BY COUNT(ta) DESC,
+                ta.date ASC,
+                ta.dayOfWeek ASC,
+                ta.startTime ASC
+    """)
+    List<TimeAvailabilityHeatmapRow> findHeatmapByMeetingCode(String code);
 }

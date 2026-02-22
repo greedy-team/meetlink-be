@@ -1,6 +1,5 @@
-package com.greedy.meetlink.place.domain;
+package com.greedy.meetlink.candidate.entity;
 
-import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.participant.entity.Participant;
 import jakarta.persistence.Column;

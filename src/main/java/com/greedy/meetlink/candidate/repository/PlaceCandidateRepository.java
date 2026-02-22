@@ -1,4 +1,4 @@
-package com.greedy.meetlink.candidate;
+package com.greedy.meetlink.candidate.repository;
 
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.meeting.entity.Meeting;

@@ -1,12 +1,9 @@
-package com.greedy.meetlink.place.controller;
+package com.greedy.meetlink.candidate.controller;
 
+import com.greedy.meetlink.candidate.dto.response.PlaceCandidateListResponse;
+import com.greedy.meetlink.candidate.service.PlaceCandidateQueryService;
+import com.greedy.meetlink.candidate.service.PlaceRecommendService;
 import com.greedy.meetlink.common.ApiResponse;
-import com.greedy.meetlink.common.exception.MeetingNotFoundException;
-import com.greedy.meetlink.meeting.entity.Meeting;
-import com.greedy.meetlink.meeting.repository.MeetingRepository;
-import com.greedy.meetlink.place.client.dto.PlaceCandidateListResponse;
-import com.greedy.meetlink.place.service.PlaceCandidateQueryService;
-import com.greedy.meetlink.place.service.PlaceRecommendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,24 +18,17 @@ public class PlaceCandidateController implements PlaceCandidateControllerSpec {
 
     private final PlaceRecommendService placeRecommendService;
     private final PlaceCandidateQueryService placeCandidateQueryService;
-    private final MeetingRepository meetingRepository;
 
     @Override
     @PostMapping
     public ApiResponse<Void> calculate(@PathVariable String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
-
-        placeRecommendService.recommendAndSave(meeting);
+        placeRecommendService.recommendAndSave(code);
         return ApiResponse.success();
     }
 
     @Override
     @GetMapping
     public ApiResponse<PlaceCandidateListResponse> getCandidates(@PathVariable String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
-
-        return ApiResponse.success(placeCandidateQueryService.getCandidates(meeting));
+        return ApiResponse.success(placeCandidateQueryService.getCandidates(code));
     }
 }

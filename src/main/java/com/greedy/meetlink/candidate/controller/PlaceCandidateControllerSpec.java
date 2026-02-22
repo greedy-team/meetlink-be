@@ -1,7 +1,7 @@
-package com.greedy.meetlink.place.controller;
+package com.greedy.meetlink.candidate.controller;
 
+import com.greedy.meetlink.candidate.dto.response.PlaceCandidateListResponse;
 import com.greedy.meetlink.common.ApiResponse;
-import com.greedy.meetlink.place.client.dto.PlaceCandidateListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Tag(name = "Place Candidate", description = "장소 후보 API")
 public interface PlaceCandidateControllerSpec {
 
-    @Operation(summary = "추천 장소 계산", description = "현재 참여자들의 위치 데이터를 기반으로 추천 장소 후보를 새로 계산하고 저장합니다.")
+    @Operation(
+            summary = "추천 장소 계산",
+            description = "현재 참여자들의 위치 데이터를 기반으로 추천 장소 후보를 새로 계산하고 저장합니다.")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
                 responseCode = "200",
@@ -83,18 +85,7 @@ public interface PlaceCandidateControllerSpec {
                                         "rank": 1,
                                         "averageDuration": 1530,
                                         "maxDuration": 2400,
-                                        "participantDurations": [
-                                            {
-                                                "nickname": "홍길동",
-                                                "duration": 1500,
-                                                "pathData": "polyline_encoded_string"
-                                            },
-                                            {
-                                                "nickname": "김철수",
-                                                "duration": 1560,
-                                                "pathData": "polyline_encoded_string"
-                                            }
-                                        ]
+                                        "participantDurations": []
                                     }
                                 ]
                             }

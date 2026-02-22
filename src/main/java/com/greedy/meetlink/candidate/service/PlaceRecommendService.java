@@ -1,11 +1,15 @@
-package com.greedy.meetlink.place.service;
+package com.greedy.meetlink.candidate.service;
 
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.PlaceCalculationType;
-import com.greedy.meetlink.candidate.PlaceCandidateRepository;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceTravelInfo;
+import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
+import com.greedy.meetlink.candidate.repository.PlaceTravelInfoRepository;
+import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
+import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import com.greedy.meetlink.place.algorithm.CandidateFilter;
@@ -15,8 +19,6 @@ import com.greedy.meetlink.place.algorithm.PlaceMapper;
 import com.greedy.meetlink.place.algorithm.PlaceMapper.MatchedPlace;
 import com.greedy.meetlink.place.algorithm.PolarSamplingGenerator;
 import com.greedy.meetlink.place.domain.Coordinate;
-import com.greedy.meetlink.place.domain.PlaceTravelInfo;
-import com.greedy.meetlink.place.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ public class PlaceRecommendService {
     private final CandidateScorer candidateScorer;
     private final PlaceMapper placeMapper;
 
+    private final MeetingRepository meetingRepository;
     private final PlaceCandidateRepository placeCandidateRepository;
     private final PlaceTravelInfoRepository placeTravelInfoRepository;
     private final MeetingResultRepository meetingResultRepository;
@@ -48,7 +51,10 @@ public class PlaceRecommendService {
     private final LocationAvailabilityRepository locationAvailabilityRepository;
 
     @Transactional
-    public void recommendAndSave(Meeting meeting) {
+    public void recommendAndSave(String code) {
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+
         List<Participant> participants = participantRepository.findByMeeting(meeting);
 
         if (participants == null || participants.size() < 2) {
@@ -82,7 +88,8 @@ public class PlaceRecommendService {
                         .toList();
 
         if (!missingLocations.isEmpty()) {
-            throw new IllegalStateException("출발지를 등록하지 않은 참여자가 있습니다: " + missingLocations);
+            throw new IllegalStateException(
+                    "출발지를 등록하지 않은 참여자가 있습니다: " + missingLocations);
         }
     }
 
@@ -96,7 +103,8 @@ public class PlaceRecommendService {
         List<Coordinate> rawCandidates = polarSamplingGenerator.generate(center, coordinates);
         log.info("후보 좌표 생성: {}개", rawCandidates.size());
 
-        double realDMax = coordinates.stream().mapToDouble(center::distanceTo).max().orElse(0.0);
+        double realDMax =
+                coordinates.stream().mapToDouble(center::distanceTo).max().orElse(0.0);
         List<Coordinate> distanceFiltered =
                 candidateFilter.filterByDistance(rawCandidates, coordinates, realDMax);
         log.info("1차 거리 필터 후: {}개", distanceFiltered.size());
@@ -137,7 +145,8 @@ public class PlaceRecommendService {
                             .build();
 
             saved.add(placeCandidateRepository.save(candidate));
-            log.info("PlaceCandidate 저장: rank={}, name={}", mp.rank(), mp.searchResult().name());
+            log.info(
+                    "PlaceCandidate 저장: rank={}, name={}", mp.rank(), mp.searchResult().name());
         }
 
         return saved;
@@ -169,7 +178,8 @@ public class PlaceRecommendService {
         MeetingResult meetingResult =
                 meetingResultRepository
                         .findByMeeting(meeting)
-                        .orElseGet(() -> meetingResultRepository.save(new MeetingResult(meeting)));
+                        .orElseGet(
+                                () -> meetingResultRepository.save(new MeetingResult(meeting)));
 
         meetingResult.updatePlaceCandidate(topCandidate);
 

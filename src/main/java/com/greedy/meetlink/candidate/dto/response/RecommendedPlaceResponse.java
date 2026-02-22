@@ -1,15 +1,9 @@
-package com.greedy.meetlink.place.client.dto;
+package com.greedy.meetlink.candidate.dto.response;
 
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
-import com.greedy.meetlink.place.domain.PlaceTravelInfo;
+import com.greedy.meetlink.candidate.entity.PlaceTravelInfo;
 import java.util.List;
 
-/**
- * 추천 장소 단건 응답 DTO
- *
- * <p>averageDuration / maxDuration: 초 단위 (PlaceCandidate.avgTravelTime / maxTravelTime은 분 단위이므로 ×
- * 60 변환)
- */
 public record RecommendedPlaceResponse(
         String placeName,
         String roadAddress,
@@ -19,6 +13,7 @@ public record RecommendedPlaceResponse(
         int averageDuration,
         int maxDuration,
         List<ParticipantDurationResponse> participantDurations) {
+
     public static RecommendedPlaceResponse of(
             PlaceCandidate candidate, List<PlaceTravelInfo> travelInfos) {
 

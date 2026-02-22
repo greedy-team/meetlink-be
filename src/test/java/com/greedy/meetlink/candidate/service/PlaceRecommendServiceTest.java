@@ -1,23 +1,25 @@
-package com.greedy.meetlink.place.service;
+package com.greedy.meetlink.candidate.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
-import com.greedy.meetlink.candidate.PlaceCandidateRepository;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
+import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
+import com.greedy.meetlink.candidate.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.meeting.entity.Meeting;
+import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import com.greedy.meetlink.place.algorithm.*;
 import com.greedy.meetlink.place.client.PoiClient;
 import com.greedy.meetlink.place.client.TransitClient;
 import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
-import com.greedy.meetlink.place.repository.PlaceTravelInfoRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.List;
@@ -33,6 +35,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class PlaceRecommendServiceTest {
 
+    @Mock private MeetingRepository meetingRepository;
     @Mock private PlaceCandidateRepository placeCandidateRepository;
     @Mock private PlaceTravelInfoRepository placeTravelInfoRepository;
     @Mock private MeetingResultRepository meetingResultRepository;
@@ -63,6 +66,7 @@ class PlaceRecommendServiceTest {
                         candidateFilter,
                         candidateScorer,
                         placeMapper,
+                        meetingRepository,
                         placeCandidateRepository,
                         placeTravelInfoRepository,
                         meetingResultRepository,
@@ -82,6 +86,7 @@ class PlaceRecommendServiceTest {
         LocationAvailability la1 = createLocationAvailability(p1, 37.5665, 126.9780);
         LocationAvailability la2 = createLocationAvailability(p2, 37.4979, 127.0276);
 
+        given(meetingRepository.findByCode("TEST-CODE")).willReturn(Optional.of(meeting));
         given(participantRepository.findByMeeting(meeting)).willReturn(participants);
         given(locationAvailabilityRepository.findByParticipantIn(anyList()))
                 .willReturn(List.of(la1, la2));
@@ -95,7 +100,7 @@ class PlaceRecommendServiceTest {
                 .willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        placeRecommendService.recommendAndSave(meeting);
+        placeRecommendService.recommendAndSave("TEST-CODE");
 
         // then
         verify(placeCandidateRepository, atLeastOnce()).save(any(PlaceCandidate.class));
@@ -109,14 +114,15 @@ class PlaceRecommendServiceTest {
     void recommendAndSave_TooFewParticipants() {
         // given
         Meeting meeting = createMeeting(1L, "CODE");
-        List<Participant> participants = List.of(createParticipant(1L, meeting, "A"));
-        given(participantRepository.findByMeeting(meeting)).willReturn(participants);
+        given(meetingRepository.findByCode("CODE")).willReturn(Optional.of(meeting));
+        given(participantRepository.findByMeeting(meeting))
+                .willReturn(List.of(createParticipant(1L, meeting, "A")));
 
         // when & then
         assertThat(
                         org.junit.jupiter.api.Assertions.assertThrows(
                                 IllegalArgumentException.class,
-                                () -> placeRecommendService.recommendAndSave(meeting)))
+                                () -> placeRecommendService.recommendAndSave("CODE")))
                 .hasMessageContaining("참여자가 2명 이상 필요합니다.");
     }
 
@@ -128,18 +134,16 @@ class PlaceRecommendServiceTest {
         Participant p1 = createParticipant(1L, meeting, "A");
         Participant p2 = createParticipant(2L, meeting, "B");
 
-        // p1만 LocationAvailability가 있고 p2는 없음
-        LocationAvailability la1 = createLocationAvailability(p1, 37.5, 127.0);
-
+        given(meetingRepository.findByCode("CODE")).willReturn(Optional.of(meeting));
         given(participantRepository.findByMeeting(meeting)).willReturn(List.of(p1, p2));
         given(locationAvailabilityRepository.findByParticipantIn(anyList()))
-                .willReturn(List.of(la1));
+                .willReturn(List.of(createLocationAvailability(p1, 37.5, 127.0)));
 
         // when & then
         assertThat(
                         org.junit.jupiter.api.Assertions.assertThrows(
                                 IllegalStateException.class,
-                                () -> placeRecommendService.recommendAndSave(meeting)))
+                                () -> placeRecommendService.recommendAndSave("CODE")))
                 .hasMessageContaining("출발지를 등록하지 않은 참여자가 있습니다");
     }
 

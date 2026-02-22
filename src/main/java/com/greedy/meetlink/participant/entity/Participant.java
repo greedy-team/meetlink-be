@@ -47,10 +47,17 @@ public class Participant extends BaseEntity {
     private LocalDateTime locationSubmittedAt;
 
     @Builder
-    private Participant(Meeting meeting, String nickname, String token) {
+    private Participant(
+            Meeting meeting,
+            String nickname,
+            String token,
+            LocalDateTime timeSubmittedAt,
+            LocalDateTime locationSubmittedAt) {
         this.meeting = meeting;
         this.nickname = nickname;
         this.token = token;
+        this.timeSubmittedAt = timeSubmittedAt;
+        this.locationSubmittedAt = locationSubmittedAt;
     }
 
     public static Participant create(Meeting meeting, String nickname, String token) {

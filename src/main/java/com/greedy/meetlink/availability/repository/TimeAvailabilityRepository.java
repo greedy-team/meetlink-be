@@ -4,8 +4,10 @@ import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.participant.entity.Participant;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailability, Long> {
@@ -21,6 +23,16 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
 
     void deleteByMeetingAndParticipant(Meeting meeting, Participant participant);
 
+    @Modifying
+    @Query(
+            "DELETE FROM TimeAvailability ta WHERE ta.meeting = :meeting AND ta.startTime < :rangeStart")
+    void deleteBeforeRangeStart(Meeting meeting, LocalTime rangeStart);
+
+    @Modifying
+    @Query(
+            "DELETE FROM TimeAvailability ta WHERE ta.meeting = :meeting AND ta.startTime >= :rangeEnd")
+    void deleteFromRangeEnd(Meeting meeting, LocalTime rangeEnd);
+
     @Query(
             """
         SELECT
@@ -30,13 +42,16 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
             COUNT(ta) AS availableCount
         FROM TimeAvailability ta
         WHERE ta.meeting.code = :code
+          AND (:rangeStart IS NULL OR ta.startTime >= :rangeStart)
+          AND (:rangeEnd IS NULL OR ta.startTime < :rangeEnd)
         GROUP BY ta.date, ta.dayOfWeek, ta.startTime
         ORDER BY COUNT(ta) DESC,
                 ta.date ASC,
                 ta.dayOfWeek ASC,
                 ta.startTime ASC
     """)
-    List<TimeAvailabilityHeatmapRow> findHeatmapByMeetingCode(String code);
+    List<TimeAvailabilityHeatmapRow> findHeatmapByMeetingCode(
+            String code, LocalTime rangeStart, LocalTime rangeEnd);
 
     List<TimeAvailability> findByMeetingAndParticipant(Meeting meeting, Participant participant);
 }

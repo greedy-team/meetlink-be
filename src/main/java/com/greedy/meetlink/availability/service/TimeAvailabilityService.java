@@ -8,8 +8,10 @@ import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
+import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
+import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TimeAvailabilityService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
+    private final MeetingRepository meetingRepository;
     private final ParticipantValidator participantValidator;
 
     @Transactional
@@ -63,8 +66,14 @@ public class TimeAvailabilityService {
 
     @Transactional(readOnly = true)
     public TimeAvailabilityResponse getHeatmap(String meetingCode) {
+        Meeting meeting =
+                meetingRepository
+                        .findByCode(meetingCode)
+                        .orElseThrow(MeetingNotFoundException::new);
+
         List<TimeAvailabilityHeatmapRow> rows =
-                timeAvailabilityRepository.findHeatmapByMeetingCode(meetingCode);
+                timeAvailabilityRepository.findHeatmapByMeetingCode(
+                        meetingCode, meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
 
         if (rows.isEmpty()) {
             return TimeAvailabilityResponse.builder().heatmaps(List.of()).build();

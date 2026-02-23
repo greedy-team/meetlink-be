@@ -33,20 +33,19 @@ public class TimeCandidateService {
 
     @Transactional
     public List<TimeCandidateResponse> calculate(String code) {
-        if (!isCalculationRequired(code)) return list(code);
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
-        // DB에서 이미 집계 완료된 결과만 가져옴
+        if (!isCalculationRequired(meeting)) return list(code);
+
         List<TimeAvailabilityHeatmapRow> rows =
-                timeAvailabilityRepository.findHeatmapByMeetingCode(code);
+                timeAvailabilityRepository.findHeatmapByMeetingCode(
+                        code, meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
 
-        // 데이터 없으면 후보 제거 후 빈 응답
         if (rows.isEmpty()) {
             timeCandidateRepository.deleteByMeetingCode(code);
             return List.of();
         }
-
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
         // 기존 후보 삭제
         timeCandidateRepository.deleteByMeetingCode(code);
@@ -66,18 +65,22 @@ public class TimeCandidateService {
                 .toList();
     }
 
-    /** 재계산 필요 여부 판단 */
-    private boolean isCalculationRequired(String code) {
-        Optional<LocalDateTime> lastSubmission = participantRepository.findLastTimeSubmission(code);
+    private boolean isCalculationRequired(Meeting meeting) {
+        Optional<LocalDateTime> lastSubmission =
+                participantRepository.findLastTimeSubmission(meeting.getCode());
 
         if (lastSubmission.isEmpty()) return false;
 
-        Optional<LocalDateTime> lastCalculated = timeCandidateRepository.findLastCalculatedAt(code);
+        Optional<LocalDateTime> lastCalculated =
+                timeCandidateRepository.findLastCalculatedAt(meeting.getCode());
 
-        // 계산된 후보가 없거나, 마지막 제출이 마지막 계산보다 이후면 재계산 필요
-        return lastCalculated
-                .map((calculated) -> lastSubmission.get().isAfter(calculated))
-                .orElse(true);
+        if (lastCalculated.isEmpty()) return true;
+
+        LocalDateTime calculated = lastCalculated.get();
+
+        // 마지막 제출 또는 모임 설정 변경이 마지막 계산 이후이면 재계산
+        return lastSubmission.get().isAfter(calculated)
+                || meeting.getUpdatedAt().isAfter(calculated);
     }
 
     /** DB aggregation 결과 -> 후보 상위 N개 생성 */

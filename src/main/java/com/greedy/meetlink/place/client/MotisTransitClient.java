@@ -57,7 +57,10 @@ public class MotisTransitClient implements TransitClient {
             return seconds;
 
         } catch (WebClientResponseException e) {
-            log.error("MOTIS API 오류: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error(
+                    "MOTIS API 오류: status={}, body={}",
+                    e.getStatusCode(),
+                    e.getResponseBodyAsString());
             return null;
         } catch (Exception e) {
             log.error("MOTIS API 호출 중 예외 발생: {}", e.getMessage(), e);

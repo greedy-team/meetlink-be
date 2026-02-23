@@ -1,7 +1,7 @@
 package com.greedy.meetlink.candidate.controller;
 
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
-import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
+import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.candidate.service.PlaceCandidateService;
 import com.greedy.meetlink.candidate.service.TimeCandidateService;
 import com.greedy.meetlink.common.ApiResponse;
@@ -23,14 +23,14 @@ public class CandidateController implements CandidateControllerSpec {
 
     @Override
     @PostMapping("/time")
-    public ApiResponse<TimeCandidatesResponse> calculateTime(@PathVariable String code) {
+    public ApiResponse<List<TimeCandidateResponse>> calculateTime(@PathVariable String code) {
         return ApiResponse.success(timeCandidateService.calculate(code));
     }
 
     @Override
     @GetMapping("/time")
-    public ApiResponse<TimeCandidatesResponse> getTime(@PathVariable String code) {
-        return ApiResponse.success(timeCandidateService.get(code));
+    public ApiResponse<List<TimeCandidateResponse>> getTime(@PathVariable String code) {
+        return ApiResponse.success(timeCandidateService.list(code));
     }
 
     @Override

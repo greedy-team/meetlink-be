@@ -1,4 +1,4 @@
-package com.greedy.meetlink.place;
+package com.greedy.meetlink.common;
 
 /** 위경도 좌표 값 객체 */
 public record Coordinate(double latitude, double longitude) {

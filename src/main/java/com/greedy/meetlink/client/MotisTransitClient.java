@@ -1,13 +1,13 @@
-package com.greedy.meetlink.place.client;
+package com.greedy.meetlink.client;
 
-import com.greedy.meetlink.place.Coordinate;
-import com.greedy.meetlink.place.client.dto.MotisRouteResponse;
+import com.greedy.meetlink.client.dto.MotisRouteResponse;
+import com.greedy.meetlink.common.Coordinate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 /** MOTIS 대중교통 경로 클라이언트 (GET /api/v5/plan) */
 @Slf4j
@@ -17,12 +17,12 @@ public class MotisTransitClient implements TransitClient {
 
     private static final String PLAN_PATH = "/api/v5/plan";
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     public MotisTransitClient(
-            WebClient.Builder webClientBuilder,
+            RestClient.Builder restClientBuilder,
             @Value("${motis.base-url:https://api.transitous.org}") String baseUrl) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+        this.restClient = restClientBuilder.baseUrl(baseUrl).build();
     }
 
     @Override
@@ -32,7 +32,7 @@ public class MotisTransitClient implements TransitClient {
 
         try {
             MotisRouteResponse response =
-                    webClient
+                    restClient
                             .get()
                             .uri(
                                     uriBuilder ->
@@ -42,8 +42,7 @@ public class MotisTransitClient implements TransitClient {
                                                     .queryParam("toPlace", toPlace)
                                                     .build())
                             .retrieve()
-                            .bodyToMono(MotisRouteResponse.class)
-                            .block();
+                            .body(MotisRouteResponse.class);
 
             if (response == null) {
                 log.warn("MOTIS API 응답 없음: origin={}, destination={}", origin, destination);
@@ -56,7 +55,7 @@ public class MotisTransitClient implements TransitClient {
             }
             return seconds;
 
-        } catch (WebClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error(
                     "MOTIS API 오류: status={}, body={}",
                     e.getStatusCode(),

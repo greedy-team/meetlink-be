@@ -1,16 +1,16 @@
-package com.greedy.meetlink.place.client;
+package com.greedy.meetlink.client;
 
-import com.greedy.meetlink.place.Coordinate;
-import com.greedy.meetlink.place.client.dto.PoiSearchResponse;
-import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
+import com.greedy.meetlink.client.dto.PoiSearchResponse;
+import com.greedy.meetlink.client.dto.PoiSearchResponse.PoiPlace;
+import com.greedy.meetlink.common.Coordinate;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 /** 카카오 키워드 장소 검색 클라이언트 (GET /v2/local/search/keyword.json) */
 @Slf4j
@@ -23,14 +23,14 @@ public class KakaoPoiClient implements PoiClient {
     private static final String SEARCH_QUERY = "카페";
     private static final int MAX_POI_COUNT = 5;
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     public KakaoPoiClient(
-            WebClient.Builder webClientBuilder,
+            RestClient.Builder restClientBuilder,
             @Value("${kakao.api-key}") String restApiKey,
             @Value("${kakao.base-url:https://dapi.kakao.com}") String baseUrl) {
-        this.webClient =
-                webClientBuilder
+        this.restClient =
+                restClientBuilder
                         .baseUrl(baseUrl)
                         .defaultHeader("Authorization", "KakaoAK " + restApiKey)
                         .build();
@@ -40,7 +40,7 @@ public class KakaoPoiClient implements PoiClient {
     public List<PoiPlace> searchNearby(Coordinate center) {
         try {
             PoiSearchResponse response =
-                    webClient
+                    restClient
                             .get()
                             .uri(
                                     uriBuilder ->
@@ -55,8 +55,7 @@ public class KakaoPoiClient implements PoiClient {
                                                     .queryParam("size", MAX_POI_COUNT)
                                                     .build())
                             .retrieve()
-                            .bodyToMono(PoiSearchResponse.class)
-                            .block();
+                            .body(PoiSearchResponse.class);
 
             if (response == null) {
                 log.warn("Kakao POI 응답 없음: center={}", center);
@@ -67,7 +66,7 @@ public class KakaoPoiClient implements PoiClient {
             log.debug("Kakao POI 검색 완료: center={}, 결과 수={}", center, places.size());
             return places;
 
-        } catch (WebClientResponseException e) {
+        } catch (RestClientResponseException e) {
             log.error(
                     "Kakao POI API 오류: status={}, body={}",
                     e.getStatusCode(),

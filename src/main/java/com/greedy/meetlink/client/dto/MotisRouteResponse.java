@@ -1,4 +1,4 @@
-package com.greedy.meetlink.place.client.dto;
+package com.greedy.meetlink.client.dto;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package com.greedy.meetlink.place.client;
+package com.greedy.meetlink.client;
 
-import com.greedy.meetlink.place.Coordinate;
-import com.greedy.meetlink.place.client.dto.PoiSearchResponse.PoiPlace;
+import com.greedy.meetlink.client.dto.PoiSearchResponse.PoiPlace;
+import com.greedy.meetlink.common.Coordinate;
 import java.util.List;
 
 /** POI(관심지점) 검색 클라이언트 인터페이스 - KakaoPoiClient (Real) - FakePoiClient (Test) */

@@ -1,7 +1,7 @@
 package com.greedy.meetlink.candidate.algorithm;
 
-import com.greedy.meetlink.place.Coordinate;
-import com.greedy.meetlink.place.client.TransitClient;
+import com.greedy.meetlink.client.TransitClient;
+import com.greedy.meetlink.common.Coordinate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;

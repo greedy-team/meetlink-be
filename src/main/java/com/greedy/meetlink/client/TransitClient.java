@@ -1,6 +1,6 @@
-package com.greedy.meetlink.place.client;
+package com.greedy.meetlink.client;
 
-import com.greedy.meetlink.place.Coordinate;
+import com.greedy.meetlink.common.Coordinate;
 
 /** 대중교통 경로 조회 클라이언트 인터페이스 - MotisTransitClient (Real) - FakeTransitClient (Test) */
 public interface TransitClient {

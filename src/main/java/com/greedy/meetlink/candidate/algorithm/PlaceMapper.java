@@ -15,15 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * 좌표-장소 매핑 (Place Mapper)
- *
- * <p>후보 좌표를 실제 장소(POI) 정보와 매칭하고, 실제 POI 좌표 기준으로 이동시간을 재계산하여 최종 순위를 확정합니다.
- *
- * <p>[Step 7] 상위 K개 좌표에 대해 POI 검색
- *
- * <p>[Step 8] 실제 POI 좌표 기준으로 이동시간 재계산 → 재정렬 및 rank 재부여
- */
+/** 후보 좌표를 카카오 POI 검색으로 실제 장소와 매칭하고, POI 좌표 기준으로 이동시간을 재계산하여 최종 순위를 확정 */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -41,7 +33,6 @@ public class PlaceMapper {
             List<ParticipantTravelTime> originalTimes =
                     candidate.filteredCandidate().participantTravelTimes();
 
-            // Step 7: POI 검색
             List<PoiPlace> places = poiClient.searchNearby(coord);
 
             String name;
@@ -62,7 +53,6 @@ public class PlaceMapper {
                 address = place.address();
                 poiCoord = new Coordinate(place.latitude(), place.longitude());
 
-                // Step 8: 실제 POI 좌표 기준 이동시간 재계산
                 travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
             }
 
@@ -77,10 +67,9 @@ public class PlaceMapper {
                             scoreResult.avg(),
                             scoreResult.max(),
                             scoreResult.score(),
-                            0)); // rank는 재정렬 후 부여
+                            0));
         }
 
-        // Step 8: 재계산된 점수 기준 재정렬 및 rank 재부여
         results.sort(Comparator.comparingDouble(MatchedPlace::score));
         for (int i = 0; i < results.size(); i++) {
             results.set(i, results.get(i).withRank(i + 1));
@@ -89,24 +78,20 @@ public class PlaceMapper {
         return results;
     }
 
-    /**
-     * 실제 POI 좌표 기준으로 각 참여자의 이동시간 재계산
-     *
-     * <p>API 호출 실패 시 원래 이동시간으로 fallback
-     */
     private List<Double> recalculateTravelTimes(
             List<ParticipantTravelTime> originalTimes, Coordinate poiCoord) {
         List<Double> times = new ArrayList<>();
 
         for (ParticipantTravelTime ptt : originalTimes) {
-            Double recalcTime = callTransit(ptt.participantCoordinate(), poiCoord);
+            Double recalcTime =
+                    transitClient.getTravelTimeSeconds(ptt.participantCoordinate(), poiCoord);
 
             if (recalcTime == null) {
                 log.warn(
                         "POI 기준 이동시간 재계산 실패 → 원래 값 사용: participant={}, original={}",
                         ptt.participantCoordinate(),
-                        ptt.travelTimeMinutes());
-                times.add(ptt.travelTimeMinutes());
+                        ptt.travelTimeSeconds());
+                times.add(ptt.travelTimeSeconds());
             } else {
                 times.add(recalcTime);
             }
@@ -117,19 +102,15 @@ public class PlaceMapper {
 
     private List<Double> toTimeList(List<ParticipantTravelTime> participantTravelTimes) {
         return participantTravelTimes.stream()
-                .map(ParticipantTravelTime::travelTimeMinutes)
+                .map(ParticipantTravelTime::travelTimeSeconds)
                 .collect(Collectors.toList());
-    }
-
-    private Double callTransit(Coordinate origin, Coordinate destination) {
-        return transitClient.getTravelTimeMinutes(origin, destination);
     }
 
     public record MatchedPlace(
             String name,
             String address,
             Coordinate coordinate,
-            List<Double> travelTimesMinutes,
+            List<Double> travelTimesSeconds,
             double avgTravelTime,
             double maxTravelTime,
             double score,
@@ -139,7 +120,7 @@ public class PlaceMapper {
                     name,
                     address,
                     coordinate,
-                    travelTimesMinutes,
+                    travelTimesSeconds,
                     avgTravelTime,
                     maxTravelTime,
                     score,

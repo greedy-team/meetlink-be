@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class CandidateFilter {
 
     private static final double DISTANCE_THRESHOLD_FACTOR = 1.2;
-    private static final double MAX_TRAVEL_TIME_MINUTES = 60.0;
+    private static final double MAX_TRAVEL_TIME_SECONDS = 3600.0; // 60분
     private static final int SAMPLE_PARTICIPANT_COUNT = 3;
 
     private final TransitClient transitClient;
@@ -40,13 +40,9 @@ public class CandidateFilter {
     }
 
     /**
-     * 2차 필터링: 이동 시간 기반 (TMap API 호출)
+     * 2차 필터링: 이동 시간 기반 (MOTIS API 호출)
      *
-     * <p>[전략] API 호출 최소화를 위해 2단계로 진행 1단계: 기하중심에서 가장 먼 참여자(샘플) 먼저 검증 → 60분 초과 시 즉시 탈락 2단계: 나머지 참여자
-     * 검증 → API 실패 or 60분 초과 시 탈락
-     *
-     * <p>✅ 리팩토링: 기존 2단계 루프에서 나머지 참여자는 null 체크만 했으나, MAX_TRAVEL_TIME_MINUTES 초과도 탈락 조건에 포함되도록 수정.
-     * (샘플만 시간 제한을 받는 비대칭 로직 버그 수정)
+     * <p>API 호출 최소화를 위해 기하중심에서 가장 먼 참여자(샘플)를 먼저 검증하고, 통과 시 나머지 참여자를 검증한다.
      */
     public List<FilteredCandidate> filterByTravelTime(
             List<Coordinate> candidates, List<Coordinate> participants, Coordinate center) {
@@ -113,11 +109,6 @@ public class CandidateFilter {
         return false;
     }
 
-    /**
-     * 나머지 참여자 검증 — 실패 시 true 반환
-     *
-     * <p>✅ 리팩토링: null 체크 외에 MAX_TRAVEL_TIME_MINUTES 초과도 탈락 조건 추가
-     */
     private boolean isFailedOnRemainder(
             Coordinate candidate,
             List<Coordinate> participants,
@@ -141,13 +132,13 @@ public class CandidateFilter {
         return false;
     }
 
-    /** 이동시간이 유효하지 않은 경우: null이거나 60분 초과 */
+    /** 이동시간이 유효하지 않은 경우: null이거나 3600초(60분) 초과 */
     private boolean isInvalidTravelTime(Double travelTime) {
-        return travelTime == null || travelTime > MAX_TRAVEL_TIME_MINUTES;
+        return travelTime == null || travelTime > MAX_TRAVEL_TIME_SECONDS;
     }
 
     private Double callTransit(Coordinate origin, Coordinate destination) {
-        return transitClient.getTravelTimeMinutes(origin, destination);
+        return transitClient.getTravelTimeSeconds(origin, destination);
     }
 
     // -------------------------------------------------------------------------
@@ -158,5 +149,5 @@ public class CandidateFilter {
             Coordinate coordinate, List<ParticipantTravelTime> participantTravelTimes) {}
 
     public record ParticipantTravelTime(
-            Coordinate participantCoordinate, double travelTimeMinutes) {}
+            Coordinate participantCoordinate, double travelTimeSeconds) {}
 }

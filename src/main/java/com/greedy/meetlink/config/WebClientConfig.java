@@ -11,11 +11,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
-/**
- * WebClient 공통 설정
- *
- * <p>TMapTransitClient 등에서 WebClient.Builder를 주입받아 사용 기본 타임아웃 설정 적용 (5초)
- */
+/** WebClient 공통 설정 - 커넥션/읽기/쓰기 타임아웃 5초 */
 @Configuration
 public class WebClientConfig {
 

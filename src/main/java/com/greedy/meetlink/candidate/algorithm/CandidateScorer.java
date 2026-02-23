@@ -9,25 +9,13 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * 후보 좌표 점수 산정
- *
- * <p>score(P) = W_AVG × T_avg + W_MAX × T_max + W_STDDEV × T_stddev (가중치는 ScoreCalculator 참조) 점수가
- * 낮을수록 좋음 (이동시간 최소화 목표)
- */
+/** 후보 좌표 점수 산정 및 상위 K개 선발 */
 @Component
 @RequiredArgsConstructor
 public class CandidateScorer {
 
     private final ScoreCalculator scoreCalculator;
 
-    /**
-     * 후보 목록을 점수 기준으로 정렬하여 반환 점수 낮은 순(이동시간 합이 최소) → rank 1이 가장 좋음
-     *
-     * @param candidates 2차 필터 통과 후보 목록
-     * @param topK 반환할 상위 후보 수
-     * @return 점수 + 순위가 계산된 후보 목록
-     */
     public List<ScoredCandidate> score(List<FilteredCandidate> candidates, int topK) {
         List<ScoredCandidate> scored =
                 candidates.stream()
@@ -46,7 +34,7 @@ public class CandidateScorer {
     private ScoredCandidate calculateScore(FilteredCandidate candidate) {
         List<Double> times =
                 candidate.participantTravelTimes().stream()
-                        .map(ParticipantTravelTime::travelTimeMinutes)
+                        .map(ParticipantTravelTime::travelTimeSeconds)
                         .collect(Collectors.toList());
 
         ScoreResult result = scoreCalculator.calculate(times);
@@ -61,7 +49,6 @@ public class CandidateScorer {
                 );
     }
 
-    /** 점수가 산정된 후보 */
     public record ScoredCandidate(
             FilteredCandidate filteredCandidate,
             double avgTravelTime,

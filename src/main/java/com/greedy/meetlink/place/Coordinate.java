@@ -1,10 +1,6 @@
 package com.greedy.meetlink.place;
 
-/**
- * 위경도 좌표 값 객체 - latitude: 위도 (Y축) - longitude: 경도 (X축)
- *
- * <p>TMap API 스펙: startX / endX = longitude (경도) startY / endY = latitude (위도)
- */
+/** 위경도 좌표 값 객체 */
 public record Coordinate(double latitude, double longitude) {
 
     /** Haversine 공식으로 두 좌표 간 구면 직선 거리(km) 계산 */
@@ -23,7 +19,7 @@ public record Coordinate(double latitude, double longitude) {
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    /** 기준 좌표로부터 거리(km)와 각도(degree)만큼 이동한 좌표 반환 Polar Sampling에서 후보 좌표 생성 시 사용 */
+    /** 기준 좌표로부터 거리(km)와 각도(degree)만큼 이동한 좌표 반환 */
     public Coordinate move(double distanceKm, double angleDegrees) {
         final double R = 6371.0;
         double angularDistance = distanceKm / R;

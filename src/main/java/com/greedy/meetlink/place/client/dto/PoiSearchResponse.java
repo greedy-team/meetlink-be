@@ -9,72 +9,53 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 /**
- * TMap POI(관심지점) 검색 API 응답 GET https://apis.openapi.sk.com/tmap/pois
+ * 카카오 키워드 장소 검색 API 응답 GET https://dapi.kakao.com/v2/local/search/keyword.json
  *
- * <p>카테고리 코드 예시: - 음식점: "FD6" - 카페: "CE7" - 편의시설/회의공간: "AD5"
+ * <p>x: 경도(longitude), y: 위도(latitude)
  */
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PoiSearchResponse {
 
-    @JsonProperty("searchPoiInfo")
-    private SearchPoiInfo searchPoiInfo;
+    @JsonProperty("documents")
+    private List<Document> documents;
 
-    /** 응답에서 실제 장소 목록으로 변환 */
     public List<PoiPlace> extractPlaces() {
-        return Optional.ofNullable(searchPoiInfo)
-                .map(SearchPoiInfo::getPois)
-                .map(Pois::getPoi)
-                .orElse(Collections.emptyList())
-                .stream()
+        return Optional.ofNullable(documents).orElse(Collections.emptyList()).stream()
                 .map(
-                        poi ->
+                        doc ->
                                 new PoiPlace(
-                                        poi.getName(),
-                                        poi.getUpperAddrName()
-                                                + " "
-                                                + poi.getMiddleAddrName()
-                                                + " "
-                                                + poi.getLowerAddrName(),
-                                        Double.parseDouble(poi.getFrontLat()),
-                                        Double.parseDouble(poi.getFrontLon())))
+                                        doc.getPlaceName(),
+                                        doc.getPreferredAddress(),
+                                        Double.parseDouble(doc.getY()),
+                                        Double.parseDouble(doc.getX())))
                 .collect(Collectors.toList());
     }
 
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class SearchPoiInfo {
-        @JsonProperty("pois")
-        private Pois pois;
-    }
+    public static class Document {
+        @JsonProperty("place_name")
+        private String placeName;
 
-    @Getter
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Pois {
-        @JsonProperty("poi")
-        private List<Poi> poi;
-    }
+        @JsonProperty("road_address_name")
+        private String roadAddressName;
 
-    @Getter
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Poi {
-        @JsonProperty("name")
-        private String name;
+        @JsonProperty("address_name")
+        private String addressName;
 
-        @JsonProperty("upperAddrName")
-        private String upperAddrName; // 시/도
+        @JsonProperty("x") // 경도(longitude)
+        private String x;
 
-        @JsonProperty("middleAddrName")
-        private String middleAddrName; // 구/군
+        @JsonProperty("y") // 위도(latitude)
+        private String y;
 
-        @JsonProperty("lowerAddrName")
-        private String lowerAddrName; // 동/읍/면
-
-        @JsonProperty("frontLat")
-        private String frontLat; // 정문 위도 (문자열로 내려옴)
-
-        @JsonProperty("frontLon")
-        private String frontLon; // 정문 경도 (문자열로 내려옴)
+        /** 도로명주소 우선, 없으면 지번주소 */
+        public String getPreferredAddress() {
+            return (roadAddressName != null && !roadAddressName.isBlank())
+                    ? roadAddressName
+                    : addressName;
+        }
     }
 
     /** 서비스 레이어에서 사용할 장소 정보 */

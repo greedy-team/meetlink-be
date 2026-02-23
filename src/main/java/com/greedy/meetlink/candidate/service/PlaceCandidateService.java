@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PlaceCandidateService {
-
     private static final int TOP_K = 3;
 
     private final GeometricMedianCalculator geometricMedianCalculator;

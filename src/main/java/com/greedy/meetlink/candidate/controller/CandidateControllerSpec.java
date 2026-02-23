@@ -1,7 +1,7 @@
 package com.greedy.meetlink.candidate.controller;
 
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
-import com.greedy.meetlink.candidate.dto.response.TimeCandidatesResponse;
+import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +19,7 @@ public interface CandidateControllerSpec {
                 responseCode = "200",
                 description = "계산 성공")
     })
-    ApiResponse<TimeCandidatesResponse> calculateTime(@PathVariable String code);
+    ApiResponse<List<TimeCandidateResponse>> calculateTime(@PathVariable String code);
 
     @Operation(summary = "시간 후보 조회", description = "해당 모임의 시간 후보 목록을 조회합니다.")
     @ApiResponses({
@@ -27,7 +27,7 @@ public interface CandidateControllerSpec {
                 responseCode = "200",
                 description = "조회 성공")
     })
-    ApiResponse<TimeCandidatesResponse> getTime(@PathVariable String code);
+    ApiResponse<List<TimeCandidateResponse>> getTime(@PathVariable String code);
 
     @Operation(summary = "추천 장소 계산", description = "현재 참여자들의 위치 데이터를 기반으로 추천 장소 후보를 새로 계산하고 저장합니다.")
     @ApiResponses({

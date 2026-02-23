@@ -5,13 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
-/**
- * Polar Sampling 방식으로 후보 좌표 생성
- *
- * <p>기준점(기하중심)으로부터 거리(r)와 각도(θ)를 조합하여 유한한 후보 집합 생성
- *
- * <p>후보 수 목표: 30개 (최소 20 ~ 최대 50)
- */
+/** 기하중심으로부터 거리(r)와 각도(θ)를 조합한 Polar Sampling으로 후보 좌표 생성 */
 @Component
 public class PolarSamplingGenerator {
 
@@ -48,18 +42,6 @@ public class PolarSamplingGenerator {
         return Math.max(dMax * ALPHA, R_MIN_KM);
     }
 
-    /**
-     * 목표 후보 수(30개)를 맞추기 위한 각도 간격 계산
-     *
-     * <p>✅ 수정: 기존 공식은 정수 나눗셈으로 인해 실제 후보 수가 목표치에 못 미치는 문제가 있었음.
-     *
-     * <p>[기존 버그] angleStep = ceil(360 × 4 / 29) = 50 실제 생성 수 = 4 × (360 / 50) + 1 = 4 × 7 + 1 = 29
-     * ← 정수 나눗셈 360/50=7.0 → 7 (소수점 버림)
-     *
-     * <p>[수정 방향] angleStep을 1씩 줄여가면서 실제 생성 후보 수가 MIN~MAX 범위에 들어오는 가장 큰 angleStep을 선택
-     *
-     * <p>[결과] angleStep=45 → 4×(360/45)+1 = 4×8+1 = 33개 (MIN=20 이상, MAX=50 이하 ✅)
-     */
     private int calculateAngleStep() {
         int radiusDivisions = RADIUS_RATIOS.length;
 

@@ -89,17 +89,34 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<?>> handleIllegalArgumentException(
-            IllegalArgumentException e) {
+    @ExceptionHandler(InsufficientParticipantsException.class)
+    public ResponseEntity<ApiResponse<?>> handleInsufficientParticipantsException(
+            InsufficientParticipantsException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ApiResponse<?>> handleIllegalStateException(IllegalStateException e) {
+    @ExceptionHandler(MissingParticipantLocationException.class)
+    public ResponseEntity<ApiResponse<?>> handleMissingParticipantLocationException(
+            MissingParticipantLocationException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
+    }
+
+    @ExceptionHandler(PlaceRecommendationFailedException.class)
+    public ResponseEntity<ApiResponse<?>> handlePlaceRecommendationFailedException(
+            PlaceRecommendationFailedException e) {
+        log.error("Place recommendation failed", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
+    }
+
+    @ExceptionHandler(EmptyCoordinatesException.class)
+    public ResponseEntity<ApiResponse<?>> handleEmptyCoordinatesException(
+            EmptyCoordinatesException e) {
+        log.error("Empty coordinates encountered", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
     }
 
     @ExceptionHandler(Exception.class)

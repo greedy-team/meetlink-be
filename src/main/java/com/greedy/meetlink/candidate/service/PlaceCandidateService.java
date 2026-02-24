@@ -12,7 +12,10 @@ import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
 import com.greedy.meetlink.common.Coordinate;
+import com.greedy.meetlink.common.exception.InsufficientParticipantsException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.exception.MissingParticipantLocationException;
+import com.greedy.meetlink.common.exception.PlaceRecommendationFailedException;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -51,7 +54,7 @@ public class PlaceCandidateService {
         List<Participant> participants = participantRepository.findByMeeting(meeting);
 
         if (participants.size() < 2) {
-            throw new IllegalArgumentException("장소 추천을 위해 참여자가 2명 이상 필요합니다.");
+            throw new InsufficientParticipantsException();
         }
 
         Map<Long, LocationAvailability> locationMap = loadLocationMap(participants);
@@ -60,8 +63,7 @@ public class PlaceCandidateService {
         List<MatchedPlace> matchedPlaces = computeRecommendedPlaces(participants, locationMap);
 
         if (matchedPlaces.isEmpty()) {
-            throw new IllegalStateException(
-                    "meetingId=" + meeting.getId() + " : 추천 가능한 장소를 찾지 못했습니다.");
+            throw new PlaceRecommendationFailedException();
         }
 
         List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
@@ -88,14 +90,11 @@ public class PlaceCandidateService {
 
     private void validateLocations(
             List<Participant> participants, Map<Long, LocationAvailability> locationMap) {
-        List<String> missing =
-                participants.stream()
-                        .filter(p -> !locationMap.containsKey(p.getId()))
-                        .map(Participant::getNickname)
-                        .toList();
+        boolean hasMissing =
+                participants.stream().anyMatch(p -> !locationMap.containsKey(p.getId()));
 
-        if (!missing.isEmpty()) {
-            throw new IllegalStateException("출발지를 등록하지 않은 참여자가 있습니다: " + missing);
+        if (hasMissing) {
+            throw new MissingParticipantLocationException();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.greedy.meetlink.candidate.algorithm;
 
 import com.greedy.meetlink.common.Coordinate;
+import com.greedy.meetlink.common.exception.EmptyCoordinatesException;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ public class GeometricMedianCalculator {
 
     public Coordinate calculate(List<Coordinate> coordinates) {
         if (coordinates.isEmpty()) {
-            throw new IllegalArgumentException("좌표 목록이 비어 있습니다.");
+            throw new EmptyCoordinatesException();
         }
         if (coordinates.size() == 1) {
             return coordinates.get(0);

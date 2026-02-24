@@ -34,18 +34,23 @@ public class GeometricMedianCalculator {
             current = next;
         }
 
-        log.warn("Geometric median 수렴 실패: {}회 반복 후 근사값 반환", MAX_ITERATIONS);
+        log.warn(
+                "Geometric median did not converge after {} iterations, returning approximation",
+                MAX_ITERATIONS);
         return current;
     }
 
     // next = Σ(xi / di) / Σ(1 / di)
+    // Weiszfeld 수렴 보장을 위해 좌표 공간(degree)과 동일한 Euclidean 거리 사용
     private Coordinate weiszfeldStep(Coordinate current, List<Coordinate> coordinates) {
         double weightedLatSum = 0.0;
         double weightedLonSum = 0.0;
         double weightSum = 0.0;
 
         for (Coordinate coord : coordinates) {
-            double distance = current.distanceTo(coord);
+            double dLat = coord.latitude() - current.latitude();
+            double dLon = coord.longitude() - current.longitude();
+            double distance = Math.sqrt(dLat * dLat + dLon * dLon);
 
             if (distance < 1e-10) {
                 return coord; // 0 나눗셈 방지: 현재 추정점이 좌표와 거의 일치

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PlaceMapper {
-
     private final PoiClient poiClient;
     private final TransitClient transitClient;
     private final ScoreCalculator scoreCalculator;
@@ -41,6 +40,11 @@ public class PlaceMapper {
             List<Double> travelTimes;
 
             if (places.isEmpty()) {
+                log.debug(
+                        "[6-{}] No POI found near ({}, {}), using raw coordinate",
+                        i + 1,
+                        coord.latitude(),
+                        coord.longitude());
                 name = "추천 중간 지점 " + (i + 1);
                 address =
                         String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
@@ -51,11 +55,18 @@ public class PlaceMapper {
                 name = place.name();
                 address = place.address();
                 poiCoord = new Coordinate(place.latitude(), place.longitude());
+                log.debug("[6-{}] POI matched: {} / {}", i + 1, name, address);
 
                 travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
             }
 
             ScoreResult scoreResult = scoreCalculator.calculate(travelTimes);
+            log.debug(
+                    "[6-{}] Score: avg={}s, max={}s, score={}",
+                    i + 1,
+                    String.format("%.0f", scoreResult.avg()),
+                    String.format("%.0f", scoreResult.max()),
+                    String.format("%.1f", scoreResult.score()));
 
             results.add(
                     new MatchedPlace(
@@ -84,7 +95,9 @@ public class PlaceMapper {
             Double recalcTime =
                     transitClient.getTravelTimeSeconds(ptt.participantCoordinate(), poiCoord);
             if (recalcTime == null) {
-                log.warn("POI 이동시간 재계산 실패, 기존값 사용: poi={}", poiCoord);
+                log.warn(
+                        "POI travel time recalculation failed, using original value: poi={}",
+                        poiCoord);
             }
             times.add(recalcTime != null ? recalcTime : ptt.travelTimeSeconds());
         }

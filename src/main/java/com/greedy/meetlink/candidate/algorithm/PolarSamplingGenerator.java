@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 /** 기하중심으로부터 거리(r)와 각도(θ)를 조합한 Polar Sampling으로 후보 좌표 생성 */
 @Component
 public class PolarSamplingGenerator {
-
     private static final double ALPHA = 0.6;
     private static final double R_MIN_KM = 0.6;
     private static final double[] RADIUS_RATIOS = {0.25, 0.5, 0.75, 1.0};

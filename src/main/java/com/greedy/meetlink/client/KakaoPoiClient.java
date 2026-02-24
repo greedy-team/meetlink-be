@@ -5,6 +5,7 @@ import com.greedy.meetlink.client.dto.PoiSearchResponse.PoiPlace;
 import com.greedy.meetlink.common.Coordinate;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,12 +24,12 @@ public class KakaoPoiClient implements PoiClient {
 
     public KakaoPoiClient(
             RestClient.Builder restClientBuilder,
-            @Value("${kakao.api-key}") String restApiKey,
+            @Value("${kakao.api-key}") String apiKey,
             @Value("${kakao.base-url:https://dapi.kakao.com}") String baseUrl) {
         this.restClient =
                 restClientBuilder
                         .baseUrl(baseUrl)
-                        .defaultHeader("Authorization", "KakaoAK " + restApiKey)
+                        .defaultHeader("Authorization", "KakaoAK " + apiKey)
                         .build();
     }
 
@@ -54,22 +55,27 @@ public class KakaoPoiClient implements PoiClient {
                             .body(PoiSearchResponse.class);
 
             if (response == null) {
-                log.warn("Kakao POI 응답 없음: center={}", center);
+                log.warn("Kakao POI API returned null response: center={}", center);
                 return Collections.emptyList();
             }
 
-            List<PoiPlace> places = response.extractPlaces();
-            log.debug("Kakao POI 검색 완료: center={}, 결과 수={}", center, places.size());
+            List<PoiPlace> places =
+                    response.documents() == null
+                            ? Collections.emptyList()
+                            : response.documents().stream()
+                                    .map(PoiPlace::from)
+                                    .collect(Collectors.toList());
+            log.debug("Kakao POI search completed: center={}, results={}", center, places.size());
             return places;
 
         } catch (RestClientResponseException e) {
             log.error(
-                    "Kakao POI API 오류: status={}, body={}",
+                    "Kakao POI API error: status={}, body={}",
                     e.getStatusCode(),
                     e.getResponseBodyAsString());
             return Collections.emptyList();
         } catch (Exception e) {
-            log.error("Kakao POI API 호출 중 예외 발생: {}", e.getMessage(), e);
+            log.error("Kakao POI API call failed unexpectedly: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }

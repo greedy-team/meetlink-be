@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ScoreCalculator {
-
     private static final double W_AVG = 0.4;
     private static final double W_MAX = 0.4;
     private static final double W_STDDEV = 0.2;

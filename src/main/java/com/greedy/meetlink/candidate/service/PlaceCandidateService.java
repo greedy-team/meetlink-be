@@ -21,9 +21,11 @@ import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlaceCandidateService {
@@ -107,20 +109,35 @@ public class PlaceCandidateService {
     }
 
     private List<MatchedPlace> computeRecommendedPlaces(List<Coordinate> coordinates) {
+        log.debug("[1] Participants: {} locations", coordinates.size());
+
         Coordinate center = geometricMedianCalculator.calculate(coordinates);
+        log.debug("[2] Geometric median: ({}, {})", center.latitude(), center.longitude());
+
         List<Coordinate> rawCandidates = polarSamplingGenerator.generate(center, coordinates);
+        log.debug("[3] Polar sampling: {} raw candidates", rawCandidates.size());
 
         double realDMax = coordinates.stream().mapToDouble(center::distanceTo).max().orElse(0.0);
         List<Coordinate> distanceFiltered =
                 candidateFilter.filterByDistance(rawCandidates, coordinates, realDMax);
-
-        List<CandidateFilter.FilteredCandidate> timeFiltered =
-                candidateFilter.filterByTravelTime(distanceFiltered, coordinates);
+        log.debug(
+                "[4] Distance filter: {} → {} candidates (dMax: {} km)",
+                rawCandidates.size(),
+                distanceFiltered.size(),
+                String.format("%.3f", realDMax));
 
         List<CandidateFilter.FilteredCandidate> scored =
-                candidateScorer.selectTop(timeFiltered, TOP_K);
+                candidateScorer.selectTop(distanceFiltered, coordinates, TOP_K);
+        log.debug("[5] Travel time + top {}: {} candidates remaining", TOP_K, scored.size());
 
-        return placeMapper.match(scored);
+        List<MatchedPlace> results = placeMapper.match(scored);
+        log.debug(
+                "[6] Final results: {}",
+                results.stream()
+                        .map(p -> p.name() + "(score=" + String.format("%.1f", p.score()) + ")")
+                        .toList());
+
+        return results;
     }
 
     private List<PlaceCandidate> saveCandidates(Meeting meeting, List<MatchedPlace> matchedPlaces) {

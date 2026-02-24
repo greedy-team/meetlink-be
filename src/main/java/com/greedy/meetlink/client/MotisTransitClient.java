@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
-/** MOTIS 대중교통 경로 클라이언트 (GET /api/v5/plan) */
 @Slf4j
 @Component
 public class MotisTransitClient implements TransitClient {
@@ -42,24 +41,35 @@ public class MotisTransitClient implements TransitClient {
                             .body(MotisRouteResponse.class);
 
             if (response == null) {
-                log.warn("MOTIS API 응답 없음: origin={}, destination={}", origin, destination);
+                log.warn(
+                        "MOTIS API returned null response: origin={}, destination={}",
+                        origin,
+                        destination);
                 return null;
             }
 
-            Double seconds = response.extractMinTravelTimeSeconds();
+            Double seconds = null;
+            if (response.itineraries() != null && !response.itineraries().isEmpty()) {
+                Long d = response.itineraries().get(0).duration();
+                if (d != null) seconds = d.doubleValue();
+            } else if (response.direct() != null && !response.direct().isEmpty()) {
+                Long d = response.direct().get(0).duration();
+                if (d != null) seconds = d.doubleValue();
+            }
+
             if (seconds == null) {
-                log.warn("MOTIS 경로 없음: origin={}, destination={}", origin, destination);
+                log.warn("MOTIS no route found: origin={}, destination={}", origin, destination);
             }
             return seconds;
 
         } catch (RestClientResponseException e) {
             log.error(
-                    "MOTIS API 오류: status={}, body={}",
+                    "MOTIS API error: status={}, body={}",
                     e.getStatusCode(),
                     e.getResponseBodyAsString());
             return null;
         } catch (Exception e) {
-            log.error("MOTIS API 호출 중 예외 발생: {}", e.getMessage(), e);
+            log.error("MOTIS API call failed unexpectedly: {}", e.getMessage(), e);
             return null;
         }
     }

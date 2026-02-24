@@ -1,4 +1,4 @@
-package com.greedy.meetlink.client;
+package com.greedy.meetlink.common.client;
 
 import com.greedy.meetlink.common.Coordinate;
 

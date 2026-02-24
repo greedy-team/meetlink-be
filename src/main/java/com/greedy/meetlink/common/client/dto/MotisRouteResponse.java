@@ -1,4 +1,4 @@
-package com.greedy.meetlink.client.dto;
+package com.greedy.meetlink.common.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;

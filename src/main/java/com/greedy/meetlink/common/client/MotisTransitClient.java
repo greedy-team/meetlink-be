@@ -1,7 +1,7 @@
-package com.greedy.meetlink.client;
+package com.greedy.meetlink.common.client;
 
-import com.greedy.meetlink.client.dto.MotisRouteResponse;
 import com.greedy.meetlink.common.Coordinate;
+import com.greedy.meetlink.common.client.dto.MotisRouteResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

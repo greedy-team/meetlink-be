@@ -10,7 +10,6 @@ import com.greedy.meetlink.common.Coordinate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -41,24 +40,20 @@ public class PlaceMapper {
 
             if (places.isEmpty()) {
                 log.debug(
-                        "[6-{}] No POI found near ({}, {}), using raw coordinate",
+                        "[6-{}] No POI found near ({}, {}), skipping",
                         i + 1,
                         coord.latitude(),
                         coord.longitude());
-                name = "추천 중간 지점 " + (i + 1);
-                address =
-                        String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
-                poiCoord = coord;
-                travelTimes = extractTravelTimes(originalTimes);
-            } else {
-                PoiPlace place = places.get(0);
-                name = place.name();
-                address = place.address();
-                poiCoord = new Coordinate(place.latitude(), place.longitude());
-                log.debug("[6-{}] POI matched: {} / {}", i + 1, name, address);
-
-                travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
+                continue;
             }
+
+            PoiPlace place = places.get(0);
+            name = place.name();
+            address = place.address();
+            poiCoord = new Coordinate(place.latitude(), place.longitude());
+            log.debug("[6-{}] POI matched: {} / {}", i + 1, name, address);
+
+            travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
 
             ScoreResult scoreResult = scoreCalculator.calculate(travelTimes);
             log.debug(
@@ -103,12 +98,6 @@ public class PlaceMapper {
         }
 
         return times;
-    }
-
-    private List<Double> extractTravelTimes(List<ParticipantTravelTime> participantTravelTimes) {
-        return participantTravelTimes.stream()
-                .map(ParticipantTravelTime::travelTimeSeconds)
-                .collect(Collectors.toList());
     }
 
     public record MatchedPlace(

@@ -3,3 +3,9 @@ services:
     container_name: meetlink-db-local
     ports:
       - "5432:5432"
+  motis:
+    container_name: meetlink-motis-local
+    volumes:
+      - ./motis-data:/data
+    ports:
+      - "3000:3000"

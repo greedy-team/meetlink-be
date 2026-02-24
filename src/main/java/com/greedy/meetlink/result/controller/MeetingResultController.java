@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/meetings/{code}/result")
-public class MeetingResultController {
+public class MeetingResultController implements MeetingResultControllerSpec {
     private final MeetingResultService meetingResultService;
 
     @GetMapping

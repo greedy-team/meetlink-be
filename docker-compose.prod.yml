@@ -2,6 +2,9 @@ services:
   postgres:
     container_name: meetlink-db-prod
     restart: unless-stopped
+  motis:
+    container_name: meetlink-motis-prod
+    restart: unless-stopped
   backend:
     container_name: meetlink-be-prod
     restart: unless-stopped

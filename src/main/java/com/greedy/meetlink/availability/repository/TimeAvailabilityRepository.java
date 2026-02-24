@@ -42,8 +42,8 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
             COUNT(ta) AS availableCount
         FROM TimeAvailability ta
         WHERE ta.meeting.code = :code
-          AND (:rangeStart IS NULL OR ta.startTime >= :rangeStart)
-          AND (:rangeEnd IS NULL OR ta.startTime < :rangeEnd)
+          AND ta.startTime >= :rangeStart
+          AND ta.startTime < :rangeEnd
         GROUP BY ta.date, ta.dayOfWeek, ta.startTime
         ORDER BY COUNT(ta) DESC,
                 ta.date ASC,

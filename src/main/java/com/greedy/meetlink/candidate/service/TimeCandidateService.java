@@ -9,6 +9,8 @@ import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
+import com.greedy.meetlink.result.entity.MeetingResult;
+import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,49 +32,67 @@ public class TimeCandidateService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingRepository meetingRepository;
+    private final MeetingResultRepository meetingResultRepository;
 
     @Transactional
     public List<TimeCandidateResponse> calculate(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
-        if (!isCalculationRequired(meeting)) return list(code);
+        if (!isCalculationRequired(meeting)) return toResponses(meeting);
 
         List<TimeAvailabilityHeatmapRow> rows =
                 timeAvailabilityRepository.findHeatmapByMeetingCode(
                         code, meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
 
         if (rows.isEmpty()) {
-            timeCandidateRepository.deleteByMeetingCode(code);
+            timeCandidateRepository.deleteByMeeting(meeting);
             return List.of();
         }
 
         // 기존 후보 삭제
-        timeCandidateRepository.deleteByMeetingCode(code);
+        timeCandidateRepository.deleteByMeeting(meeting);
 
         // 상위 랭킹 후보 생성 후 연속된 슬롯 합침
         List<TimeCandidate> candidates = buildCandidates(rows, meeting);
 
         timeCandidateRepository.saveAll(candidates);
+        updateMeetingResult(meeting, candidates);
 
         return candidates.stream().map(TimeCandidateResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public List<TimeCandidateResponse> list(String code) {
-        return timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code).stream()
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+        return toResponses(meeting);
+    }
+
+    private List<TimeCandidateResponse> toResponses(Meeting meeting) {
+        return timeCandidateRepository.findByMeetingOrderByRankAsc(meeting).stream()
                 .map(TimeCandidateResponse::from)
                 .toList();
     }
 
+    private void updateMeetingResult(Meeting meeting, List<TimeCandidate> candidates) {
+        MeetingResult result = meetingResultRepository.findByMeeting(meeting).orElseThrow();
+        candidates.stream()
+                .filter(c -> c.getRank() == 1)
+                .findFirst()
+                .ifPresent(result::updateTimeCandidate);
+    }
+
     private boolean isCalculationRequired(Meeting meeting) {
+        if (meeting.getTimeRangeStart() == null || meeting.getTimeRangeEnd() == null) return false;
+
         Optional<LocalDateTime> lastSubmission =
                 participantRepository.findLastTimeSubmission(meeting.getCode());
 
         if (lastSubmission.isEmpty()) return false;
 
         Optional<LocalDateTime> lastCalculated =
-                timeCandidateRepository.findLastCalculatedAt(meeting.getCode());
+                timeCandidateRepository.findLastCalculatedAt(meeting);
 
         if (lastCalculated.isEmpty()) return true;
 
@@ -127,14 +147,13 @@ public class TimeCandidateService {
                 candidateEnd = candidateEnd.plusMinutes(SLOT_MINUTES);
             } else {
                 merged.add(
-                        TimeCandidate.builder()
-                                .meeting(meeting)
-                                .date(candidateDate)
-                                .dayOfWeek(candidateDayOfWeek)
-                                .startTime(candidateStart)
-                                .endTime(candidateEnd)
-                                .availableCount(candidateAvailableCount)
-                                .build());
+                        TimeCandidate.create(
+                                meeting,
+                                candidateDate,
+                                candidateDayOfWeek,
+                                candidateStart,
+                                candidateEnd,
+                                candidateAvailableCount));
 
                 candidateDate = row.getDate();
                 candidateDayOfWeek = row.getDayOfWeek();
@@ -145,14 +164,13 @@ public class TimeCandidateService {
         }
 
         merged.add(
-                TimeCandidate.builder()
-                        .meeting(meeting)
-                        .date(candidateDate)
-                        .dayOfWeek(candidateDayOfWeek)
-                        .startTime(candidateStart)
-                        .endTime(candidateEnd)
-                        .availableCount(candidateAvailableCount)
-                        .build());
+                TimeCandidate.create(
+                        meeting,
+                        candidateDate,
+                        candidateDayOfWeek,
+                        candidateStart,
+                        candidateEnd,
+                        candidateAvailableCount));
 
         return merged;
     }

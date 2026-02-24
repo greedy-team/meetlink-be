@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LocationAvailabilityRepository extends JpaRepository<LocationAvailability, Long> {
     boolean existsByParticipant(Participant participant);
@@ -21,4 +22,9 @@ public interface LocationAvailabilityRepository extends JpaRepository<LocationAv
     List<Long> findSubmittedParticipantIds(Meeting meeting);
 
     Optional<LocationAvailability> findByParticipant(Participant participant);
+
+    @Query(
+            "SELECT la FROM LocationAvailability la JOIN FETCH la.participant WHERE la.participant IN :participants")
+    List<LocationAvailability> findByParticipantIn(
+            @Param("participants") List<Participant> participants);
 }

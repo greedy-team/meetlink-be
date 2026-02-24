@@ -89,6 +89,22 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
     }
 
+    @ExceptionHandler(PlaceRecommendationFailedException.class)
+    public ResponseEntity<ApiResponse<?>> handlePlaceRecommendationFailedException(
+            PlaceRecommendationFailedException e) {
+        log.error("Place recommendation failed", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
+    }
+
+    @ExceptionHandler(EmptyCoordinatesException.class)
+    public ResponseEntity<ApiResponse<?>> handleEmptyCoordinatesException(
+            EmptyCoordinatesException e) {
+        log.error("Empty coordinates encountered", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleFallbackException(Exception e) {
         log.error("Unexpected server error occurred: ", e);

@@ -84,6 +84,8 @@ public class TimeCandidateService {
     }
 
     private boolean isCalculationRequired(Meeting meeting) {
+        if (meeting.getTimeRangeStart() == null || meeting.getTimeRangeEnd() == null) return false;
+
         Optional<LocalDateTime> lastSubmission =
                 participantRepository.findLastTimeSubmission(meeting.getCode());
 

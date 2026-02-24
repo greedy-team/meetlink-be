@@ -17,31 +17,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/meetings/{code}/candidates")
 public class CandidateController implements CandidateControllerSpec {
-
     private final TimeCandidateService timeCandidateService;
     private final PlaceCandidateService placeCandidateService;
 
-    @Override
     @PostMapping("/time")
     public ApiResponse<List<TimeCandidateResponse>> calculateTime(@PathVariable String code) {
         return ApiResponse.success(timeCandidateService.calculate(code));
     }
 
-    @Override
     @GetMapping("/time")
-    public ApiResponse<List<TimeCandidateResponse>> getTime(@PathVariable String code) {
+    public ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(@PathVariable String code) {
         return ApiResponse.success(timeCandidateService.list(code));
     }
 
-    @Override
     @PostMapping("/place")
     public ApiResponse<List<PlaceCandidateResponse>> calculatePlace(@PathVariable String code) {
         return ApiResponse.success(placeCandidateService.calculate(code));
     }
 
-    @Override
     @GetMapping("/place")
-    public ApiResponse<List<PlaceCandidateResponse>> getPlace(@PathVariable String code) {
-        return ApiResponse.success(placeCandidateService.get(code));
+    public ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(@PathVariable String code) {
+        return ApiResponse.success(placeCandidateService.list(code));
     }
 }

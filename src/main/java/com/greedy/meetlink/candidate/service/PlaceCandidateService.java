@@ -1,6 +1,5 @@
 package com.greedy.meetlink.candidate.service;
 
-import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter;
 import com.greedy.meetlink.candidate.algorithm.CandidateScorer;
@@ -21,8 +20,6 @@ import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,9 +52,12 @@ public class PlaceCandidateService {
             return toResponses(meeting);
         }
 
-        Map<Long, LocationAvailability> locationMap = loadLocationMap(participants);
+        List<Coordinate> coordinates =
+                locationAvailabilityRepository.findByParticipantIn(participants).stream()
+                        .map(la -> new Coordinate(la.getLatitude(), la.getLongitude()))
+                        .toList();
 
-        List<MatchedPlace> matchedPlaces = computeRecommendedPlaces(participants, locationMap);
+        List<MatchedPlace> matchedPlaces = computeRecommendedPlaces(coordinates);
 
         if (matchedPlaces.isEmpty()) {
             throw new PlaceRecommendationFailedException();
@@ -106,15 +106,7 @@ public class PlaceCandidateService {
         result.updatePlaceCandidate(topCandidate);
     }
 
-    private Map<Long, LocationAvailability> loadLocationMap(List<Participant> participants) {
-        return locationAvailabilityRepository.findByParticipantIn(participants).stream()
-                .collect(Collectors.toMap(la -> la.getParticipant().getId(), la -> la));
-    }
-
-    private List<MatchedPlace> computeRecommendedPlaces(
-            List<Participant> participants, Map<Long, LocationAvailability> locationMap) {
-        List<Coordinate> coordinates = toCoordinates(participants, locationMap);
-
+    private List<MatchedPlace> computeRecommendedPlaces(List<Coordinate> coordinates) {
         Coordinate center = geometricMedianCalculator.calculate(coordinates);
         List<Coordinate> rawCandidates = polarSamplingGenerator.generate(center, coordinates);
 
@@ -147,16 +139,5 @@ public class PlaceCandidateService {
                                                 mp.rank()))
                         .toList();
         return placeCandidateRepository.saveAll(candidates);
-    }
-
-    private List<Coordinate> toCoordinates(
-            List<Participant> participants, Map<Long, LocationAvailability> locationMap) {
-        return participants.stream()
-                .map(
-                        p -> {
-                            LocationAvailability loc = locationMap.get(p.getId());
-                            return new Coordinate(loc.getLatitude(), loc.getLongitude());
-                        })
-                .toList();
     }
 }

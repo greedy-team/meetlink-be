@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Component
+@Profile("!test")
 public class KakaoPoiClient implements PoiClient {
     private static final String KEYWORD_SEARCH_PATH = "/v2/local/search/keyword.json";
     private static final int DEFAULT_SEARCH_RADIUS_METERS = 300;

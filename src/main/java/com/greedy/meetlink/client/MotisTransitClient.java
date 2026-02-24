@@ -4,7 +4,6 @@ import com.greedy.meetlink.client.dto.MotisRouteResponse;
 import com.greedy.meetlink.common.Coordinate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -12,9 +11,7 @@ import org.springframework.web.client.RestClientResponseException;
 /** MOTIS 대중교통 경로 클라이언트 (GET /api/v5/plan) */
 @Slf4j
 @Component
-@Profile("!test")
 public class MotisTransitClient implements TransitClient {
-
     private static final String PLAN_PATH = "/api/v5/plan";
 
     private final RestClient restClient;

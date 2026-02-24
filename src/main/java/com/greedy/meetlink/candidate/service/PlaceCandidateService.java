@@ -19,16 +19,13 @@ import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlaceCandidateService {
@@ -53,7 +50,7 @@ public class PlaceCandidateService {
 
         List<Participant> participants = participantRepository.findByMeeting(meeting);
 
-        if (participants == null || participants.size() < 2) {
+        if (participants.size() < 2) {
             throw new IllegalArgumentException("장소 추천을 위해 참여자가 2명 이상 필요합니다.");
         }
 
@@ -107,47 +104,37 @@ public class PlaceCandidateService {
         List<Coordinate> coordinates = toCoordinates(participants, locationMap);
 
         Coordinate center = geometricMedianCalculator.calculate(coordinates);
-        log.info("기하중심 계산 완료: {}", center);
-
         List<Coordinate> rawCandidates = polarSamplingGenerator.generate(center, coordinates);
-        log.info("후보 좌표 생성: {}개", rawCandidates.size());
 
         double realDMax = coordinates.stream().mapToDouble(center::distanceTo).max().orElse(0.0);
         List<Coordinate> distanceFiltered =
                 candidateFilter.filterByDistance(rawCandidates, coordinates, realDMax);
-        log.info("1차 거리 필터 후: {}개", distanceFiltered.size());
 
         List<CandidateFilter.FilteredCandidate> timeFiltered =
                 candidateFilter.filterByTravelTime(distanceFiltered, coordinates, center);
-        log.info("2차 이동시간 필터 후: {}개", timeFiltered.size());
 
-        List<CandidateScorer.ScoredCandidate> scored = candidateScorer.score(timeFiltered, TOP_K);
-        log.info("점수 산정 완료: {}개", scored.size());
+        List<CandidateFilter.FilteredCandidate> scored = candidateScorer.score(timeFiltered, TOP_K);
 
         return placeMapper.match(scored);
     }
 
     private List<PlaceCandidate> saveCandidates(Meeting meeting, List<MatchedPlace> matchedPlaces) {
-        List<PlaceCandidate> saved = new ArrayList<>();
-
-        for (MatchedPlace mp : matchedPlaces) {
-            PlaceCandidate candidate =
-                    PlaceCandidate.builder()
-                            .meeting(meeting)
-                            .name(mp.name())
-                            .address(mp.address())
-                            .latitude(mp.coordinate().latitude())
-                            .longitude(mp.coordinate().longitude())
-                            .avgTravelTime(mp.avgTravelTime())
-                            .maxTravelTime(mp.maxTravelTime())
-                            .rank(mp.rank())
-                            .build();
-
-            saved.add(placeCandidateRepository.save(candidate));
-            log.info("PlaceCandidate 저장: rank={}, name={}", mp.rank(), mp.name());
-        }
-
-        return saved;
+        List<PlaceCandidate> candidates =
+                matchedPlaces.stream()
+                        .map(
+                                mp ->
+                                        PlaceCandidate.builder()
+                                                .meeting(meeting)
+                                                .name(mp.name())
+                                                .address(mp.address())
+                                                .latitude(mp.coordinate().latitude())
+                                                .longitude(mp.coordinate().longitude())
+                                                .avgTravelTime(mp.avgTravelTime())
+                                                .maxTravelTime(mp.maxTravelTime())
+                                                .rank(mp.rank())
+                                                .build())
+                        .toList();
+        return placeCandidateRepository.saveAll(candidates);
     }
 
     private void linkToMeetingResult(Meeting meeting, PlaceCandidate topCandidate) {
@@ -157,11 +144,6 @@ public class PlaceCandidateService {
                         .orElseGet(() -> meetingResultRepository.save(new MeetingResult(meeting)));
 
         meetingResult.updatePlaceCandidate(topCandidate);
-
-        log.info(
-                "MeetingResult 연결 완료: meetingId={}, placeCandidate={}",
-                meeting.getId(),
-                topCandidate.getName());
     }
 
     private List<Coordinate> toCoordinates(

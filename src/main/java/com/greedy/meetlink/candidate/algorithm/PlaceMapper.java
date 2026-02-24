@@ -1,7 +1,7 @@
 package com.greedy.meetlink.candidate.algorithm;
 
+import com.greedy.meetlink.candidate.algorithm.CandidateFilter.FilteredCandidate;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.ParticipantTravelTime;
-import com.greedy.meetlink.candidate.algorithm.CandidateScorer.ScoredCandidate;
 import com.greedy.meetlink.candidate.algorithm.ScoreCalculator.ScoreResult;
 import com.greedy.meetlink.client.PoiClient;
 import com.greedy.meetlink.client.TransitClient;
@@ -12,11 +12,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /** 후보 좌표를 카카오 POI 검색으로 실제 장소와 매칭하고, POI 좌표 기준으로 이동시간을 재계산하여 최종 순위를 확정 */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PlaceMapper {
@@ -25,13 +23,13 @@ public class PlaceMapper {
     private final TransitClient transitClient;
     private final ScoreCalculator scoreCalculator;
 
-    public List<MatchedPlace> match(List<ScoredCandidate> topCandidates) {
+    public List<MatchedPlace> match(List<FilteredCandidate> candidates) {
         List<MatchedPlace> results = new ArrayList<>();
 
-        for (ScoredCandidate candidate : topCandidates) {
-            Coordinate coord = candidate.filteredCandidate().coordinate();
-            List<ParticipantTravelTime> originalTimes =
-                    candidate.filteredCandidate().participantTravelTimes();
+        for (int i = 0; i < candidates.size(); i++) {
+            FilteredCandidate candidate = candidates.get(i);
+            Coordinate coord = candidate.coordinate();
+            List<ParticipantTravelTime> originalTimes = candidate.participantTravelTimes();
 
             List<PoiPlace> places = poiClient.searchNearby(coord);
 
@@ -41,8 +39,7 @@ public class PlaceMapper {
             List<Double> travelTimes;
 
             if (places.isEmpty()) {
-                log.warn("POI 검색 결과 없음: coordinate={}", coord);
-                name = "추천 중간 지점 " + candidate.rank();
+                name = "추천 중간 지점 " + (i + 1);
                 address =
                         String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
                 poiCoord = coord;
@@ -63,7 +60,6 @@ public class PlaceMapper {
                             name,
                             address,
                             poiCoord,
-                            travelTimes,
                             scoreResult.avg(),
                             scoreResult.max(),
                             scoreResult.score(),
@@ -85,16 +81,7 @@ public class PlaceMapper {
         for (ParticipantTravelTime ptt : originalTimes) {
             Double recalcTime =
                     transitClient.getTravelTimeSeconds(ptt.participantCoordinate(), poiCoord);
-
-            if (recalcTime == null) {
-                log.warn(
-                        "POI 기준 이동시간 재계산 실패 → 원래 값 사용: participant={}, original={}",
-                        ptt.participantCoordinate(),
-                        ptt.travelTimeSeconds());
-                times.add(ptt.travelTimeSeconds());
-            } else {
-                times.add(recalcTime);
-            }
+            times.add(recalcTime != null ? recalcTime : ptt.travelTimeSeconds());
         }
 
         return times;
@@ -110,21 +97,13 @@ public class PlaceMapper {
             String name,
             String address,
             Coordinate coordinate,
-            List<Double> travelTimesSeconds,
             double avgTravelTime,
             double maxTravelTime,
             double score,
             int rank) {
         public MatchedPlace withRank(int rank) {
             return new MatchedPlace(
-                    name,
-                    address,
-                    coordinate,
-                    travelTimesSeconds,
-                    avgTravelTime,
-                    maxTravelTime,
-                    score,
-                    rank);
+                    name, address, coordinate, avgTravelTime, maxTravelTime, score, rank);
         }
     }
 }

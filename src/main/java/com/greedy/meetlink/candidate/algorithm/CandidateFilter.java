@@ -10,15 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /** 후보 좌표 필터링 (1차: 거리 기반 / 2차: 이동시간 기반) */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CandidateFilter {
-
     private static final double DISTANCE_THRESHOLD_FACTOR = 1.2;
     private static final double MAX_TRAVEL_TIME_SECONDS = 3600.0; // 60분
     private static final int SAMPLE_PARTICIPANT_COUNT = 3;
@@ -53,7 +50,7 @@ public class CandidateFilter {
         for (Coordinate candidate : candidates) {
             Map<Coordinate, Double> travelTimeCache = new HashMap<>();
 
-            if (isFailedOnSample(candidate, participants, sampleSet, travelTimeCache)) {
+            if (isFailedOnSample(candidate, sampleSet, travelTimeCache)) {
                 continue;
             }
 
@@ -72,10 +69,6 @@ public class CandidateFilter {
         return result;
     }
 
-    // -------------------------------------------------------------------------
-    // private helpers
-    // -------------------------------------------------------------------------
-
     /** 기하중심에서 가장 먼 순으로 샘플 참여자 선택 */
     private Set<Coordinate> selectSampleParticipants(
             List<Coordinate> participants, Coordinate center) {
@@ -87,23 +80,11 @@ public class CandidateFilter {
 
     /** 샘플 참여자 검증 — 실패 시 true 반환 */
     private boolean isFailedOnSample(
-            Coordinate candidate,
-            List<Coordinate> participants,
-            Set<Coordinate> sampleSet,
-            Map<Coordinate, Double> cache) {
+            Coordinate candidate, Set<Coordinate> sampleSet, Map<Coordinate, Double> cache) {
 
-        for (Coordinate p : participants) {
-            if (!sampleSet.contains(p)) continue;
-
-            Double travelTime = callTransit(p, candidate);
-            if (isInvalidTravelTime(travelTime)) {
-                log.debug(
-                        "샘플 필터 탈락: candidate={}, participant={}, time={}",
-                        candidate,
-                        p,
-                        travelTime);
-                return true;
-            }
+        for (Coordinate p : sampleSet) {
+            Double travelTime = transitClient.getTravelTimeSeconds(p, candidate);
+            if (isInvalidTravelTime(travelTime)) return true;
             cache.put(p, travelTime);
         }
         return false;
@@ -118,15 +99,8 @@ public class CandidateFilter {
         for (Coordinate p : participants) {
             if (sampleSet.contains(p)) continue;
 
-            Double travelTime = callTransit(p, candidate);
-            if (isInvalidTravelTime(travelTime)) {
-                log.warn(
-                        "나머지 참여자 필터 탈락: candidate={}, participant={}, time={}",
-                        candidate,
-                        p,
-                        travelTime);
-                return true;
-            }
+            Double travelTime = transitClient.getTravelTimeSeconds(p, candidate);
+            if (isInvalidTravelTime(travelTime)) return true;
             cache.put(p, travelTime);
         }
         return false;
@@ -136,14 +110,6 @@ public class CandidateFilter {
     private boolean isInvalidTravelTime(Double travelTime) {
         return travelTime == null || travelTime > MAX_TRAVEL_TIME_SECONDS;
     }
-
-    private Double callTransit(Coordinate origin, Coordinate destination) {
-        return transitClient.getTravelTimeSeconds(origin, destination);
-    }
-
-    // -------------------------------------------------------------------------
-    // result types
-    // -------------------------------------------------------------------------
 
     public record FilteredCandidate(
             Coordinate coordinate, List<ParticipantTravelTime> participantTravelTimes) {}

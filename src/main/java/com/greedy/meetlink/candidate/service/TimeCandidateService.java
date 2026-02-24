@@ -9,6 +9,8 @@ import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
+import com.greedy.meetlink.result.entity.MeetingResult;
+import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,6 +32,7 @@ public class TimeCandidateService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingRepository meetingRepository;
+    private final MeetingResultRepository meetingResultRepository;
 
     @Transactional
     public List<TimeCandidateResponse> calculate(String code) {
@@ -54,6 +57,7 @@ public class TimeCandidateService {
         List<TimeCandidate> candidates = buildCandidates(rows, meeting);
 
         timeCandidateRepository.saveAll(candidates);
+        updateMeetingResult(meeting, candidates);
 
         return candidates.stream().map(TimeCandidateResponse::from).toList();
     }
@@ -63,6 +67,14 @@ public class TimeCandidateService {
         return timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code).stream()
                 .map(TimeCandidateResponse::from)
                 .toList();
+    }
+
+    private void updateMeetingResult(Meeting meeting, List<TimeCandidate> candidates) {
+        MeetingResult result = meetingResultRepository.findByMeeting(meeting).orElseThrow();
+        candidates.stream()
+                .filter(c -> c.getRank() == 1)
+                .findFirst()
+                .ifPresent(result::updateTimeCandidate);
     }
 
     private boolean isCalculationRequired(Meeting meeting) {

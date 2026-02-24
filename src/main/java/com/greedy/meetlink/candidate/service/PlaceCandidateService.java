@@ -124,16 +124,15 @@ public class PlaceCandidateService {
                 matchedPlaces.stream()
                         .map(
                                 mp ->
-                                        PlaceCandidate.builder()
-                                                .meeting(meeting)
-                                                .name(mp.name())
-                                                .address(mp.address())
-                                                .latitude(mp.coordinate().latitude())
-                                                .longitude(mp.coordinate().longitude())
-                                                .avgTravelTime(mp.avgTravelTime())
-                                                .maxTravelTime(mp.maxTravelTime())
-                                                .rank(mp.rank())
-                                                .build())
+                                        PlaceCandidate.create(
+                                                meeting,
+                                                mp.name(),
+                                                mp.address(),
+                                                mp.coordinate().latitude(),
+                                                mp.coordinate().longitude(),
+                                                mp.avgTravelTime(),
+                                                mp.maxTravelTime(),
+                                                mp.rank()))
                         .toList();
         return placeCandidateRepository.saveAll(candidates);
     }

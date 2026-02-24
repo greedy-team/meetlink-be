@@ -67,4 +67,25 @@ public class PlaceCandidate extends BaseEntity {
         this.maxTravelTime = maxTravelTime;
         this.rank = rank;
     }
+
+    public static PlaceCandidate create(
+            Meeting meeting,
+            String name,
+            String address,
+            double latitude,
+            double longitude,
+            double avgTravelTime,
+            double maxTravelTime,
+            int rank) {
+        return PlaceCandidate.builder()
+                .meeting(meeting)
+                .name(name)
+                .address(address)
+                .latitude(latitude)
+                .longitude(longitude)
+                .avgTravelTime(avgTravelTime)
+                .maxTravelTime(maxTravelTime)
+                .rank(rank)
+                .build();
+    }
 }

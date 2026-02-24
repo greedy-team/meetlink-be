@@ -45,6 +45,10 @@ public class MeetingResult extends BaseEntity {
         return MeetingResult.builder().meeting(meeting).build();
     }
 
+    public void updateTimeCandidate(TimeCandidate timeCandidate) {
+        this.timeCandidate = timeCandidate;
+    }
+
     public void updatePlaceCandidate(PlaceCandidate placeCandidate) {
         this.placeCandidate = placeCandidate;
     }

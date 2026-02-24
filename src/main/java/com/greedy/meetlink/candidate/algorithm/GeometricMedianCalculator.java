@@ -3,9 +3,11 @@ package com.greedy.meetlink.candidate.algorithm;
 import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.exception.EmptyCoordinatesException;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /** Weiszfeld 알고리즘으로 기하중심(Geometric Median) 계산 */
+@Slf4j
 @Component
 public class GeometricMedianCalculator {
 
@@ -32,6 +34,7 @@ public class GeometricMedianCalculator {
             current = next;
         }
 
+        log.warn("Geometric median 수렴 실패: {}회 반복 후 근사값 반환", MAX_ITERATIONS);
         return current;
     }
 

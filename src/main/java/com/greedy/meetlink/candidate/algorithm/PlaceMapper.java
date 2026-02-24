@@ -12,9 +12,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /** 후보 좌표를 카카오 POI 검색으로 실제 장소와 매칭하고, POI 좌표 기준으로 이동시간을 재계산하여 최종 순위를 확정 */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class PlaceMapper {
@@ -81,6 +83,9 @@ public class PlaceMapper {
         for (ParticipantTravelTime ptt : originalTimes) {
             Double recalcTime =
                     transitClient.getTravelTimeSeconds(ptt.participantCoordinate(), poiCoord);
+            if (recalcTime == null) {
+                log.warn("POI 이동시간 재계산 실패, 기존값 사용: poi={}", poiCoord);
+            }
             times.add(recalcTime != null ? recalcTime : ptt.travelTimeSeconds());
         }
 

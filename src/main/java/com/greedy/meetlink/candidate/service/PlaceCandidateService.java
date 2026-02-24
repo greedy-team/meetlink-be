@@ -115,7 +115,7 @@ public class PlaceCandidateService {
                 candidateFilter.filterByDistance(rawCandidates, coordinates, realDMax);
 
         List<CandidateFilter.FilteredCandidate> timeFiltered =
-                candidateFilter.filterByTravelTime(distanceFiltered, coordinates, center);
+                candidateFilter.filterByTravelTime(distanceFiltered, coordinates);
 
         List<CandidateFilter.FilteredCandidate> scored =
                 candidateScorer.selectTop(timeFiltered, TOP_K);

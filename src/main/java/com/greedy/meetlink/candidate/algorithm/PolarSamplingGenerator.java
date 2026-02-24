@@ -15,6 +15,7 @@ public class PolarSamplingGenerator {
 
     private static final int MIN_CANDIDATES = 20;
     private static final int MAX_CANDIDATES = 50;
+    private static final int TARGET_CANDIDATES = 30;
 
     public List<Coordinate> generate(Coordinate center, List<Coordinate> coordinates) {
         double radius = calculateRadius(center, coordinates);
@@ -44,14 +45,20 @@ public class PolarSamplingGenerator {
 
     private int calculateAngleStep() {
         int radiusDivisions = RADIUS_RATIOS.length;
+        int bestStep = 1;
+        int bestDiff = Integer.MAX_VALUE;
 
-        for (int step = 360; step >= 1; step--) {
+        for (int step = 1; step <= 360; step++) {
+            if (360 % step != 0) continue; // 균등 각도 분할을 위해 360의 약수만 허용
             int count = radiusDivisions * (360 / step) + 1;
-            if (count >= MIN_CANDIDATES && count <= MAX_CANDIDATES) {
-                return step;
+            if (count < MIN_CANDIDATES || count > MAX_CANDIDATES) continue;
+            int diff = Math.abs(count - TARGET_CANDIDATES);
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                bestStep = step;
             }
         }
 
-        return 1;
+        return bestStep;
     }
 }

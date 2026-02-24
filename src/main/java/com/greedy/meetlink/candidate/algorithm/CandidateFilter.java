@@ -3,11 +3,7 @@ package com.greedy.meetlink.candidate.algorithm;
 import com.greedy.meetlink.client.TransitClient;
 import com.greedy.meetlink.common.Coordinate;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,8 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CandidateFilter {
     private static final double DISTANCE_THRESHOLD_FACTOR = 1.2;
-    private static final double MAX_TRAVEL_TIME_SECONDS = 3600.0; // 60분
-    private static final int SAMPLE_PARTICIPANT_COUNT = 3;
 
     private final TransitClient transitClient;
 
@@ -36,79 +30,31 @@ public class CandidateFilter {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 2차 필터링: 이동 시간 기반 (MOTIS API 호출)
-     *
-     * <p>API 호출 최소화를 위해 기하중심에서 가장 먼 참여자(샘플)를 먼저 검증하고, 통과 시 나머지 참여자를 검증한다.
-     */
+    /** 2차 필터링: 이동 시간 기반 (MOTIS API 호출) — 이동시간 계산 실패 시 해당 후보 제외 */
     public List<FilteredCandidate> filterByTravelTime(
-            List<Coordinate> candidates, List<Coordinate> participants, Coordinate center) {
+            List<Coordinate> candidates, List<Coordinate> participants) {
 
-        Set<Coordinate> sampleSet = selectSampleParticipants(participants, center);
         List<FilteredCandidate> result = new ArrayList<>();
 
         for (Coordinate candidate : candidates) {
-            Map<Coordinate, Double> travelTimeCache = new HashMap<>();
-
-            if (failsSampleCheck(candidate, sampleSet, travelTimeCache)) {
-                continue;
+            List<ParticipantTravelTime> travelTimes = collectTravelTimes(candidate, participants);
+            if (travelTimes != null) {
+                result.add(new FilteredCandidate(candidate, travelTimes));
             }
-
-            if (failsRemainderCheck(candidate, participants, sampleSet, travelTimeCache)) {
-                continue;
-            }
-
-            List<ParticipantTravelTime> travelTimes =
-                    participants.stream()
-                            .map(p -> new ParticipantTravelTime(p, travelTimeCache.get(p)))
-                            .collect(Collectors.toList());
-
-            result.add(new FilteredCandidate(candidate, travelTimes));
         }
 
         return result;
     }
 
-    /** 기하중심에서 가장 먼 순으로 샘플 참여자 선택 */
-    private Set<Coordinate> selectSampleParticipants(
-            List<Coordinate> participants, Coordinate center) {
-        return participants.stream()
-                .sorted(Comparator.comparingDouble(center::distanceTo).reversed())
-                .limit(Math.min(SAMPLE_PARTICIPANT_COUNT, participants.size()))
-                .collect(Collectors.toSet());
-    }
-
-    /** 샘플 참여자 검증 — 실패 시 true 반환 */
-    private boolean failsSampleCheck(
-            Coordinate candidate, Set<Coordinate> sampleSet, Map<Coordinate, Double> cache) {
-
-        for (Coordinate p : sampleSet) {
-            Double travelTime = transitClient.getTravelTimeSeconds(p, candidate);
-            if (isInvalidTravelTime(travelTime)) return true;
-            cache.put(p, travelTime);
-        }
-        return false;
-    }
-
-    private boolean failsRemainderCheck(
-            Coordinate candidate,
-            List<Coordinate> participants,
-            Set<Coordinate> sampleSet,
-            Map<Coordinate, Double> cache) {
-
+    private List<ParticipantTravelTime> collectTravelTimes(
+            Coordinate candidate, List<Coordinate> participants) {
+        List<ParticipantTravelTime> times = new ArrayList<>();
         for (Coordinate p : participants) {
-            if (sampleSet.contains(p)) continue;
-
             Double travelTime = transitClient.getTravelTimeSeconds(p, candidate);
-            if (isInvalidTravelTime(travelTime)) return true;
-            cache.put(p, travelTime);
+            if (travelTime == null) return null;
+            times.add(new ParticipantTravelTime(p, travelTime));
         }
-        return false;
-    }
-
-    /** 이동시간이 유효하지 않은 경우: null이거나 3600초(60분) 초과 */
-    private boolean isInvalidTravelTime(Double travelTime) {
-        return travelTime == null || travelTime > MAX_TRAVEL_TIME_SECONDS;
+        return times;
     }
 
     public record FilteredCandidate(

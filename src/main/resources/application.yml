@@ -20,5 +20,7 @@ server:
 cors:
   allowed-origins: >
     http://localhost:5173
+motis:
+  base-url: http://motis:3000
 kakao:
   api-key: ${KAKAO_API_KEY}

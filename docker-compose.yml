@@ -15,11 +15,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  motis:
+    image: ghcr.io/motis-project/motis:latest
+    container_name: meetlink-motis
+    restart: always
+    volumes:
+      - ./motis-data:/data
+    command: /motis server
   backend:
     image: ${APP_IMAGE}
     depends_on:
       postgres:
         condition: service_healthy
+      motis:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE}
       DB_HOST: ${DB_HOST}
@@ -27,6 +36,7 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      KAKAO_API_KEY: ${KAKAO_API_KEY}
     profiles: ["deploy"]
   nginx:
     container_name: meetlink-nginx

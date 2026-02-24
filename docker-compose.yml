@@ -20,7 +20,7 @@ services:
     container_name: meetlink-motis
     restart: always
     volumes:
-      - ./motis-data:/data
+      - ${MOTIS_DATA_PATH}:/data
     command: /motis server
   backend:
     image: ${APP_IMAGE}

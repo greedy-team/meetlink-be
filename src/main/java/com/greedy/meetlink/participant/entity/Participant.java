@@ -29,7 +29,6 @@ import lombok.NoArgsConstructor;
             @UniqueConstraint(columnNames = {"meeting_id", "nickname"})
         })
 public class Participant extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

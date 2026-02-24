@@ -16,7 +16,7 @@ public class CandidateScorer {
 
     private final ScoreCalculator scoreCalculator;
 
-    public List<FilteredCandidate> score(List<FilteredCandidate> candidates, int topK) {
+    public List<FilteredCandidate> selectTop(List<FilteredCandidate> candidates, int topK) {
         return candidates.stream()
                 .sorted(Comparator.comparingDouble(this::calculateScore))
                 .limit(topK)

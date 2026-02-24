@@ -36,7 +36,7 @@ public class PolarSamplingGenerator {
         return candidates;
     }
 
-    public double calculateRadius(Coordinate center, List<Coordinate> coordinates) {
+    private double calculateRadius(Coordinate center, List<Coordinate> coordinates) {
         double dMax = coordinates.stream().mapToDouble(center::distanceTo).max().orElse(0.0);
 
         return Math.max(dMax * ALPHA, R_MIN_KM);

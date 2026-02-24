@@ -57,7 +57,7 @@ public class PlaceCandidateService {
         Map<Long, LocationAvailability> locationMap = loadLocationMap(participants);
         validateLocations(participants, locationMap);
 
-        List<MatchedPlace> matchedPlaces = runAlgorithm(participants, locationMap);
+        List<MatchedPlace> matchedPlaces = computeRecommendedPlaces(participants, locationMap);
 
         if (matchedPlaces.isEmpty()) {
             throw new IllegalStateException(
@@ -65,7 +65,7 @@ public class PlaceCandidateService {
         }
 
         List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
-        linkToMeetingResult(meeting, savedCandidates.get(0));
+        updateMeetingResult(meeting, savedCandidates.get(0));
 
         return savedCandidates.stream().map(PlaceCandidateResponse::from).toList();
     }
@@ -99,7 +99,7 @@ public class PlaceCandidateService {
         }
     }
 
-    private List<MatchedPlace> runAlgorithm(
+    private List<MatchedPlace> computeRecommendedPlaces(
             List<Participant> participants, Map<Long, LocationAvailability> locationMap) {
         List<Coordinate> coordinates = toCoordinates(participants, locationMap);
 
@@ -113,7 +113,8 @@ public class PlaceCandidateService {
         List<CandidateFilter.FilteredCandidate> timeFiltered =
                 candidateFilter.filterByTravelTime(distanceFiltered, coordinates, center);
 
-        List<CandidateFilter.FilteredCandidate> scored = candidateScorer.score(timeFiltered, TOP_K);
+        List<CandidateFilter.FilteredCandidate> scored =
+                candidateScorer.selectTop(timeFiltered, TOP_K);
 
         return placeMapper.match(scored);
     }
@@ -137,13 +138,9 @@ public class PlaceCandidateService {
         return placeCandidateRepository.saveAll(candidates);
     }
 
-    private void linkToMeetingResult(Meeting meeting, PlaceCandidate topCandidate) {
-        MeetingResult meetingResult =
-                meetingResultRepository
-                        .findByMeeting(meeting)
-                        .orElseGet(() -> meetingResultRepository.save(new MeetingResult(meeting)));
-
-        meetingResult.updatePlaceCandidate(topCandidate);
+    private void updateMeetingResult(Meeting meeting, PlaceCandidate topCandidate) {
+        MeetingResult result = meetingResultRepository.findByMeeting(meeting).orElseThrow();
+        result.updatePlaceCandidate(topCandidate);
     }
 
     private List<Coordinate> toCoordinates(

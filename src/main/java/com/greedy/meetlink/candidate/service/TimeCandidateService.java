@@ -127,14 +127,13 @@ public class TimeCandidateService {
                 candidateEnd = candidateEnd.plusMinutes(SLOT_MINUTES);
             } else {
                 merged.add(
-                        TimeCandidate.builder()
-                                .meeting(meeting)
-                                .date(candidateDate)
-                                .dayOfWeek(candidateDayOfWeek)
-                                .startTime(candidateStart)
-                                .endTime(candidateEnd)
-                                .availableCount(candidateAvailableCount)
-                                .build());
+                        TimeCandidate.create(
+                                meeting,
+                                candidateDate,
+                                candidateDayOfWeek,
+                                candidateStart,
+                                candidateEnd,
+                                candidateAvailableCount));
 
                 candidateDate = row.getDate();
                 candidateDayOfWeek = row.getDayOfWeek();
@@ -145,14 +144,13 @@ public class TimeCandidateService {
         }
 
         merged.add(
-                TimeCandidate.builder()
-                        .meeting(meeting)
-                        .date(candidateDate)
-                        .dayOfWeek(candidateDayOfWeek)
-                        .startTime(candidateStart)
-                        .endTime(candidateEnd)
-                        .availableCount(candidateAvailableCount)
-                        .build());
+                TimeCandidate.create(
+                        meeting,
+                        candidateDate,
+                        candidateDayOfWeek,
+                        candidateStart,
+                        candidateEnd,
+                        candidateAvailableCount));
 
         return merged;
     }

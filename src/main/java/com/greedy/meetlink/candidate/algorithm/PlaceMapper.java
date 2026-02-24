@@ -43,7 +43,7 @@ public class PlaceMapper {
                 address =
                         String.format("상세 주소 없음 (%.4f, %.4f)", coord.latitude(), coord.longitude());
                 poiCoord = coord;
-                travelTimes = toTimeList(originalTimes);
+                travelTimes = extractTravelTimes(originalTimes);
             } else {
                 PoiPlace place = places.get(0);
                 name = place.name();
@@ -87,7 +87,7 @@ public class PlaceMapper {
         return times;
     }
 
-    private List<Double> toTimeList(List<ParticipantTravelTime> participantTravelTimes) {
+    private List<Double> extractTravelTimes(List<ParticipantTravelTime> participantTravelTimes) {
         return participantTravelTimes.stream()
                 .map(ParticipantTravelTime::travelTimeSeconds)
                 .collect(Collectors.toList());

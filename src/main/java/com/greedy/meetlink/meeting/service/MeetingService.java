@@ -11,6 +11,8 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.meeting.util.MeetingCodeGenerator;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
+import com.greedy.meetlink.result.entity.MeetingResult;
+import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MeetingService {
     private static final int MAX_CODE_GENERATION_ATTEMPTS = 10;
     private final MeetingRepository meetingRepository;
+    private final MeetingResultRepository meetingResultRepository;
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final TimeCandidateRepository timeCandidateRepository;
     private final ParticipantRepository participantRepository;
@@ -48,6 +51,7 @@ public class MeetingService {
                         request.getTimeRangeEnd());
 
         Meeting savedMeeting = meetingRepository.save(meeting);
+        meetingResultRepository.save(MeetingResult.create(savedMeeting));
 
         return MeetingResponse.from(savedMeeting);
     }

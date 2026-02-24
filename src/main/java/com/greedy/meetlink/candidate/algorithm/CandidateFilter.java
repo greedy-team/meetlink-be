@@ -50,11 +50,11 @@ public class CandidateFilter {
         for (Coordinate candidate : candidates) {
             Map<Coordinate, Double> travelTimeCache = new HashMap<>();
 
-            if (isFailedOnSample(candidate, sampleSet, travelTimeCache)) {
+            if (failsSampleCheck(candidate, sampleSet, travelTimeCache)) {
                 continue;
             }
 
-            if (isFailedOnRemainder(candidate, participants, sampleSet, travelTimeCache)) {
+            if (failsRemainderCheck(candidate, participants, sampleSet, travelTimeCache)) {
                 continue;
             }
 
@@ -79,7 +79,7 @@ public class CandidateFilter {
     }
 
     /** 샘플 참여자 검증 — 실패 시 true 반환 */
-    private boolean isFailedOnSample(
+    private boolean failsSampleCheck(
             Coordinate candidate, Set<Coordinate> sampleSet, Map<Coordinate, Double> cache) {
 
         for (Coordinate p : sampleSet) {
@@ -90,7 +90,7 @@ public class CandidateFilter {
         return false;
     }
 
-    private boolean isFailedOnRemainder(
+    private boolean failsRemainderCheck(
             Coordinate candidate,
             List<Coordinate> participants,
             Set<Coordinate> sampleSet,

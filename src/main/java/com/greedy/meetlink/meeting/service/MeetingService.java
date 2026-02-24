@@ -80,7 +80,7 @@ public class MeetingService {
                 timeAvailabilityRepository.deleteFromRangeEnd(meeting, meeting.getTimeRangeEnd());
             }
             participantRepository.resetTimeSubmittedIfNoAvailability(meeting);
-            timeCandidateRepository.deleteByMeetingCode(code);
+            timeCandidateRepository.deleteByMeeting(meeting);
         }
 
         return MeetingResponse.from(meeting);

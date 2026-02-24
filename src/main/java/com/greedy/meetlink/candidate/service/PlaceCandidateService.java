@@ -12,9 +12,7 @@ import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
 import com.greedy.meetlink.common.Coordinate;
-import com.greedy.meetlink.common.exception.InsufficientParticipantsException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
-import com.greedy.meetlink.common.exception.MissingParticipantLocationException;
 import com.greedy.meetlink.common.exception.PlaceRecommendationFailedException;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
@@ -53,12 +51,11 @@ public class PlaceCandidateService {
 
         List<Participant> participants = participantRepository.findByMeeting(meeting);
 
-        if (participants.size() < 2) {
-            throw new InsufficientParticipantsException();
+        if (!isCalculationRequired(meeting, participants)) {
+            return toResponses(meeting);
         }
 
         Map<Long, LocationAvailability> locationMap = loadLocationMap(participants);
-        validateLocations(participants, locationMap);
 
         List<MatchedPlace> matchedPlaces = computeRecommendedPlaces(participants, locationMap);
 
@@ -66,8 +63,9 @@ public class PlaceCandidateService {
             throw new PlaceRecommendationFailedException();
         }
 
+        placeCandidateRepository.deleteByMeeting(meeting);
         List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
-        updateMeetingResult(meeting, savedCandidates.get(0));
+        updateMeetingResult(meeting, savedCandidates.getFirst());
 
         return savedCandidates.stream().map(PlaceCandidateResponse::from).toList();
     }
@@ -76,26 +74,41 @@ public class PlaceCandidateService {
     public List<PlaceCandidateResponse> get(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+        return toResponses(meeting);
+    }
 
-        List<PlaceCandidate> candidates =
-                placeCandidateRepository.findByMeetingOrderByRankAsc(meeting);
+    private List<PlaceCandidateResponse> toResponses(Meeting meeting) {
+        return placeCandidateRepository.findByMeetingOrderByRankAsc(meeting).stream()
+                .map(PlaceCandidateResponse::from)
+                .toList();
+    }
 
-        return candidates.stream().map(PlaceCandidateResponse::from).toList();
+    private boolean isCalculationRequired(Meeting meeting, List<Participant> participants) {
+        if (participants.size() < 2) return false;
+
+        List<Long> submittedIds =
+                locationAvailabilityRepository.findSubmittedParticipantIds(meeting);
+        if (submittedIds.size() != participants.size()) return false;
+
+        return participantRepository
+                .findLastLocationSubmission(meeting)
+                .map(
+                        lastSubmission ->
+                                placeCandidateRepository
+                                        .findLastCalculatedAt(meeting)
+                                        .map(lastSubmission::isAfter)
+                                        .orElse(true))
+                .orElse(false);
+    }
+
+    private void updateMeetingResult(Meeting meeting, PlaceCandidate topCandidate) {
+        MeetingResult result = meetingResultRepository.findByMeeting(meeting).orElseThrow();
+        result.updatePlaceCandidate(topCandidate);
     }
 
     private Map<Long, LocationAvailability> loadLocationMap(List<Participant> participants) {
         return locationAvailabilityRepository.findByParticipantIn(participants).stream()
                 .collect(Collectors.toMap(la -> la.getParticipant().getId(), la -> la));
-    }
-
-    private void validateLocations(
-            List<Participant> participants, Map<Long, LocationAvailability> locationMap) {
-        boolean hasMissing =
-                participants.stream().anyMatch(p -> !locationMap.containsKey(p.getId()));
-
-        if (hasMissing) {
-            throw new MissingParticipantLocationException();
-        }
     }
 
     private List<MatchedPlace> computeRecommendedPlaces(
@@ -134,11 +147,6 @@ public class PlaceCandidateService {
                                                 mp.rank()))
                         .toList();
         return placeCandidateRepository.saveAll(candidates);
-    }
-
-    private void updateMeetingResult(Meeting meeting, PlaceCandidate topCandidate) {
-        MeetingResult result = meetingResultRepository.findByMeeting(meeting).orElseThrow();
-        result.updatePlaceCandidate(topCandidate);
     }
 
     private List<Coordinate> toCoordinates(

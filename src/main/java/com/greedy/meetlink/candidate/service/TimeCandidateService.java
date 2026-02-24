@@ -39,19 +39,19 @@ public class TimeCandidateService {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
-        if (!isCalculationRequired(meeting)) return list(code);
+        if (!isCalculationRequired(meeting)) return toResponses(meeting);
 
         List<TimeAvailabilityHeatmapRow> rows =
                 timeAvailabilityRepository.findHeatmapByMeetingCode(
                         code, meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
 
         if (rows.isEmpty()) {
-            timeCandidateRepository.deleteByMeetingCode(code);
+            timeCandidateRepository.deleteByMeeting(meeting);
             return List.of();
         }
 
         // 기존 후보 삭제
-        timeCandidateRepository.deleteByMeetingCode(code);
+        timeCandidateRepository.deleteByMeeting(meeting);
 
         // 상위 랭킹 후보 생성 후 연속된 슬롯 합침
         List<TimeCandidate> candidates = buildCandidates(rows, meeting);
@@ -64,7 +64,13 @@ public class TimeCandidateService {
 
     @Transactional(readOnly = true)
     public List<TimeCandidateResponse> list(String code) {
-        return timeCandidateRepository.findByMeeting_CodeOrderByRankAsc(code).stream()
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+        return toResponses(meeting);
+    }
+
+    private List<TimeCandidateResponse> toResponses(Meeting meeting) {
+        return timeCandidateRepository.findByMeetingOrderByRankAsc(meeting).stream()
                 .map(TimeCandidateResponse::from)
                 .toList();
     }
@@ -84,7 +90,7 @@ public class TimeCandidateService {
         if (lastSubmission.isEmpty()) return false;
 
         Optional<LocalDateTime> lastCalculated =
-                timeCandidateRepository.findLastCalculatedAt(meeting.getCode());
+                timeCandidateRepository.findLastCalculatedAt(meeting);
 
         if (lastCalculated.isEmpty()) return true;
 

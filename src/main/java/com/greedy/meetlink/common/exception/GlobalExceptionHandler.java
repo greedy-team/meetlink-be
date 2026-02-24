@@ -89,20 +89,6 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
     }
 
-    @ExceptionHandler(InsufficientParticipantsException.class)
-    public ResponseEntity<ApiResponse<?>> handleInsufficientParticipantsException(
-            InsufficientParticipantsException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
-    }
-
-    @ExceptionHandler(MissingParticipantLocationException.class)
-    public ResponseEntity<ApiResponse<?>> handleMissingParticipantLocationException(
-            MissingParticipantLocationException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
-    }
-
     @ExceptionHandler(PlaceRecommendationFailedException.class)
     public ResponseEntity<ApiResponse<?>> handlePlaceRecommendationFailedException(
             PlaceRecommendationFailedException e) {

@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
+import com.greedy.meetlink.config.MockClientConfig;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
+import com.greedy.meetlink.result.entity.MeetingResult;
+import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -17,17 +20,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
+@Import(MockClientConfig.class)
 class TimeCandidateServiceTest {
     @Autowired private TimeCandidateService timeCandidateService;
     @Autowired private TimeAvailabilityRepository timeAvailabilityRepository;
     @Autowired private ParticipantRepository participantRepository;
     @Autowired private MeetingRepository meetingRepository;
+    @Autowired private MeetingResultRepository meetingResultRepository;
 
     @Test
     @DisplayName("후보 시간과 히트맵이 DB 기반으로 정상 추출되어야 한다.")
@@ -37,7 +43,15 @@ class TimeCandidateServiceTest {
         LocalDate testDate = LocalDate.of(2026, 2, 24);
 
         Meeting meeting =
-                meetingRepository.save(Meeting.builder().name("테스트 모임").code(meetingCode).build());
+                meetingRepository.save(
+                        Meeting.builder()
+                                .name("테스트 모임")
+                                .code(meetingCode)
+                                .enableTimeRecommendation(true)
+                                .timeRangeStart(LocalTime.of(9, 0))
+                                .timeRangeEnd(LocalTime.of(12, 0))
+                                .build());
+        meetingResultRepository.save(MeetingResult.create(meeting));
 
         Participant p1 =
                 participantRepository.save(

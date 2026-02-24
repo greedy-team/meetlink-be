@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,4 +35,21 @@ public class MeetingResult extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_candidate_id")
     private PlaceCandidate placeCandidate;
+
+    @Builder
+    private MeetingResult(Meeting meeting) {
+        this.meeting = meeting;
+    }
+
+    public static MeetingResult create(Meeting meeting) {
+        return MeetingResult.builder().meeting(meeting).build();
+    }
+
+    public void updateTimeCandidate(TimeCandidate timeCandidate) {
+        this.timeCandidate = timeCandidate;
+    }
+
+    public void updatePlaceCandidate(PlaceCandidate placeCandidate) {
+        this.placeCandidate = placeCandidate;
+    }
 }

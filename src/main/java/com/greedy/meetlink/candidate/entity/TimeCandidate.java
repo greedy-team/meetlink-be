@@ -61,6 +61,23 @@ public class TimeCandidate extends BaseEntity {
         this.rank = 0;
     }
 
+    public static TimeCandidate create(
+            Meeting meeting,
+            LocalDate date,
+            Integer dayOfWeek,
+            LocalTime startTime,
+            LocalTime endTime,
+            int availableCount) {
+        return TimeCandidate.builder()
+                .meeting(meeting)
+                .date(date)
+                .dayOfWeek(dayOfWeek)
+                .startTime(startTime)
+                .endTime(endTime)
+                .availableCount(availableCount)
+                .build();
+    }
+
     public void assignRank(int rank) {
         this.rank = rank;
     }

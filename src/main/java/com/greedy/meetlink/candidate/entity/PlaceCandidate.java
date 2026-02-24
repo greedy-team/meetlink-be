@@ -1,12 +1,9 @@
 package com.greedy.meetlink.candidate.entity;
 
-import com.greedy.meetlink.candidate.PlaceCalculationType;
 import com.greedy.meetlink.common.entity.BaseEntity;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -47,10 +45,48 @@ public class PlaceCandidate extends BaseEntity {
     @Column(nullable = false)
     private double maxTravelTime;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PlaceCalculationType calculationType;
-
     @Column(nullable = false)
     private int rank;
+
+    @Builder
+    private PlaceCandidate(
+            Meeting meeting,
+            String name,
+            String address,
+            double latitude,
+            double longitude,
+            double avgTravelTime,
+            double maxTravelTime) {
+        this.meeting = meeting;
+        this.name = name;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.avgTravelTime = avgTravelTime;
+        this.maxTravelTime = maxTravelTime;
+        this.rank = 0;
+    }
+
+    public static PlaceCandidate create(
+            Meeting meeting,
+            String name,
+            String address,
+            double latitude,
+            double longitude,
+            double avgTravelTime,
+            double maxTravelTime) {
+        return PlaceCandidate.builder()
+                .meeting(meeting)
+                .name(name)
+                .address(address)
+                .latitude(latitude)
+                .longitude(longitude)
+                .avgTravelTime(avgTravelTime)
+                .maxTravelTime(maxTravelTime)
+                .build();
+    }
+
+    public void assignRank(int rank) {
+        this.rank = rank;
+    }
 }

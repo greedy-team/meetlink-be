@@ -25,6 +25,14 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     """)
     Optional<LocalDateTime> findLastTimeSubmission(String code);
 
+    @Query(
+            """
+        SELECT MAX(p.locationSubmittedAt)
+        FROM Participant p
+        WHERE p.meeting = :meeting
+    """)
+    Optional<LocalDateTime> findLastLocationSubmission(Meeting meeting);
+
     @Modifying
     @Query(
             """

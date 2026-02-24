@@ -56,8 +56,7 @@ public class PlaceCandidate extends BaseEntity {
             double latitude,
             double longitude,
             double avgTravelTime,
-            double maxTravelTime,
-            int rank) {
+            double maxTravelTime) {
         this.meeting = meeting;
         this.name = name;
         this.address = address;
@@ -65,7 +64,7 @@ public class PlaceCandidate extends BaseEntity {
         this.longitude = longitude;
         this.avgTravelTime = avgTravelTime;
         this.maxTravelTime = maxTravelTime;
-        this.rank = rank;
+        this.rank = 0;
     }
 
     public static PlaceCandidate create(
@@ -75,8 +74,7 @@ public class PlaceCandidate extends BaseEntity {
             double latitude,
             double longitude,
             double avgTravelTime,
-            double maxTravelTime,
-            int rank) {
+            double maxTravelTime) {
         return PlaceCandidate.builder()
                 .meeting(meeting)
                 .name(name)
@@ -85,7 +83,10 @@ public class PlaceCandidate extends BaseEntity {
                 .longitude(longitude)
                 .avgTravelTime(avgTravelTime)
                 .maxTravelTime(maxTravelTime)
-                .rank(rank)
                 .build();
+    }
+
+    public void assignRank(int rank) {
+        this.rank = rank;
     }
 }

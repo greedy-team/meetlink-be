@@ -73,7 +73,7 @@ public class PlaceCandidateService {
     }
 
     @Transactional(readOnly = true)
-    public List<PlaceCandidateResponse> get(String code) {
+    public List<PlaceCandidateResponse> list(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
         return toResponses(meeting);
@@ -152,9 +152,13 @@ public class PlaceCandidateService {
                                                 mp.coordinate().latitude(),
                                                 mp.coordinate().longitude(),
                                                 mp.avgTravelTime(),
-                                                mp.maxTravelTime(),
-                                                mp.rank()))
+                                                mp.maxTravelTime()))
                         .toList();
+
+        for (int i = 0; i < candidates.size(); i++) {
+            candidates.get(i).assignRank(i + 1);
+        }
+
         return placeCandidateRepository.saveAll(candidates);
     }
 }

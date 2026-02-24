@@ -3,11 +3,7 @@ package com.greedy.meetlink.candidate.algorithm;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
-/**
- * 이동 시간 기반 점수 계산기
- *
- * <p>score = W_AVG × avg + W_MAX × max + W_STDDEV × stddev (낮을수록 좋음)
- */
+/** 이동 시간 기반 점수 계산 score = W_AVG × avg + W_MAX × max + W_STDDEV × stddev (lower is better) */
 @Component
 public class ScoreCalculator {
     private static final double W_AVG = 0.4;

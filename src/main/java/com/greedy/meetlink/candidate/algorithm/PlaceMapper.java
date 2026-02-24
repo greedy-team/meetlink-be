@@ -70,14 +70,10 @@ public class PlaceMapper {
                             poiCoord,
                             scoreResult.avg(),
                             scoreResult.max(),
-                            scoreResult.score(),
-                            0));
+                            scoreResult.score()));
         }
 
         results.sort(Comparator.comparingDouble(MatchedPlace::score));
-        for (int i = 0; i < results.size(); i++) {
-            results.set(i, results.get(i).withRank(i + 1));
-        }
 
         return results;
     }
@@ -106,11 +102,5 @@ public class PlaceMapper {
             Coordinate coordinate,
             double avgTravelTime,
             double maxTravelTime,
-            double score,
-            int rank) {
-        public MatchedPlace withRank(int rank) {
-            return new MatchedPlace(
-                    name, address, coordinate, avgTravelTime, maxTravelTime, score, rank);
-        }
-    }
+            double score) {}
 }

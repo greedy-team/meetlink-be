@@ -4,7 +4,7 @@ spring:
       ddl-auto: update
 logging:
   level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
+    org.hibernate.SQL: info
+    org.hibernate.orm.jdbc.bind: debug
 motis:
   base-url: http://localhost:3000

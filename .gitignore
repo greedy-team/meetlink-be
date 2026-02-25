@@ -45,4 +45,5 @@ out/
 .DS_Store
 
 ### MOTIS ###
+config/motis/input/*
 motis-data/

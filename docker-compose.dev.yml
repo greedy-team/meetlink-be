@@ -1,12 +1,13 @@
 services:
   postgres:
-    container_name: meetlink-db-dev
+    container_name: postgres-dev
     ports:
       - "5432:5432"
   motis:
-    container_name: meetlink-motis-dev
+    container_name: motis-dev
   backend:
-    container_name: meetlink-be-dev
+    container_name: backend-dev
   nginx:
+    container_name: nginx-dev
     volumes:
-      - ./config/nginx.dev.conf:/etc/nginx/conf.d/default.conf
+      - ./config/nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf

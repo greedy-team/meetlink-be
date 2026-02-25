@@ -15,15 +15,23 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  motis-import:
+    image: ghcr.io/motis-project/motis:latest
+    profiles: ["import"]
+    volumes:
+      - /srv/meetlink/motis/input:/input
+      - /srv/meetlink/motis/config.yml:/config.yml
+      - motis-data:/data
+    command: /motis import
   motis:
     image: ghcr.io/motis-project/motis:latest
-    container_name: meetlink-motis
     restart: always
     volumes:
-      - ${MOTIS_DATA_PATH}:/data
+      - motis-data:/data
     command: /motis server
   backend:
     image: ${APP_IMAGE}
+    profiles: ["deploy"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,17 +45,16 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_API_KEY: ${KAKAO_API_KEY}
-    profiles: ["deploy"]
   nginx:
-    container_name: meetlink-nginx
     image: nginx:alpine
+    profiles: ["deploy"]
     restart: always
     ports:
       - "443:443"
     volumes:
-      - ${NGINX_CERTS_PATH}:/etc/nginx/certs
+      - /srv/meetlink/nginx/certs:/etc/nginx/certs
     depends_on:
       - backend
-    profiles: ["deploy"]
 volumes:
   postgres-data:
+  motis-data:

@@ -54,6 +54,11 @@ public class PlaceCandidateService {
             return toResponses(meeting);
         }
 
+        log.info(
+                "Place candidate calculation started: meeting={}, participants={}",
+                code,
+                participants.size());
+
         List<Coordinate> coordinates =
                 locationAvailabilityRepository.findByParticipantIn(participants).stream()
                         .map(la -> new Coordinate(la.getLatitude(), la.getLongitude()))
@@ -68,6 +73,11 @@ public class PlaceCandidateService {
         placeCandidateRepository.deleteByMeeting(meeting);
         List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
         updateMeetingResult(meeting, savedCandidates.getFirst());
+
+        log.info(
+                "Place candidate calculation completed: meeting={}, results={}",
+                code,
+                savedCandidates.size());
 
         return savedCandidates.stream().map(PlaceCandidateResponse::from).toList();
     }

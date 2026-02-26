@@ -24,3 +24,9 @@ motis:
   base-url: http://motis:3000
 kakao:
   api-key: ${KAKAO_API_KEY}
+sentry:
+  dsn: ${SENTRY_DSN}
+  environment: ${SPRING_PROFILE}
+  logs:
+    enabled: true
+  send-default-pii: true

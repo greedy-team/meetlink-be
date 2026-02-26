@@ -20,7 +20,7 @@ services:
     profiles: ["import"]
     volumes:
       - /srv/meetlink/motis/input:/input
-      - /srv/meetlink/motis/config.yml:/config.yml
+      - ./config/motis/config.yml:/config.yml
       - motis-data:/data
     command: /motis import
   motis:

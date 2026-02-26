@@ -1,0 +1,20 @@
+name: MOTIS Import (Manual)
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Select environment"
+        required: true
+        type: environment
+jobs:
+  import:
+    runs-on: [self-hosted, "${{ inputs.target }}"]
+    environment: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stop MOTIS
+        run: docker compose stop motis || true
+      - name: Run MOTIS Import
+        run: docker compose --profile import up motis-import
+      - name: Start MOTIS
+        run: docker compose start motis

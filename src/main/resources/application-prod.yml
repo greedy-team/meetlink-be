@@ -6,6 +6,9 @@ logging:
   level:
     root: warn
     org.hibernate.SQL: warn
+    com.greedy.meetlink: info
+sentry:
+  traces-sample-rate: 0.2
 cors:
   allowed-origins: >
     https://meetlink.now

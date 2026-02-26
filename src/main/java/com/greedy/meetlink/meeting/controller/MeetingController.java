@@ -7,7 +7,6 @@ import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
 import com.greedy.meetlink.meeting.service.MeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,11 +38,5 @@ public class MeetingController implements MeetingControllerSpec {
             @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request) {
         MeetingResponse response = meetingService.update(code, request);
         return ApiResponse.success(response);
-    }
-
-    @DeleteMapping("/{code}")
-    public ApiResponse<Void> delete(@PathVariable String code) {
-        meetingService.delete(code);
-        return ApiResponse.success();
     }
 }

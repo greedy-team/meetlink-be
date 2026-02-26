@@ -226,37 +226,4 @@ public interface MeetingControllerSpec {
     })
     ApiResponse<MeetingResponse> update(
             @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request);
-
-    @Operation(summary = "모임 삭제")
-    @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                responseCode = "200",
-                description = "삭제 성공",
-                content =
-                        @Content(
-                                examples =
-                                        @ExampleObject(
-                                                value =
-                                                        """
-                            {
-                                "status": true
-                            }
-                        """))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                responseCode = "404",
-                description = "모임 없음",
-                content =
-                        @Content(
-                                examples =
-                                        @ExampleObject(
-                                                value =
-                                                        """
-                            {
-                                "status": false,
-                                "code": "NOT_FOUND",
-                                "message": "모임을 찾을 수 없습니다."
-                            }
-                        """)))
-    })
-    ApiResponse<Void> delete(@PathVariable String code);
 }

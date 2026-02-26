@@ -5,6 +5,7 @@ spring:
 logging:
   level:
     org.hibernate.SQL: info
+    com.greedy.meetlink: debug
 cors:
   allowed-origins: >
     http://localhost:5173,

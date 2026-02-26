@@ -7,7 +7,7 @@ on:
         required: true
         type: environment
 jobs:
-  import:
+  motis-import:
     runs-on: [self-hosted, ${{ inputs.target }}]
     environment: ${{ inputs.target }}
     steps:

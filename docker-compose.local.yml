@@ -1,10 +1,15 @@
 services:
   postgres:
-    container_name: meetlink-db-local
+    container_name: postgres-local
     ports:
       - "5432:5432"
+  motis-import:
+    volumes:
+      - ./config/motis/input:/input
+      - ./config/motis/config.yml:/config.yml
+      - ./motis-data:/data
   motis:
-    container_name: meetlink-motis-local
+    container_name: motis-local
     volumes:
       - ./motis-data:/data
     ports:

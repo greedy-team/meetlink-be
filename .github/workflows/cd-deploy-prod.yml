@@ -26,9 +26,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           SPRING_PROFILE: prod
           APP_IMAGE: ghcr.io/${{ github.repository }}:prod-latest
-          NGINX_CERTS_PATH: ${{ vars.NGINX_CERTS_PATH }}
           KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
-          MOTIS_DATA_PATH: ${{ vars.MOTIS_DATA_PATH }}
         run:
           docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile deploy up -d --pull always --remove-orphans
           docker compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx

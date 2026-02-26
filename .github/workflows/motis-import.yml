@@ -8,8 +8,8 @@ on:
         type: environment
 jobs:
   import:
-    runs-on: [self-hosted, ${{ inputs.target.name }}]
-    environment: ${{ inputs.target.name }}
+    runs-on: [self-hosted, ${{ inputs.target }}]
+    environment: ${{ inputs.target }}
     steps:
       - uses: actions/checkout@v4
       - name: Stop MOTIS

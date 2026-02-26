@@ -6,7 +6,6 @@ services:
   motis-import:
     volumes:
       - ./config/motis/input:/input
-      - ./config/motis/config.yml:/config.yml
       - ./motis-data:/data
   motis:
     container_name: motis-local

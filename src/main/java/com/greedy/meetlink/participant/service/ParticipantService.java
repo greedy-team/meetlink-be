@@ -53,6 +53,16 @@ public class ParticipantService {
 
     // 참여자 목록 조회
     public List<ParticipantResponse> list(String meetingCode, String token) {
+        if (token == null) {
+            Meeting meeting =
+                    meetingRepository
+                            .findByCode(meetingCode)
+                            .orElseThrow(MeetingNotFoundException::new);
+            return participantRepository.findByMeeting(meeting).stream()
+                    .map(ParticipantResponse::of)
+                    .toList();
+        }
+
         Participant participant =
                 participantValidator.validateAndGetParticipant(meetingCode, token);
         Meeting meeting = participant.getMeeting();

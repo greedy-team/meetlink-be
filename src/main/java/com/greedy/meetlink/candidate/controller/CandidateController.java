@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,8 +27,9 @@ public class CandidateController implements CandidateControllerSpec {
     }
 
     @GetMapping("/time")
-    public ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(@PathVariable String code) {
-        return ApiResponse.success(timeCandidateService.list(code));
+    public ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        return ApiResponse.success(timeCandidateService.list(code, token));
     }
 
     @PostMapping("/place")
@@ -36,7 +38,8 @@ public class CandidateController implements CandidateControllerSpec {
     }
 
     @GetMapping("/place")
-    public ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(@PathVariable String code) {
-        return ApiResponse.success(placeCandidateService.list(code));
+    public ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        return ApiResponse.success(placeCandidateService.list(code, token));
     }
 }

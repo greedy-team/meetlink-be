@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "Meeting", description = "모임 API")
 public interface MeetingControllerSpec {
@@ -225,5 +226,7 @@ public interface MeetingControllerSpec {
                         """)))
     })
     ApiResponse<MeetingResponse> update(
-            @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request);
+            @PathVariable String code,
+            @RequestHeader("X-Participant-Token") String token,
+            @Valid @RequestBody MeetingUpdateRequest request);
 }

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "MeetingResult", description = "모임 추천 결과 API")
 public interface MeetingResultControllerSpec {
@@ -51,5 +52,6 @@ public interface MeetingResultControllerSpec {
                                     }
                                     """)))
     })
-    ApiResponse<MeetingResultResponse> get(@PathVariable String code);
+    ApiResponse<MeetingResultResponse> get(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
 }

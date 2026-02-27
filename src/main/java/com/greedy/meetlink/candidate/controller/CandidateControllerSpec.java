@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "Candidate", description = "후보 API")
 public interface CandidateControllerSpec {
@@ -58,7 +59,8 @@ public interface CandidateControllerSpec {
                                 }
                                 """)))
     })
-    ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(@PathVariable String code);
+    ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
 
     @Operation(summary = "장소 후보 조회", description = "해당 모임에 대해 계산된 장소 후보 목록을 조회합니다.")
     @ApiResponses({
@@ -108,5 +110,6 @@ public interface CandidateControllerSpec {
                                                                 }
                         """)))
     })
-    ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(@PathVariable String code);
+    ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
 }

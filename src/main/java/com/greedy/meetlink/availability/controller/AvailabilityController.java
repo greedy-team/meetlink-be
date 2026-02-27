@@ -35,8 +35,9 @@ public class AvailabilityController implements AvailabilityControllerSpec {
     }
 
     @GetMapping("/time")
-    public ApiResponse<TimeAvailabilityResponse> getTimeHeatmap(@PathVariable String code) {
-        return ApiResponse.success(timeAvailabilityService.getHeatmap(code));
+    public ApiResponse<TimeAvailabilityResponse> getTimeHeatmap(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        return ApiResponse.success(timeAvailabilityService.getHeatmap(code, token));
     }
 
     @GetMapping("/time/me")

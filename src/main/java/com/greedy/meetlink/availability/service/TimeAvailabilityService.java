@@ -8,7 +8,6 @@ import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
-import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
@@ -65,11 +64,9 @@ public class TimeAvailabilityService {
     }
 
     @Transactional(readOnly = true)
-    public TimeAvailabilityResponse getHeatmap(String meetingCode) {
+    public TimeAvailabilityResponse getHeatmap(String meetingCode, String token) {
         Meeting meeting =
-                meetingRepository
-                        .findByCode(meetingCode)
-                        .orElseThrow(MeetingNotFoundException::new);
+                participantValidator.validateAndGetParticipant(meetingCode, token).getMeeting();
 
         List<TimeAvailabilityHeatmapRow> rows =
                 timeAvailabilityRepository.findHeatmapByMeetingCode(

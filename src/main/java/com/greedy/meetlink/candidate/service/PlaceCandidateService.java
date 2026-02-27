@@ -13,6 +13,7 @@ import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
 import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.exception.PlaceRecommendationFailedException;
+import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -42,6 +43,7 @@ public class PlaceCandidateService {
     private final MeetingResultRepository meetingResultRepository;
     private final ParticipantRepository participantRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
+    private final ParticipantValidator participantValidator;
 
     @Transactional
     public List<PlaceCandidateResponse> calculate(String code) {
@@ -83,9 +85,8 @@ public class PlaceCandidateService {
     }
 
     @Transactional(readOnly = true)
-    public List<PlaceCandidateResponse> list(String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+    public List<PlaceCandidateResponse> list(String code, String token) {
+        Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
         return toResponses(meeting);
     }
 

@@ -6,6 +6,7 @@ import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
@@ -33,6 +34,7 @@ public class TimeCandidateService {
     private final ParticipantRepository participantRepository;
     private final MeetingRepository meetingRepository;
     private final MeetingResultRepository meetingResultRepository;
+    private final ParticipantValidator participantValidator;
 
     @Transactional
     public List<TimeCandidateResponse> calculate(String code) {
@@ -63,9 +65,8 @@ public class TimeCandidateService {
     }
 
     @Transactional(readOnly = true)
-    public List<TimeCandidateResponse> list(String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+    public List<TimeCandidateResponse> list(String code, String token) {
+        Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
         return toResponses(meeting);
     }
 

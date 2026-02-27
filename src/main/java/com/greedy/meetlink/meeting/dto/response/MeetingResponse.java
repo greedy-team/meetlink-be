@@ -13,7 +13,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MeetingResponse {
-    private final Long id;
     private final String name;
     private final String code;
     private final boolean enableTimeRecommendation;
@@ -26,7 +25,6 @@ public class MeetingResponse {
 
     public static MeetingResponse from(Meeting meeting) {
         return MeetingResponse.builder()
-                .id(meeting.getId())
                 .name(meeting.getName())
                 .code(meeting.getCode())
                 .enableTimeRecommendation(meeting.isEnableTimeRecommendation())

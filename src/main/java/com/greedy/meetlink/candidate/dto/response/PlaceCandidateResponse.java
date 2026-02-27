@@ -10,7 +10,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PlaceCandidateResponse {
-    private final Long id;
     private final String name;
     private final String address;
     private final Double latitude;
@@ -21,7 +20,6 @@ public class PlaceCandidateResponse {
 
     public static PlaceCandidateResponse from(PlaceCandidate candidate) {
         return PlaceCandidateResponse.builder()
-                .id(candidate.getId())
                 .name(candidate.getName())
                 .address(candidate.getAddress())
                 .latitude(candidate.getLatitude())

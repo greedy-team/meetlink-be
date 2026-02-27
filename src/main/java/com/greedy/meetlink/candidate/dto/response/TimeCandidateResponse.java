@@ -12,7 +12,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeCandidateResponse {
-    private final Long id;
     private final LocalDate date;
     private final Integer dayOfWeek;
     private final LocalTime startTime;
@@ -22,7 +21,6 @@ public class TimeCandidateResponse {
 
     public static TimeCandidateResponse from(TimeCandidate candidate) {
         return TimeCandidateResponse.builder()
-                .id(candidate.getId())
                 .date(candidate.getDate())
                 .dayOfWeek(candidate.getDayOfWeek())
                 .startTime(candidate.getStartTime())

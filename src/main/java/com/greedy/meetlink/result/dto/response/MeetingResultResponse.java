@@ -13,7 +13,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MeetingResultResponse {
-    private final Long id;
     private final TimeCandidateResponse timeCandidate;
     private final PlaceCandidateResponse placeCandidate;
     private final LocalDateTime createdAt;
@@ -21,7 +20,6 @@ public class MeetingResultResponse {
 
     public static MeetingResultResponse from(MeetingResult result) {
         return MeetingResultResponse.builder()
-                .id(result.getId())
                 .timeCandidate(
                         result.getTimeCandidate() != null
                                 ? TimeCandidateResponse.from(result.getTimeCandidate())

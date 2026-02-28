@@ -1,7 +1,9 @@
 package com.greedy.meetlink.common.exception;
 
-public class MeetingCodeGenerationException extends RuntimeException {
+import com.greedy.meetlink.common.ResponseCode;
+
+public class MeetingCodeGenerationException extends AppException {
     public MeetingCodeGenerationException() {
-        super("고유한 모임 코드 생성에 실패했습니다.");
+        super(ResponseCode.MEETING_CODE_GENERATION_FAILED);
     }
 }

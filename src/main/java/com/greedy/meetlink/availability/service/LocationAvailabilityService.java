@@ -1,8 +1,10 @@
 package com.greedy.meetlink.availability.service;
 
 import com.greedy.meetlink.availability.dto.request.LocationAvailabilityRequest;
+import com.greedy.meetlink.availability.dto.response.LocationAvailabilityResponse;
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
+import com.greedy.meetlink.common.exception.LocationAvailabilityNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.participant.entity.Participant;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +46,17 @@ public class LocationAvailabilityService {
 
         // 장소 제출 여부 체크
         participant.markLocationSubmitted();
+    }
+
+    @Transactional(readOnly = true)
+    public LocationAvailabilityResponse getMyLocationAvailability(
+            String meetingCode, String token) {
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
+
+        return locationAvailabilityRepository
+                .findByParticipant(participant)
+                .map(LocationAvailabilityResponse::from)
+                .orElseThrow(LocationAvailabilityNotFoundException::new);
     }
 }

@@ -88,7 +88,7 @@ public interface ParticipantControllerSpec {
                                                         """
                                             {
                                                 "status": false,
-                                                "code": "CONFLICT",
+                                                "code": "DUPLICATE_NICKNAME",
                                                 "message": "이미 사용 중인 닉네임입니다."
                                             }
                                             """)))
@@ -103,37 +103,59 @@ public interface ParticipantControllerSpec {
                 description = "조회 성공",
                 content =
                         @Content(
-                                examples =
-                                        @ExampleObject(
-                                                value =
-                                                        """
+                                examples = {
+                                    @ExampleObject(
+                                            name = "토큰 있는 경우",
+                                            value =
+                                                    """
                                             {
                                                 "status": true,
                                                 "result": [
                                                     {
-                                                        "id": 1,
                                                         "nickname": "테스트1",
-                                                        "placeSubmitted": true,
-                                                        "timeSubmitted": true
+                                                        "isPlaceSubmitted": true,
+                                                        "isTimeSubmitted": true
                                                     },
                                                     {
-                                                        "id": 2,
                                                         "nickname": "테스트2",
-                                                        "placeSubmitted": true,
-                                                        "timeSubmitted": false
+                                                        "isPlaceSubmitted": true,
+                                                        "isTimeSubmitted": false
                                                     },
                                                     {
-                                                        "id": 3,
                                                         "nickname": "테스트3",
-                                                        "placeSubmitted": false,
-                                                        "timeSubmitted": false
+                                                        "isPlaceSubmitted": false,
+                                                        "isTimeSubmitted": false
                                                     }
                                                 ]
                                             }
-                                            """)))
+                                            """),
+                                    @ExampleObject(
+                                            name = "토큰 없는 경우",
+                                            value =
+                                                    """
+                                            {
+                                                "status": true,
+                                                "result": [
+                                                    {
+                                                        "nickname": "테스트1",
+                                                        "token": "1915086f-f1dc-4d32-8311-9ed9b7c38507"
+                                                    },
+                                                    {
+                                                        "nickname": "테스트2",
+                                                        "token": "2a3b4c5d-e6f7-8901-abcd-ef1234567890"
+                                                    },
+                                                    {
+                                                        "nickname": "테스트3",
+                                                        "token": "3c4d5e6f-7890-1234-bcde-f01234567891"
+                                                    }
+                                                ]
+                                            }
+                                            """)
+                                }))
     })
-    ApiResponse<List<ParticipantResponse>> list(
-            @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
+    ApiResponse<List<ParticipantResponse>> getParticipants(
+            @PathVariable String code,
+            @RequestHeader(value = "X-Participant-Token", required = false) String token);
 
     @Operation(summary = "내 참여 상태 조회")
     @ApiResponses({
@@ -149,10 +171,9 @@ public interface ParticipantControllerSpec {
                                             {
                                                 "status": true,
                                                 "result": {
-                                                    "id": 1,
                                                     "nickname": "테스트1",
-                                                    "placeSubmitted": true,
-                                                    "timeSubmitted": true
+                                                    "isPlaceSubmitted": true,
+                                                    "isTimeSubmitted": true
                                                 }
                                             }
                                             """)))

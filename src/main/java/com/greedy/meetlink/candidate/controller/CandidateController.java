@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,21 +23,23 @@ public class CandidateController implements CandidateControllerSpec {
 
     @PostMapping("/time")
     public ApiResponse<List<TimeCandidateResponse>> calculateTime(@PathVariable String code) {
-        return ApiResponse.success(timeCandidateService.calculate(code));
+        return ApiResponse.success(timeCandidateService.calculateTimeCandidates(code));
     }
 
     @GetMapping("/time")
-    public ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(@PathVariable String code) {
-        return ApiResponse.success(timeCandidateService.list(code));
+    public ApiResponse<List<TimeCandidateResponse>> getTimeCandidates(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        return ApiResponse.success(timeCandidateService.getTimeCandidates(code, token));
     }
 
     @PostMapping("/place")
     public ApiResponse<List<PlaceCandidateResponse>> calculatePlace(@PathVariable String code) {
-        return ApiResponse.success(placeCandidateService.calculate(code));
+        return ApiResponse.success(placeCandidateService.calculatePlaceCandidates(code));
     }
 
     @GetMapping("/place")
-    public ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(@PathVariable String code) {
-        return ApiResponse.success(placeCandidateService.list(code));
+    public ApiResponse<List<PlaceCandidateResponse>> getPlaceCandidates(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        return ApiResponse.success(placeCandidateService.getPlaceCandidates(code, token));
     }
 }

@@ -3,7 +3,6 @@ package com.greedy.meetlink.candidate.algorithm;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.FilteredCandidate;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.ParticipantTravelTime;
 import com.greedy.meetlink.candidate.algorithm.ScoreCalculator.ScoreResult;
-import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.client.TransitClient;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +34,12 @@ public class CandidateScorer {
             Coordinate candidate, List<Coordinate> participants) {
         List<ParticipantTravelTime> times = new ArrayList<>();
         for (Coordinate p : participants) {
-            Double t = transitClient.getTravelTimeSeconds(p, candidate);
+            Double t =
+                    transitClient.getTravelTimeSeconds(
+                            p.latitude(),
+                            p.longitude(),
+                            candidate.latitude(),
+                            candidate.longitude());
             if (t == null) return null;
             times.add(new ParticipantTravelTime(p, t));
         }

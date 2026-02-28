@@ -18,11 +18,14 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(MeetingNotFoundException.class)
-    public ResponseEntity<ApiResponse<?>> handleMeetingNotFoundException(
-            MeetingNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<?>> handleAppException(AppException e) {
+        if (e.getResponseCode().getHttpStatus().is5xxServerError()) {
+            log.error("Application error occurred: ", e);
+        }
+
+        return ResponseEntity.status(e.getResponseCode().getHttpStatus())
+                .body(ApiResponse.error(e.getResponseCode(), e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,20 +59,6 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.METHOD_NOT_ALLOWED));
     }
 
-    @ExceptionHandler(DuplicateNicknameException.class)
-    public ResponseEntity<ApiResponse<?>> handleDuplicateNicknameException(
-            DuplicateNicknameException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(ResponseCode.CONFLICT, e.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidParticipantTokenException.class)
-    public ResponseEntity<ApiResponse<?>> handleInvalidParticipantTokenException(
-            InvalidParticipantTokenException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(ResponseCode.FORBIDDEN, e.getMessage()));
-    }
-
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ApiResponse<?>> handleMissingRequestHeaderException(
             MissingRequestHeaderException e) {
@@ -80,29 +69,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ResponseCode.INVALID_REQUEST));
-    }
-
-    @ExceptionHandler(InvalidTimeAvailabilityException.class)
-    public ResponseEntity<ApiResponse<?>> handleInvalidTimeAvailabilityException(
-            InvalidTimeAvailabilityException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ResponseCode.INVALID_REQUEST, e.getMessage()));
-    }
-
-    @ExceptionHandler(PlaceRecommendationFailedException.class)
-    public ResponseEntity<ApiResponse<?>> handlePlaceRecommendationFailedException(
-            PlaceRecommendationFailedException e) {
-        log.error("Place recommendation failed", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
-    }
-
-    @ExceptionHandler(EmptyCoordinatesException.class)
-    public ResponseEntity<ApiResponse<?>> handleEmptyCoordinatesException(
-            EmptyCoordinatesException e) {
-        log.error("Empty coordinates encountered", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
     }
 
     @ExceptionHandler(Exception.class)

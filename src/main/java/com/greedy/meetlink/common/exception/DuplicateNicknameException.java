@@ -1,7 +1,9 @@
 package com.greedy.meetlink.common.exception;
 
-public class DuplicateNicknameException extends RuntimeException {
+import com.greedy.meetlink.common.ResponseCode;
+
+public class DuplicateNicknameException extends AppException {
     public DuplicateNicknameException() {
-        super("이미 사용 중인 닉네임입니다.");
+        super(ResponseCode.DUPLICATE_NICKNAME);
     }
 }

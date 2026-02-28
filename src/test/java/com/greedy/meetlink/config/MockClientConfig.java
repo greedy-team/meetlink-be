@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Bean;
 public class MockClientConfig {
     @Bean
     public PoiClient poiClient() {
-        return center -> Collections.emptyList();
+        return (latitude, longitude) -> Collections.emptyList();
     }
 
     @Bean
     public TransitClient transitClient() {
-        return (origin, destination) -> null;
+        return (originLat, originLon, destLat, destLon) -> null;
     }
 }

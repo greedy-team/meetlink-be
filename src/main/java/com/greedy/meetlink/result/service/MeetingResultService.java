@@ -1,6 +1,7 @@
 package com.greedy.meetlink.result.service;
 
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.result.dto.response.MeetingResultResponse;
@@ -16,12 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class MeetingResultService {
     private final MeetingResultRepository meetingResultRepository;
     private final MeetingRepository meetingRepository;
+    private final ParticipantValidator participantValidator;
 
-    public MeetingResultResponse get(String meetingCode) {
+    public MeetingResultResponse getMeetingResult(String meetingCode, String token) {
         Meeting meeting =
-                meetingRepository
-                        .findByCode(meetingCode)
-                        .orElseThrow(MeetingNotFoundException::new);
+                participantValidator.validateAndGetParticipant(meetingCode, token).getMeeting();
 
         MeetingResult result =
                 meetingResultRepository

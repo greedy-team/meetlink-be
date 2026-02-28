@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimeAvailabilityRequest {
     @NotEmpty(message = "시간 선택은 최소 1개 이상이어야 합니다.")
-    private List<DailyAvailability> availabilities;
+    private List<Availability> availabilities;
 
     @Getter
-    public static class DailyAvailability {
+    public static class Availability {
         private Integer dayOfWeek; // WEEKLY 모임 전용
         private LocalDate date; // SPECIFIC_DATE 모임 전용
 

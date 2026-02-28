@@ -1,7 +1,9 @@
 package com.greedy.meetlink.common.exception;
 
-public class PlaceRecommendationFailedException extends RuntimeException {
+import com.greedy.meetlink.common.ResponseCode;
+
+public class PlaceRecommendationFailedException extends AppException {
     public PlaceRecommendationFailedException() {
-        super("추천 가능한 장소가 없습니다.");
+        super(ResponseCode.PLACE_RECOMMENDATION_FAILED);
     }
 }

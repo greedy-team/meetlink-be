@@ -4,6 +4,7 @@ import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.common.exception.MeetingCodeGenerationException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
 import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
@@ -27,9 +28,10 @@ public class MeetingService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final TimeCandidateRepository timeCandidateRepository;
     private final ParticipantRepository participantRepository;
+    private final ParticipantValidator participantValidator;
 
     @Transactional(readOnly = true)
-    public MeetingResponse get(String code) {
+    public MeetingResponse getMeeting(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
@@ -37,7 +39,7 @@ public class MeetingService {
     }
 
     @Transactional
-    public MeetingResponse create(MeetingCreateRequest request) {
+    public MeetingResponse createMeeting(MeetingCreateRequest request) {
         String code = generateUniqueCode();
 
         Meeting meeting =
@@ -57,9 +59,8 @@ public class MeetingService {
     }
 
     @Transactional
-    public MeetingResponse update(String code, MeetingUpdateRequest request) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+    public MeetingResponse updateMeeting(String code, String token, MeetingUpdateRequest request) {
+        Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
 
         boolean timeRangeChanged = isTimeRangeChanged(meeting, request);
 
@@ -94,7 +95,7 @@ public class MeetingService {
     }
 
     @Transactional
-    public void delete(String code) {
+    public void deleteMeeting(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
         meetingRepository.deleteById(meeting.getId());

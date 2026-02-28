@@ -1,7 +1,9 @@
 package com.greedy.meetlink.common.exception;
 
-public class MeetingResultNotFoundException extends RuntimeException {
-    public MeetingResultNotFoundException(String message) {
-        super("모임 추천 결과를 찾을 수 없습니다.");
+import com.greedy.meetlink.common.ResponseCode;
+
+public class MeetingResultNotFoundException extends AppException {
+    public MeetingResultNotFoundException() {
+        super(ResponseCode.MEETING_RESULT_NOT_FOUND);
     }
 }

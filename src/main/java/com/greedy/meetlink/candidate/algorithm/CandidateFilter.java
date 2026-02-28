@@ -1,6 +1,5 @@
 package com.greedy.meetlink.candidate.algorithm;
 
-import com.greedy.meetlink.common.Coordinate;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;

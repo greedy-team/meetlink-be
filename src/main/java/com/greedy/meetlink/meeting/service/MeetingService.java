@@ -31,7 +31,7 @@ public class MeetingService {
     private final ParticipantValidator participantValidator;
 
     @Transactional(readOnly = true)
-    public MeetingResponse get(String code) {
+    public MeetingResponse getMeeting(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
@@ -39,7 +39,7 @@ public class MeetingService {
     }
 
     @Transactional
-    public MeetingResponse create(MeetingCreateRequest request) {
+    public MeetingResponse createMeeting(MeetingCreateRequest request) {
         String code = generateUniqueCode();
 
         Meeting meeting =
@@ -59,7 +59,7 @@ public class MeetingService {
     }
 
     @Transactional
-    public MeetingResponse update(String code, String token, MeetingUpdateRequest request) {
+    public MeetingResponse updateMeeting(String code, String token, MeetingUpdateRequest request) {
         Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
 
         boolean timeRangeChanged = isTimeRangeChanged(meeting, request);
@@ -95,7 +95,7 @@ public class MeetingService {
     }
 
     @Transactional
-    public void delete(String code) {
+    public void deleteMeeting(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
         meetingRepository.deleteById(meeting.getId());

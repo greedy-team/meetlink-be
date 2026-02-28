@@ -92,7 +92,8 @@ class TimeCandidateServiceTest {
                                 .build()));
 
         // when
-        List<TimeCandidateResponse> response = timeCandidateService.calculate(meetingCode);
+        List<TimeCandidateResponse> response =
+                timeCandidateService.calculateTimeCandidates(meetingCode);
 
         // then
         assertThat(response).hasSize(2);

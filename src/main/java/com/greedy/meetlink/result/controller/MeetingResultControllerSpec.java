@@ -52,6 +52,6 @@ public interface MeetingResultControllerSpec {
                                     }
                                     """)))
     })
-    ApiResponse<MeetingResultResponse> get(
+    ApiResponse<MeetingResultResponse> getMeetingResult(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
 }

@@ -37,7 +37,7 @@ public class TimeCandidateService {
     private final ParticipantValidator participantValidator;
 
     @Transactional
-    public List<TimeCandidateResponse> calculate(String code) {
+    public List<TimeCandidateResponse> calculateTimeCandidates(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
@@ -65,7 +65,7 @@ public class TimeCandidateService {
     }
 
     @Transactional(readOnly = true)
-    public List<TimeCandidateResponse> list(String code, String token) {
+    public List<TimeCandidateResponse> getTimeCandidates(String code, String token) {
         Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
         return toResponses(meeting);
     }

@@ -59,7 +59,7 @@ public interface MeetingControllerSpec {
                             }
                         """)))
     })
-    ApiResponse<MeetingResponse> get(@PathVariable String code);
+    ApiResponse<MeetingResponse> getMeeting(@PathVariable String code);
 
     @Operation(
             summary = "모임 생성",
@@ -137,7 +137,7 @@ public interface MeetingControllerSpec {
                                     """)
                                 }))
     })
-    ApiResponse<MeetingResponse> create(@Valid @RequestBody MeetingCreateRequest request);
+    ApiResponse<MeetingResponse> createMeeting(@Valid @RequestBody MeetingCreateRequest request);
 
     @Operation(
             summary = "모임 수정",
@@ -225,7 +225,7 @@ public interface MeetingControllerSpec {
                             }
                         """)))
     })
-    ApiResponse<MeetingResponse> update(
+    ApiResponse<MeetingResponse> updateMeeting(
             @PathVariable String code,
             @RequestHeader("X-Participant-Token") String token,
             @Valid @RequestBody MeetingUpdateRequest request);

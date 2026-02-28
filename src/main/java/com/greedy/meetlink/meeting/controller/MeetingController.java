@@ -23,23 +23,24 @@ public class MeetingController implements MeetingControllerSpec {
     private final MeetingService meetingService;
 
     @GetMapping("/{code}")
-    public ApiResponse<MeetingResponse> get(@PathVariable String code) {
-        MeetingResponse response = meetingService.get(code);
+    public ApiResponse<MeetingResponse> getMeeting(@PathVariable String code) {
+        MeetingResponse response = meetingService.getMeeting(code);
         return ApiResponse.success(response);
     }
 
     @PostMapping
-    public ApiResponse<MeetingResponse> create(@Valid @RequestBody MeetingCreateRequest request) {
-        MeetingResponse response = meetingService.create(request);
+    public ApiResponse<MeetingResponse> createMeeting(
+            @Valid @RequestBody MeetingCreateRequest request) {
+        MeetingResponse response = meetingService.createMeeting(request);
         return ApiResponse.success(response);
     }
 
     @PatchMapping("/{code}")
-    public ApiResponse<MeetingResponse> update(
+    public ApiResponse<MeetingResponse> updateMeeting(
             @PathVariable String code,
             @RequestHeader("X-Participant-Token") String token,
             @Valid @RequestBody MeetingUpdateRequest request) {
-        MeetingResponse response = meetingService.update(code, token, request);
+        MeetingResponse response = meetingService.updateMeeting(code, token, request);
         return ApiResponse.success(response);
     }
 }

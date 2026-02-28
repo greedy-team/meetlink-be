@@ -32,10 +32,10 @@ public class ParticipantController implements ParticipantControllerSpec {
 
     // 참여자 목록 조회
     @GetMapping
-    public ApiResponse<List<ParticipantResponse>> list(
+    public ApiResponse<List<ParticipantResponse>> getParticipants(
             @PathVariable String code,
             @RequestHeader(value = "X-Participant-Token", required = false) String token) {
-        return ApiResponse.success(participantService.list(code, token));
+        return ApiResponse.success(participantService.getParticipants(code, token));
     }
 
     // 내 참여 상태 확인

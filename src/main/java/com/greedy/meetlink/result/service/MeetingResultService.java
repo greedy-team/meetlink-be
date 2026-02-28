@@ -19,7 +19,7 @@ public class MeetingResultService {
     private final MeetingRepository meetingRepository;
     private final ParticipantValidator participantValidator;
 
-    public MeetingResultResponse get(String meetingCode, String token) {
+    public MeetingResultResponse getMeetingResult(String meetingCode, String token) {
         Meeting meeting =
                 participantValidator.validateAndGetParticipant(meetingCode, token).getMeeting();
 

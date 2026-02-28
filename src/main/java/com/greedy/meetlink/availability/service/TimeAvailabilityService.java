@@ -59,7 +59,7 @@ public class TimeAvailabilityService {
     }
 
     @Transactional(readOnly = true)
-    public List<TimeAvailabilityResponse> getHeatmap(String meetingCode, String token) {
+    public List<TimeAvailabilityResponse> getTimeAvailabilities(String meetingCode, String token) {
         Meeting meeting =
                 participantValidator.validateAndGetParticipant(meetingCode, token).getMeeting();
 
@@ -74,7 +74,7 @@ public class TimeAvailabilityService {
     }
 
     @Transactional(readOnly = true)
-    public TimeAvailabilityResponse getMyAvailability(String meetingCode, String token) {
+    public TimeAvailabilityResponse getMyTimeAvailability(String meetingCode, String token) {
         Participant participant =
                 participantValidator.validateAndGetParticipant(meetingCode, token);
 

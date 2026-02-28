@@ -52,7 +52,7 @@ public class ParticipantService {
     }
 
     // 참여자 목록 조회
-    public List<ParticipantResponse> list(String meetingCode, String token) {
+    public List<ParticipantResponse> getParticipants(String meetingCode, String token) {
         if (token == null) {
             Meeting meeting =
                     meetingRepository

@@ -132,7 +132,7 @@ public interface ParticipantControllerSpec {
                                             }
                                             """)))
     })
-    ApiResponse<List<ParticipantResponse>> list(
+    ApiResponse<List<ParticipantResponse>> getParticipants(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
 
     @Operation(summary = "내 참여 상태 조회")

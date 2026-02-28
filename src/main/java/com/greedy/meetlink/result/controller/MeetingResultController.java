@@ -17,8 +17,8 @@ public class MeetingResultController implements MeetingResultControllerSpec {
     private final MeetingResultService meetingResultService;
 
     @GetMapping
-    public ApiResponse<MeetingResultResponse> get(
+    public ApiResponse<MeetingResultResponse> getMeetingResult(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
-        return ApiResponse.success(meetingResultService.get(code, token));
+        return ApiResponse.success(meetingResultService.getMeetingResult(code, token));
     }
 }

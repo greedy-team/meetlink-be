@@ -1,6 +1,5 @@
 package com.greedy.meetlink.common.client;
 
-import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.client.dto.PoiSearchResponse;
 import com.greedy.meetlink.common.client.dto.PoiSearchResponse.PoiPlace;
 import java.util.Collections;
@@ -36,7 +35,7 @@ public class KakaoPoiClient implements PoiClient {
     }
 
     @Override
-    public List<PoiPlace> searchNearby(Coordinate center) {
+    public List<PoiPlace> searchNearby(double latitude, double longitude) {
         try {
             PoiSearchResponse response =
                     restClient
@@ -46,8 +45,8 @@ public class KakaoPoiClient implements PoiClient {
                                             uriBuilder
                                                     .path(KEYWORD_SEARCH_PATH)
                                                     .queryParam("query", SEARCH_QUERY)
-                                                    .queryParam("x", center.longitude())
-                                                    .queryParam("y", center.latitude())
+                                                    .queryParam("x", longitude)
+                                                    .queryParam("y", latitude)
                                                     .queryParam(
                                                             "radius", DEFAULT_SEARCH_RADIUS_METERS)
                                                     .queryParam("sort", "distance")
@@ -57,7 +56,7 @@ public class KakaoPoiClient implements PoiClient {
                             .body(PoiSearchResponse.class);
 
             if (response == null) {
-                log.warn("Kakao POI API returned null response: center={}", center);
+                log.warn("Kakao POI API returned null response: ({}, {})", latitude, longitude);
                 return Collections.emptyList();
             }
 
@@ -67,7 +66,11 @@ public class KakaoPoiClient implements PoiClient {
                             : response.documents().stream()
                                     .map(PoiPlace::from)
                                     .collect(Collectors.toList());
-            log.debug("Kakao POI search completed: center={}, results={}", center, places.size());
+            log.debug(
+                    "Kakao POI search completed: ({}, {}), results={}",
+                    latitude,
+                    longitude,
+                    places.size());
             return places;
 
         } catch (RestClientResponseException e) {

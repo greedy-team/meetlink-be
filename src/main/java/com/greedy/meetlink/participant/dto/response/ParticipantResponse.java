@@ -10,11 +10,15 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ParticipantResponse {
     private final String nickname;
+    private final String token;
     private final Boolean isTimeSubmitted;
     private final Boolean isPlaceSubmitted;
 
     public static ParticipantResponse of(Participant participant) {
-        return ParticipantResponse.builder().nickname(participant.getNickname()).build();
+        return ParticipantResponse.builder()
+                .nickname(participant.getNickname())
+                .token(participant.getToken())
+                .build();
     }
 
     public static ParticipantResponse of(

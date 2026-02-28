@@ -1,7 +1,9 @@
 package com.greedy.meetlink.common.exception;
 
-public class InvalidTimeAvailabilityException extends RuntimeException {
+import com.greedy.meetlink.common.ResponseCode;
+
+public class InvalidTimeAvailabilityException extends AppException {
     public InvalidTimeAvailabilityException(String message) {
-        super(message);
+        super(ResponseCode.INVALID_TIME_AVAILABILITY, message);
     }
 }

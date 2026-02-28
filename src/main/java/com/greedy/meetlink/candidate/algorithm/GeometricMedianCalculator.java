@@ -1,7 +1,6 @@
 package com.greedy.meetlink.candidate.algorithm;
 
 import com.greedy.meetlink.common.Coordinate;
-import com.greedy.meetlink.common.exception.EmptyCoordinatesException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,9 +15,6 @@ public class GeometricMedianCalculator {
     private static final double CONVERGENCE_THRESHOLD_KM = 1e-4; // 0.1m
 
     public Coordinate calculate(List<Coordinate> coordinates) {
-        if (coordinates.isEmpty()) {
-            throw new EmptyCoordinatesException();
-        }
         if (coordinates.size() == 1) {
             return coordinates.get(0);
         }

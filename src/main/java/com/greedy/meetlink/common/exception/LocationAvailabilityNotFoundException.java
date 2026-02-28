@@ -1,7 +1,9 @@
 package com.greedy.meetlink.common.exception;
 
-public class LocationAvailabilityNotFoundException extends RuntimeException {
+import com.greedy.meetlink.common.ResponseCode;
+
+public class LocationAvailabilityNotFoundException extends AppException {
     public LocationAvailabilityNotFoundException() {
-        super("아직 장소를 입력하지 않았습니다.");
+        super(ResponseCode.LOCATION_NOT_SUBMITTED);
     }
 }

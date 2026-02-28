@@ -2,7 +2,6 @@ package com.greedy.meetlink.meeting.dto.response;
 
 import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.meeting.entity.Meeting;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,8 +19,6 @@ public class MeetingResponse {
     private final TimeAvailabilityType timeAvailabilityType;
     private final LocalTime timeRangeStart;
     private final LocalTime timeRangeEnd;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
 
     public static MeetingResponse from(Meeting meeting) {
         return MeetingResponse.builder()
@@ -32,8 +29,6 @@ public class MeetingResponse {
                 .timeAvailabilityType(meeting.getTimeAvailabilityType())
                 .timeRangeStart(meeting.getTimeRangeStart())
                 .timeRangeEnd(meeting.getTimeRangeEnd())
-                .createdAt(meeting.getCreatedAt())
-                .updatedAt(meeting.getUpdatedAt())
                 .build();
     }
 }

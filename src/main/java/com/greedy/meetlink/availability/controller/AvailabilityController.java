@@ -2,12 +2,12 @@ package com.greedy.meetlink.availability.controller;
 
 import com.greedy.meetlink.availability.dto.request.LocationAvailabilityRequest;
 import com.greedy.meetlink.availability.dto.request.TimeAvailabilityRequest;
-import com.greedy.meetlink.availability.dto.response.MyTimeAvailabilityResponse;
 import com.greedy.meetlink.availability.dto.response.TimeAvailabilityResponse;
 import com.greedy.meetlink.availability.service.LocationAvailabilityService;
 import com.greedy.meetlink.availability.service.TimeAvailabilityService;
 import com.greedy.meetlink.common.ApiResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,13 +35,13 @@ public class AvailabilityController implements AvailabilityControllerSpec {
     }
 
     @GetMapping("/time")
-    public ApiResponse<TimeAvailabilityResponse> getTimeHeatmap(
+    public ApiResponse<List<TimeAvailabilityResponse>> getTimeAvailabilities(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         return ApiResponse.success(timeAvailabilityService.getHeatmap(code, token));
     }
 
     @GetMapping("/time/me")
-    public ApiResponse<MyTimeAvailabilityResponse> getMyAvailability(
+    public ApiResponse<TimeAvailabilityResponse> getMyTimeAvailability(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         return ApiResponse.success(timeAvailabilityService.getMyAvailability(code, token));
     }

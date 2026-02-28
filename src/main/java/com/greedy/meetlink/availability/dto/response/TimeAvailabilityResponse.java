@@ -12,22 +12,15 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeAvailabilityResponse {
-    private final List<DailyHeatmap> heatmaps;
+    private final String nickname;
+    private final List<DailyAvailability> availabilities;
 
     @Getter
     @Builder
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class DailyHeatmap {
-        private final LocalDate date; // SPECIFIC_DATE용
-        private final Integer dayOfWeek; // WEEKLY용
-        private final List<Slot> slots;
-    }
-
-    @Getter
-    @Builder
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class Slot {
-        private final LocalTime startTime;
-        private final int availableCount;
+    public static class DailyAvailability {
+        private final LocalDate date; // SPECIFIC_DATE
+        private final Integer dayOfWeek; // WEEKLY
+        private final List<LocalTime> startTimes;
     }
 }

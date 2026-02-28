@@ -54,4 +54,17 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
             String code, LocalTime rangeStart, LocalTime rangeEnd);
 
     List<TimeAvailability> findByMeetingAndParticipant(Meeting meeting, Participant participant);
+
+    @Query(
+            """
+        SELECT ta
+        FROM TimeAvailability ta
+        JOIN FETCH ta.participant
+        WHERE ta.meeting.code = :code
+          AND ta.startTime >= :rangeStart
+          AND ta.startTime < :rangeEnd
+        ORDER BY ta.date ASC, ta.dayOfWeek ASC, ta.startTime ASC
+    """)
+    List<TimeAvailability> findValidAvailabilities(
+            String code, LocalTime rangeStart, LocalTime rangeEnd);
 }

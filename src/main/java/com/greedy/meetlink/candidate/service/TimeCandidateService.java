@@ -1,7 +1,7 @@
 package com.greedy.meetlink.candidate.service;
 
+import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
-import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
@@ -17,7 +17,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,20 +43,13 @@ public class TimeCandidateService {
 
         if (!isCalculationRequired(meeting)) return toResponses(meeting);
 
-        List<TimeAvailabilityHeatmapRow> rows =
-                timeAvailabilityRepository.findHeatmapByMeetingCode(
-                        code, meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
-
-        if (rows.isEmpty()) {
-            timeCandidateRepository.deleteByMeeting(meeting);
-            return List.of();
-        }
-
-        // 기존 후보 삭제
         timeCandidateRepository.deleteByMeeting(meeting);
 
-        // 상위 랭킹 후보 생성 후 연속된 슬롯 합침
-        List<TimeCandidate> candidates = buildCandidates(rows, meeting);
+        List<TimeCandidate> candidates = buildCandidates(meeting);
+
+        if (candidates.isEmpty()) {
+            return List.of();
+        }
 
         timeCandidateRepository.saveAll(candidates);
         updateMeetingResult(meeting, candidates);
@@ -104,18 +99,24 @@ public class TimeCandidateService {
     }
 
     /** DB aggregation 결과 -> 후보 상위 N개 생성 */
-    private List<TimeCandidate> buildCandidates(
-            List<TimeAvailabilityHeatmapRow> rows, Meeting meeting) {
-        if (rows.isEmpty()) {
+    private List<TimeCandidate> buildCandidates(Meeting meeting) {
+        List<TimeAvailability> rawAvailabilities =
+                timeAvailabilityRepository.findValidAvailabilities(
+                        meeting.getCode(), meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
+
+        if (rawAvailabilities.isEmpty()) {
             return List.of();
         }
 
-        List<TimeCandidate> mergedCandidates = mergeConsecutiveSlots(rows, meeting);
+        List<TimeCandidate> mergedCandidates = mergeInJava(rawAvailabilities, meeting);
 
         mergedCandidates.sort(
                 Comparator.comparing(TimeCandidate::getAvailableCount, Comparator.reverseOrder())
                         .thenComparing(
                                 TimeCandidate::getDate,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                TimeCandidate::getDayOfWeek,
                                 Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(TimeCandidate::getStartTime));
 
@@ -128,22 +129,53 @@ public class TimeCandidateService {
         return ranked;
     }
 
-    private List<TimeCandidate> mergeConsecutiveSlots(
-            List<TimeAvailabilityHeatmapRow> rows, Meeting meeting) {
+    private record TimeSlot(LocalDate date, Integer dayOfWeek, LocalTime startTime) {}
+
+    private List<TimeCandidate> mergeInJava(List<TimeAvailability> rawList, Meeting meeting) {
+        rawList.sort(
+                Comparator.comparing(
+                                TimeAvailability::getDate,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                TimeAvailability::getDayOfWeek,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(TimeAvailability::getStartTime));
+
+        Map<TimeSlot, Set<Long>> grouped = new java.util.LinkedHashMap<>();
+        for (TimeAvailability ta : rawList) {
+            TimeSlot slot = new TimeSlot(ta.getDate(), ta.getDayOfWeek(), ta.getStartTime());
+            grouped.computeIfAbsent(slot, k -> new java.util.HashSet<>())
+                    .add(ta.getParticipant().getId());
+        }
+
+        if (grouped.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         List<TimeCandidate> merged = new ArrayList<>();
+        java.util.Iterator<Map.Entry<TimeSlot, java.util.Set<Long>>> iterator =
+                grouped.entrySet().iterator();
+        Map.Entry<TimeSlot, java.util.Set<Long>> firstEntry = iterator.next();
 
-        LocalDate candidateDate = rows.getFirst().getDate();
-        Integer candidateDayOfWeek = rows.getFirst().getDayOfWeek();
-        LocalTime candidateStart = rows.getFirst().getStartTime();
+        LocalDate candidateDate = firstEntry.getKey().date();
+        Integer candidateDayOfWeek = firstEntry.getKey().dayOfWeek();
+        LocalTime candidateStart = firstEntry.getKey().startTime();
         LocalTime candidateEnd = candidateStart.plusMinutes(SLOT_MINUTES);
-        int candidateAvailableCount = Math.toIntExact(rows.getFirst().getAvailableCount());
+        java.util.Set<Long> candidateParticipants = firstEntry.getValue();
 
-        for (int i = 1; i < rows.size(); i++) {
-            TimeAvailabilityHeatmapRow row = rows.get(i);
-            boolean consecutive = candidateEnd.equals(row.getStartTime());
-            boolean sameCount = candidateAvailableCount == row.getAvailableCount();
+        while (iterator.hasNext()) {
+            Map.Entry<TimeSlot, java.util.Set<Long>> entry = iterator.next();
+            TimeSlot currentSlot = entry.getKey();
+            java.util.Set<Long> currentParticipants = entry.getValue();
 
-            if (consecutive && sameCount) {
+            boolean consecutive = candidateEnd.equals(currentSlot.startTime());
+            boolean sameDay =
+                    java.util.Objects.equals(candidateDayOfWeek, currentSlot.dayOfWeek())
+                            && java.util.Objects.equals(candidateDate, currentSlot.date());
+
+            boolean sameParticipants = candidateParticipants.equals(currentParticipants);
+
+            if (consecutive && sameDay && sameParticipants) {
                 candidateEnd = candidateEnd.plusMinutes(SLOT_MINUTES);
             } else {
                 merged.add(
@@ -153,13 +185,13 @@ public class TimeCandidateService {
                                 candidateDayOfWeek,
                                 candidateStart,
                                 candidateEnd,
-                                candidateAvailableCount));
+                                candidateParticipants.size()));
 
-                candidateDate = row.getDate();
-                candidateDayOfWeek = row.getDayOfWeek();
-                candidateStart = row.getStartTime();
+                candidateDate = currentSlot.date();
+                candidateDayOfWeek = currentSlot.dayOfWeek();
+                candidateStart = currentSlot.startTime();
                 candidateEnd = candidateStart.plusMinutes(SLOT_MINUTES);
-                candidateAvailableCount = Math.toIntExact(row.getAvailableCount());
+                candidateParticipants = currentParticipants;
             }
         }
 
@@ -170,7 +202,7 @@ public class TimeCandidateService {
                         candidateDayOfWeek,
                         candidateStart,
                         candidateEnd,
-                        candidateAvailableCount));
+                        candidateParticipants.size()));
 
         return merged;
     }

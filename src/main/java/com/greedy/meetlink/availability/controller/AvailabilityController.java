@@ -2,6 +2,7 @@ package com.greedy.meetlink.availability.controller;
 
 import com.greedy.meetlink.availability.dto.request.LocationAvailabilityRequest;
 import com.greedy.meetlink.availability.dto.request.TimeAvailabilityRequest;
+import com.greedy.meetlink.availability.dto.response.TimeAvailabilitiesResponse;
 import com.greedy.meetlink.availability.dto.response.TimeAvailabilityResponse;
 import com.greedy.meetlink.availability.service.LocationAvailabilityService;
 import com.greedy.meetlink.availability.service.TimeAvailabilityService;
@@ -35,13 +36,13 @@ public class AvailabilityController implements AvailabilityControllerSpec {
     }
 
     @GetMapping("/time")
-    public ApiResponse<List<TimeAvailabilityResponse>> getTimeAvailabilities(
+    public ApiResponse<List<TimeAvailabilitiesResponse>> getTimeAvailabilities(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         return ApiResponse.success(timeAvailabilityService.getTimeAvailabilities(code, token));
     }
 
     @GetMapping("/time/me")
-    public ApiResponse<TimeAvailabilityResponse> getMyTimeAvailability(
+    public ApiResponse<List<TimeAvailabilityResponse>> getMyTimeAvailability(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         return ApiResponse.success(timeAvailabilityService.getMyTimeAvailability(code, token));
     }

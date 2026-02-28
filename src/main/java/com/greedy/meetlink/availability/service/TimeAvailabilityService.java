@@ -1,6 +1,7 @@
 package com.greedy.meetlink.availability.service;
 
 import com.greedy.meetlink.availability.dto.request.TimeAvailabilityRequest;
+import com.greedy.meetlink.availability.dto.response.TimeAvailabilitiesResponse;
 import com.greedy.meetlink.availability.dto.response.TimeAvailabilityResponse;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
@@ -59,7 +60,8 @@ public class TimeAvailabilityService {
     }
 
     @Transactional(readOnly = true)
-    public List<TimeAvailabilityResponse> getTimeAvailabilities(String meetingCode, String token) {
+    public List<TimeAvailabilitiesResponse> getTimeAvailabilities(
+            String meetingCode, String token) {
         Meeting meeting =
                 participantValidator.validateAndGetParticipant(meetingCode, token).getMeeting();
 
@@ -69,12 +71,17 @@ public class TimeAvailabilityService {
                 all.stream().collect(Collectors.groupingBy(ta -> ta.getParticipant().getId()));
 
         return byParticipantId.values().stream()
-                .map(rows -> buildResponse(rows.getFirst().getParticipant(), rows))
+                .map(
+                        rows ->
+                                TimeAvailabilitiesResponse.builder()
+                                        .nickname(rows.getFirst().getParticipant().getNickname())
+                                        .availabilities(buildEntries(rows))
+                                        .build())
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public TimeAvailabilityResponse getMyTimeAvailability(String meetingCode, String token) {
+    public List<TimeAvailabilityResponse> getMyTimeAvailability(String meetingCode, String token) {
         Participant participant =
                 participantValidator.validateAndGetParticipant(meetingCode, token);
 
@@ -82,11 +89,10 @@ public class TimeAvailabilityService {
                 timeAvailabilityRepository.findByMeetingAndParticipant(
                         participant.getMeeting(), participant);
 
-        return buildResponse(participant, rows);
+        return buildEntries(rows);
     }
 
-    private TimeAvailabilityResponse buildResponse(
-            Participant participant, List<TimeAvailability> rows) {
+    private List<TimeAvailabilityResponse> buildEntries(List<TimeAvailability> rows) {
         Map<Object, List<TimeAvailability>> grouped =
                 rows.stream()
                         .collect(
@@ -96,37 +102,31 @@ public class TimeAvailabilityService {
                                                         ? row.getDate()
                                                         : row.getDayOfWeek()));
 
-        List<TimeAvailabilityResponse.DailyAvailability> availabilities =
-                grouped.values().stream()
-                        .map(
-                                group -> {
-                                    LocalDate date = group.getFirst().getDate();
-                                    Integer dayOfWeek = group.getFirst().getDayOfWeek();
-                                    List<LocalTime> times =
-                                            group.stream()
-                                                    .map(TimeAvailability::getStartTime)
-                                                    .sorted()
-                                                    .toList();
-                                    return TimeAvailabilityResponse.DailyAvailability.builder()
-                                            .date(date)
-                                            .dayOfWeek(dayOfWeek)
-                                            .startTimes(times)
-                                            .build();
-                                })
-                        .sorted(
-                                (a, b) -> {
-                                    if (a.getDate() != null && b.getDate() != null)
-                                        return a.getDate().compareTo(b.getDate());
-                                    if (a.getDayOfWeek() != null && b.getDayOfWeek() != null)
-                                        return Integer.compare(a.getDayOfWeek(), b.getDayOfWeek());
-                                    return 0;
-                                })
-                        .toList();
-
-        return TimeAvailabilityResponse.builder()
-                .nickname(participant.getNickname())
-                .availabilities(availabilities)
-                .build();
+        return grouped.values().stream()
+                .map(
+                        group -> {
+                            LocalDate date = group.getFirst().getDate();
+                            Integer dayOfWeek = group.getFirst().getDayOfWeek();
+                            List<LocalTime> times =
+                                    group.stream()
+                                            .map(TimeAvailability::getStartTime)
+                                            .sorted()
+                                            .toList();
+                            return TimeAvailabilityResponse.builder()
+                                    .date(date)
+                                    .dayOfWeek(dayOfWeek)
+                                    .startTimes(times)
+                                    .build();
+                        })
+                .sorted(
+                        (a, b) -> {
+                            if (a.getDate() != null && b.getDate() != null)
+                                return a.getDate().compareTo(b.getDate());
+                            if (a.getDayOfWeek() != null && b.getDayOfWeek() != null)
+                                return Integer.compare(a.getDayOfWeek(), b.getDayOfWeek());
+                            return 0;
+                        })
+                .toList();
     }
 
     private void validateByMeetingType(Meeting meeting, TimeAvailabilityRequest request) {

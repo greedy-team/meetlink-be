@@ -1,5 +1,6 @@
 package com.greedy.meetlink.availability.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -11,16 +12,9 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TimeAvailabilityResponse {
-    private final String nickname;
-    private final List<DailyAvailability> availabilities;
-
-    @Getter
-    @Builder
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class DailyAvailability {
-        private final LocalDate date; // SPECIFIC_DATE
-        private final Integer dayOfWeek; // WEEKLY
-        private final List<LocalTime> startTimes;
-    }
+    private final LocalDate date;
+    private final Integer dayOfWeek;
+    private final List<LocalTime> startTimes;
 }

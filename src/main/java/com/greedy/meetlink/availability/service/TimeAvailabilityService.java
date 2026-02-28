@@ -132,12 +132,12 @@ public class TimeAvailabilityService {
     private void validateByMeetingType(Meeting meeting, TimeAvailabilityRequest request) {
         TimeAvailabilityType type = meeting.getTimeAvailabilityType();
 
-        for (TimeAvailabilityRequest.DailyAvailability daily : request.getAvailabilities()) {
-            if (type == TimeAvailabilityType.WEEKLY && daily.getDayOfWeek() == null) {
+        for (TimeAvailabilityRequest.Availability availability : request.getAvailabilities()) {
+            if (type == TimeAvailabilityType.WEEKLY && availability.getDayOfWeek() == null) {
                 throw new InvalidTimeAvailabilityException("요일 기반 모임은 요일 기반 입력만 가능합니다.");
             }
 
-            if (type == TimeAvailabilityType.SPECIFIC_DATE && daily.getDate() == null) {
+            if (type == TimeAvailabilityType.SPECIFIC_DATE && availability.getDate() == null) {
                 throw new InvalidTimeAvailabilityException("날짜 기반 모임은 날짜 기반 입력만 가능합니다.");
             }
         }

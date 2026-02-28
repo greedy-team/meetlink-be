@@ -1,5 +1,6 @@
 package com.greedy.meetlink.candidate.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.greedy.meetlink.candidate.entity.TimeCandidate;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,6 +12,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TimeCandidateResponse {
     private final LocalDate date;
     private final Integer dayOfWeek;

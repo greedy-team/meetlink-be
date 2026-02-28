@@ -30,16 +30,13 @@ public interface MeetingControllerSpec {
                                 {
                                     "status": true,
                                     "result": {
-                                        "id": 1,
                                         "name": "MeetLink 팀 회의",
                                         "code": "A1B2C3",
                                         "enableTimeRecommendation": true,
                                         "enablePlaceRecommendation": false,
                                         "timeAvailabilityType": "WEEKLY",
                                         "timeRangeStart": "09:00:00",
-                                        "timeRangeEnd": "18:00:00",
-                                        "createdAt": "2026-02-18T09:00:00",
-                                        "updatedAt": "2026-02-18T09:00:00"
+                                        "timeRangeEnd": "18:00:00"
                                     }
                                 }
                             """))),
@@ -54,7 +51,7 @@ public interface MeetingControllerSpec {
                                                         """
                             {
                                 "status": false,
-                                "code": "NOT_FOUND",
+                                "code": "MEETING_NOT_FOUND",
                                 "message": "모임을 찾을 수 없습니다."
                             }
                         """)))
@@ -93,16 +90,13 @@ public interface MeetingControllerSpec {
                                 {
                                     "status": true,
                                     "result": {
-                                        "id": 1,
                                         "name": "MeetLink 팀 회의",
                                         "code": "A1B2C3",
                                         "enableTimeRecommendation": true,
                                         "enablePlaceRecommendation": false,
                                         "timeAvailabilityType": "WEEKLY",
                                         "timeRangeStart": "09:00:00",
-                                        "timeRangeEnd": "18:00:00",
-                                        "createdAt": "2026-02-18T09:00:00",
-                                        "updatedAt": "2026-02-18T09:00:00"
+                                        "timeRangeEnd": "18:00:00"
                                     }
                                 }
                             """))),
@@ -166,16 +160,13 @@ public interface MeetingControllerSpec {
                                 {
                                     "status": true,
                                     "result": {
-                                        "id": 1,
                                         "name": "테스트",
                                         "code": "A1B2C3",
                                         "enableTimeRecommendation": true,
                                         "enablePlaceRecommendation": false,
                                         "timeAvailabilityType": "WEEKLY",
                                         "timeRangeStart": "09:00:00",
-                                        "timeRangeEnd": "18:00:00",
-                                        "createdAt": "2026-02-18T09:00:00",
-                                        "updatedAt": "2026-02-18T09:00:00"
+                                        "timeRangeEnd": "18:00:00"
                                     }
                                 }
                             """))),
@@ -220,7 +211,7 @@ public interface MeetingControllerSpec {
                                                         """
                             {
                                 "status": false,
-                                "code": "NOT_FOUND",
+                                "code": "MEETING_NOT_FOUND",
                                 "message": "모임을 찾을 수 없습니다."
                             }
                         """)))

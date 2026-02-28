@@ -25,6 +25,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
     }
 
+    @ExceptionHandler(LocationAvailabilityNotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleLocationAvailabilityNotFoundException(
+            LocationAvailabilityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ResponseCode.NOT_FOUND, e.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
@@ -93,14 +100,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handlePlaceRecommendationFailedException(
             PlaceRecommendationFailedException e) {
         log.error("Place recommendation failed", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
-    }
-
-    @ExceptionHandler(EmptyCoordinatesException.class)
-    public ResponseEntity<ApiResponse<?>> handleEmptyCoordinatesException(
-            EmptyCoordinatesException e) {
-        log.error("Empty coordinates encountered", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));
     }

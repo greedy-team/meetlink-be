@@ -3,8 +3,10 @@ package com.greedy.meetlink.common.config;
 import java.util.concurrent.Executor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @EnableAsync
 @Configuration
@@ -18,5 +20,14 @@ public class AsyncConfig {
         executor.setThreadNamePrefix("candidate-calculation-");
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public TaskScheduler locationCandidateScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(2);
+        scheduler.setThreadNamePrefix("location-debounce-");
+        scheduler.initialize();
+        return scheduler;
     }
 }

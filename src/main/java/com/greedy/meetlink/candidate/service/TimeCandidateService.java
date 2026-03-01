@@ -20,9 +20,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TimeCandidateService {
@@ -41,7 +43,12 @@ public class TimeCandidateService {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
-        if (!isCalculationRequired(meeting)) return toResponses(meeting);
+        if (!isCalculationRequired(meeting)) {
+            log.debug("Time candidate calculation skipped: meeting={}", code);
+            return toResponses(meeting);
+        }
+
+        log.info("Time candidate calculation started: meeting={}", code);
 
         List<TimeAvailabilityHeatmapRow> rows =
                 timeAvailabilityRepository.findHeatmapByMeetingCode(
@@ -60,6 +67,11 @@ public class TimeCandidateService {
 
         timeCandidateRepository.saveAll(candidates);
         updateMeetingResult(meeting, candidates);
+
+        log.info(
+                "Time candidate calculation completed: meeting={}, results={}",
+                code,
+                candidates.size());
 
         return candidates.stream().map(TimeCandidateResponse::from).toList();
     }

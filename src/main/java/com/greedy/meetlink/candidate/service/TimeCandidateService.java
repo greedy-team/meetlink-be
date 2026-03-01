@@ -39,13 +39,13 @@ public class TimeCandidateService {
     private final ParticipantValidator participantValidator;
 
     @Transactional
-    public List<TimeCandidateResponse> calculateTimeCandidates(String code) {
+    public void calculateTimeCandidates(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
         if (!isCalculationRequired(meeting)) {
             log.debug("Time candidate calculation skipped: meeting={}", code);
-            return toResponses(meeting);
+            return;
         }
 
         log.info("Time candidate calculation started: meeting={}", code);
@@ -56,7 +56,7 @@ public class TimeCandidateService {
 
         if (rows.isEmpty()) {
             timeCandidateRepository.deleteByMeeting(meeting);
-            return List.of();
+            return;
         }
 
         // 기존 후보 삭제
@@ -72,8 +72,6 @@ public class TimeCandidateService {
                 "Time candidate calculation completed: meeting={}, results={}",
                 code,
                 candidates.size());
-
-        return candidates.stream().map(TimeCandidateResponse::from).toList();
     }
 
     @Transactional(readOnly = true)

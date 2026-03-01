@@ -23,8 +23,7 @@ public enum ResponseCode {
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     INVALID_PARTICIPANT_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 참여자 토큰입니다."),
     INVALID_TIME_AVAILABILITY(HttpStatus.BAD_REQUEST, "시간 입력이 올바르지 않습니다."),
-    MEETING_CODE_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "모임 코드 생성 중 오류가 발생했습니다."),
-    PLACE_RECOMMENDATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "추천 가능한 장소가 없습니다.");
+    PLACE_CANDIDATE_CALCULATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "추천 가능한 장소가 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

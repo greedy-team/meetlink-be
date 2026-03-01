@@ -6,6 +6,7 @@ import com.greedy.meetlink.availability.dto.response.TimeAvailabilityResponse;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
+import com.greedy.meetlink.candidate.event.TimeAvailabilitySubmittedEvent;
 import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TimeAvailabilityService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final ParticipantValidator participantValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void submit(String meetingCode, String token, TimeAvailabilityRequest request) {
@@ -57,6 +60,8 @@ public class TimeAvailabilityService {
 
         // 시간 제출 여부 체크
         participant.markTimeSubmitted();
+
+        eventPublisher.publishEvent(new TimeAvailabilitySubmittedEvent(meetingCode));
     }
 
     @Transactional(readOnly = true)

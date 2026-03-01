@@ -2,7 +2,6 @@ package com.greedy.meetlink.meeting.service;
 
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
-import com.greedy.meetlink.common.exception.MeetingCodeGenerationException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
@@ -108,6 +107,6 @@ public class MeetingService {
                 return code;
             }
         }
-        throw new MeetingCodeGenerationException();
+        throw new IllegalStateException("Failed to generate unique meeting code");
     }
 }

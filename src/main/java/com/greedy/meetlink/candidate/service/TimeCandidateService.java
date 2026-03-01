@@ -20,9 +20,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TimeCandidateService {
@@ -37,11 +39,16 @@ public class TimeCandidateService {
     private final ParticipantValidator participantValidator;
 
     @Transactional
-    public List<TimeCandidateResponse> calculateTimeCandidates(String code) {
+    public void calculateTimeCandidates(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
-        if (!isCalculationRequired(meeting)) return toResponses(meeting);
+        if (!isCalculationRequired(meeting)) {
+            log.debug("Time candidate calculation skipped: meeting={}", code);
+            return;
+        }
+
+        log.info("Time candidate calculation started: meeting={}", code);
 
         List<TimeAvailabilityHeatmapRow> rows =
                 timeAvailabilityRepository.findHeatmapByMeetingCode(
@@ -49,7 +56,7 @@ public class TimeCandidateService {
 
         if (rows.isEmpty()) {
             timeCandidateRepository.deleteByMeeting(meeting);
-            return List.of();
+            return;
         }
 
         // 기존 후보 삭제
@@ -61,7 +68,10 @@ public class TimeCandidateService {
         timeCandidateRepository.saveAll(candidates);
         updateMeetingResult(meeting, candidates);
 
-        return candidates.stream().map(TimeCandidateResponse::from).toList();
+        log.info(
+                "Time candidate calculation completed: meeting={}, results={}",
+                code,
+                candidates.size());
     }
 
     @Transactional(readOnly = true)

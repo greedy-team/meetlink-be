@@ -4,10 +4,12 @@ import com.greedy.meetlink.availability.dto.request.LocationAvailabilityRequest;
 import com.greedy.meetlink.availability.dto.response.LocationAvailabilityResponse;
 import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
+import com.greedy.meetlink.candidate.event.LocationAvailabilitySubmittedEvent;
 import com.greedy.meetlink.common.exception.LocationAvailabilityNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.participant.entity.Participant;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LocationAvailabilityService {
     private final LocationAvailabilityRepository locationAvailabilityRepository;
     private final ParticipantValidator participantValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void submit(String meetingCode, String token, LocationAvailabilityRequest request) {
@@ -46,6 +49,8 @@ public class LocationAvailabilityService {
 
         // 장소 제출 여부 체크
         participant.markLocationSubmitted();
+
+        eventPublisher.publishEvent(new LocationAvailabilitySubmittedEvent(meetingCode));
     }
 
     @Transactional(readOnly = true)

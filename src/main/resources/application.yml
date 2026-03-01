@@ -26,7 +26,7 @@ kakao:
   api-key: ${KAKAO_API_KEY}
 sentry:
   dsn: ${SENTRY_DSN}
-  environment: ${SPRING_PROFILE}
+  environment: ${SPRING_PROFILES_ACTIVE}
   logs:
     enabled: true
   send-default-pii: true

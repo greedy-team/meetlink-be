@@ -2,6 +2,7 @@ package com.greedy.meetlink.common.exception;
 
 import com.greedy.meetlink.common.ApiResponse;
 import com.greedy.meetlink.common.ResponseCode;
+import io.sentry.Sentry;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleAppException(AppException e) {
         if (e.getResponseCode().getHttpStatus().is5xxServerError()) {
             log.error("Application error occurred: ", e);
+            Sentry.captureException(e);
         }
 
         return ResponseEntity.status(e.getResponseCode().getHttpStatus())
@@ -74,6 +76,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleFallbackException(Exception e) {
         log.error("Unexpected server error occurred: ", e);
+        Sentry.captureException(e);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(ResponseCode.INTERNAL_ERROR));

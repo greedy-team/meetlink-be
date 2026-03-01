@@ -24,7 +24,7 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          SPRING_PROFILE: prod
+          SPRING_PROFILES_ACTIVE: prod
           APP_IMAGE: ghcr.io/${{ github.repository }}:prod-latest
           KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}

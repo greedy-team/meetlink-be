@@ -17,8 +17,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -112,15 +116,15 @@ public class TimeCandidateService {
 
     /** DB aggregation 결과 -> 후보 상위 N개 생성 */
     private List<TimeCandidate> buildCandidates(Meeting meeting) {
-        List<TimeAvailability> rawAvailabilities =
-                timeAvailabilityRepository.findValidAvailabilities(
+        List<TimeAvailability> availabilities =
+                timeAvailabilityRepository.findByMeetingCodeInTimeRange(
                         meeting.getCode(), meeting.getTimeRangeStart(), meeting.getTimeRangeEnd());
 
-        if (rawAvailabilities.isEmpty()) {
+        if (availabilities.isEmpty()) {
             return List.of();
         }
 
-        List<TimeCandidate> mergedCandidates = mergeInJava(rawAvailabilities, meeting);
+        List<TimeCandidate> mergedCandidates = mergeConsecutiveSlots(availabilities, meeting);
 
         mergedCandidates.sort(
                 Comparator.comparing(TimeCandidate::getAvailableCount, Comparator.reverseOrder())
@@ -141,9 +145,8 @@ public class TimeCandidateService {
         return ranked;
     }
 
-    private record TimeSlot(LocalDate date, Integer dayOfWeek, LocalTime startTime) {}
-
-    private List<TimeCandidate> mergeInJava(List<TimeAvailability> rawList, Meeting meeting) {
+    private List<TimeCandidate> mergeConsecutiveSlots(
+            List<TimeAvailability> rawList, Meeting meeting) {
         rawList.sort(
                 Comparator.comparing(
                                 TimeAvailability::getDate,
@@ -153,11 +156,10 @@ public class TimeCandidateService {
                                 Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(TimeAvailability::getStartTime));
 
-        Map<TimeSlot, Set<Long>> grouped = new java.util.LinkedHashMap<>();
+        Map<TimeSlot, Set<Long>> grouped = new LinkedHashMap<>();
         for (TimeAvailability ta : rawList) {
             TimeSlot slot = new TimeSlot(ta.getDate(), ta.getDayOfWeek(), ta.getStartTime());
-            grouped.computeIfAbsent(slot, k -> new java.util.HashSet<>())
-                    .add(ta.getParticipant().getId());
+            grouped.computeIfAbsent(slot, k -> new HashSet<>()).add(ta.getParticipant().getId());
         }
 
         if (grouped.isEmpty()) {
@@ -165,25 +167,24 @@ public class TimeCandidateService {
         }
 
         List<TimeCandidate> merged = new ArrayList<>();
-        java.util.Iterator<Map.Entry<TimeSlot, java.util.Set<Long>>> iterator =
-                grouped.entrySet().iterator();
-        Map.Entry<TimeSlot, java.util.Set<Long>> firstEntry = iterator.next();
+        Iterator<Map.Entry<TimeSlot, Set<Long>>> iterator = grouped.entrySet().iterator();
+        Map.Entry<TimeSlot, Set<Long>> firstEntry = iterator.next();
 
         LocalDate candidateDate = firstEntry.getKey().date();
         Integer candidateDayOfWeek = firstEntry.getKey().dayOfWeek();
         LocalTime candidateStart = firstEntry.getKey().startTime();
         LocalTime candidateEnd = candidateStart.plusMinutes(SLOT_MINUTES);
-        java.util.Set<Long> candidateParticipants = firstEntry.getValue();
+        Set<Long> candidateParticipants = firstEntry.getValue();
 
         while (iterator.hasNext()) {
-            Map.Entry<TimeSlot, java.util.Set<Long>> entry = iterator.next();
+            Map.Entry<TimeSlot, Set<Long>> entry = iterator.next();
             TimeSlot currentSlot = entry.getKey();
-            java.util.Set<Long> currentParticipants = entry.getValue();
+            Set<Long> currentParticipants = entry.getValue();
 
             boolean consecutive = candidateEnd.equals(currentSlot.startTime());
             boolean sameDay =
-                    java.util.Objects.equals(candidateDayOfWeek, currentSlot.dayOfWeek())
-                            && java.util.Objects.equals(candidateDate, currentSlot.date());
+                    Objects.equals(candidateDayOfWeek, currentSlot.dayOfWeek())
+                            && Objects.equals(candidateDate, currentSlot.date());
 
             boolean sameParticipants = candidateParticipants.equals(currentParticipants);
 
@@ -218,4 +219,6 @@ public class TimeCandidateService {
 
         return merged;
     }
+
+    private record TimeSlot(LocalDate date, Integer dayOfWeek, LocalTime startTime) {}
 }

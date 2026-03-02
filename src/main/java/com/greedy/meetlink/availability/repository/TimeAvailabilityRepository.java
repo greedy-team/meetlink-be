@@ -1,7 +1,6 @@
 package com.greedy.meetlink.availability.repository;
 
 import com.greedy.meetlink.availability.entity.TimeAvailability;
-import com.greedy.meetlink.availability.repository.projection.TimeAvailabilityHeatmapRow;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.participant.entity.Participant;
 import java.time.LocalTime;
@@ -33,27 +32,20 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
             "DELETE FROM TimeAvailability ta WHERE ta.meeting = :meeting AND ta.startTime >= :rangeEnd")
     void deleteFromRangeEnd(Meeting meeting, LocalTime rangeEnd);
 
-    @Query(
-            """
-        SELECT
-            ta.date AS date,
-            ta.dayOfWeek AS dayOfWeek,
-            ta.startTime AS startTime,
-            COUNT(ta) AS availableCount
-        FROM TimeAvailability ta
-        WHERE ta.meeting.code = :code
-          AND ta.startTime >= :rangeStart
-          AND ta.startTime < :rangeEnd
-        GROUP BY ta.date, ta.dayOfWeek, ta.startTime
-        ORDER BY COUNT(ta) DESC,
-                ta.date ASC,
-                ta.dayOfWeek ASC,
-                ta.startTime ASC
-    """)
-    List<TimeAvailabilityHeatmapRow> findHeatmapByMeetingCode(
-            String code, LocalTime rangeStart, LocalTime rangeEnd);
-
     List<TimeAvailability> findByMeeting(Meeting meeting);
 
     List<TimeAvailability> findByMeetingAndParticipant(Meeting meeting, Participant participant);
+
+    @Query(
+            """
+        SELECT ta
+        FROM TimeAvailability ta
+        JOIN FETCH ta.participant
+        WHERE ta.meeting.code = :code
+          AND ta.startTime >= :rangeStart
+          AND ta.startTime < :rangeEnd
+        ORDER BY ta.date ASC, ta.dayOfWeek ASC, ta.startTime ASC
+    """)
+    List<TimeAvailability> findByMeetingCodeInTimeRange(
+            String code, LocalTime rangeStart, LocalTime rangeEnd);
 }

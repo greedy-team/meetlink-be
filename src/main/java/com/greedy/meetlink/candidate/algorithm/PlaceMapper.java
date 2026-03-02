@@ -3,7 +3,6 @@ package com.greedy.meetlink.candidate.algorithm;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.FilteredCandidate;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.ParticipantTravelTime;
 import com.greedy.meetlink.candidate.algorithm.ScoreCalculator.ScoreResult;
-import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.client.PoiClient;
 import com.greedy.meetlink.common.client.TransitClient;
 import com.greedy.meetlink.common.client.dto.PoiSearchResponse.PoiPlace;
@@ -31,7 +30,7 @@ public class PlaceMapper {
             Coordinate coord = candidate.coordinate();
             List<ParticipantTravelTime> originalTimes = candidate.participantTravelTimes();
 
-            List<PoiPlace> places = poiClient.searchNearby(coord);
+            List<PoiPlace> places = poiClient.searchNearby(coord.latitude(), coord.longitude());
 
             String name;
             String address;
@@ -84,7 +83,11 @@ public class PlaceMapper {
 
         for (ParticipantTravelTime ptt : originalTimes) {
             Double recalcTime =
-                    transitClient.getTravelTimeSeconds(ptt.participantCoordinate(), poiCoord);
+                    transitClient.getTravelTimeSeconds(
+                            ptt.participantCoordinate().latitude(),
+                            ptt.participantCoordinate().longitude(),
+                            poiCoord.latitude(),
+                            poiCoord.longitude());
             if (recalcTime == null) {
                 log.warn(
                         "POI travel time recalculation failed, using original value: poi={}",

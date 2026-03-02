@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
-import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
+import com.greedy.meetlink.candidate.entity.TimeCandidate;
+import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.config.MockClientConfig;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(MockClientConfig.class)
 class TimeCandidateServiceTest {
     @Autowired private TimeCandidateService timeCandidateService;
+    @Autowired private TimeCandidateRepository timeCandidateRepository;
     @Autowired private TimeAvailabilityRepository timeAvailabilityRepository;
     @Autowired private ParticipantRepository participantRepository;
     @Autowired private MeetingRepository meetingRepository;
@@ -92,19 +94,20 @@ class TimeCandidateServiceTest {
                                 .build()));
 
         // when
-        List<TimeCandidateResponse> response = timeCandidateService.calculate(meetingCode);
+        timeCandidateService.calculateTimeCandidates(meetingCode);
 
         // then
-        assertThat(response).hasSize(2);
+        List<TimeCandidate> saved = timeCandidateRepository.findByMeetingOrderByRankAsc(meeting);
+        assertThat(saved).hasSize(2);
 
         // 첫 번째 후보
-        TimeCandidateResponse first = response.getFirst();
+        TimeCandidate first = saved.getFirst();
         assertThat(first.getStartTime()).isEqualTo(LocalTime.of(10, 0));
         assertThat(first.getEndTime()).isEqualTo(LocalTime.of(10, 30)); // 묶인 상태
         assertThat(first.getAvailableCount()).isEqualTo(2);
 
         // 두 번째 후보
-        TimeCandidateResponse second = response.get(1);
+        TimeCandidate second = saved.get(1);
         assertThat(second.getStartTime()).isEqualTo(LocalTime.of(10, 30));
         assertThat(second.getEndTime()).isEqualTo(LocalTime.of(11, 0)); // 묶인 상태
         assertThat(second.getAvailableCount()).isEqualTo(1);
@@ -154,19 +157,20 @@ class TimeCandidateServiceTest {
                                 .build()));
 
         // when
-        List<TimeCandidateResponse> response = timeCandidateService.calculate(meetingCode);
+        timeCandidateService.calculateTimeCandidates(meetingCode);
 
         // then
-        assertThat(response).hasSize(2);
+        List<TimeCandidate> saved = timeCandidateRepository.findByMeetingOrderByRankAsc(meeting);
+        assertThat(saved).hasSize(2);
 
         // 첫 번째 후보
-        TimeCandidateResponse first = response.getFirst();
+        TimeCandidate first = saved.getFirst();
         assertThat(first.getDate()).isEqualTo(date1);
         assertThat(first.getStartTime()).isEqualTo(LocalTime.of(15, 0));
         assertThat(first.getEndTime()).isEqualTo(LocalTime.of(15, 30));
 
         // 두 번째 후보
-        TimeCandidateResponse second = response.get(1);
+        TimeCandidate second = saved.get(1);
         assertThat(second.getDate()).isEqualTo(date2);
         assertThat(second.getStartTime()).isEqualTo(LocalTime.of(15, 30));
         assertThat(second.getEndTime()).isEqualTo(LocalTime.of(16, 0));
@@ -236,19 +240,20 @@ class TimeCandidateServiceTest {
                                 .build()));
 
         // when
-        List<TimeCandidateResponse> response = timeCandidateService.calculate(meetingCode);
+        timeCandidateService.calculateTimeCandidates(meetingCode);
 
         // then
-        assertThat(response).hasSize(2);
+        List<TimeCandidate> saved = timeCandidateRepository.findByMeetingOrderByRankAsc(meeting);
+        assertThat(saved).hasSize(2);
 
         // 첫 번째 후보
-        TimeCandidateResponse first = response.get(0);
+        TimeCandidate first = saved.get(0);
         assertThat(first.getStartTime()).isEqualTo(LocalTime.of(16, 0));
         assertThat(first.getEndTime()).isEqualTo(LocalTime.of(17, 0));
         assertThat(first.getAvailableCount()).isEqualTo(1);
 
         // 두 번째 후보
-        TimeCandidateResponse second = response.get(1);
+        TimeCandidate second = saved.get(1);
         assertThat(second.getStartTime()).isEqualTo(LocalTime.of(17, 0));
         assertThat(second.getEndTime()).isEqualTo(LocalTime.of(18, 0));
         assertThat(second.getAvailableCount()).isEqualTo(1);

@@ -32,7 +32,6 @@ class MeetingServiceTest {
         String code = "TEST_CODE";
 
         Meeting mockMeeting = mock(Meeting.class);
-        given(mockMeeting.getId()).willReturn(1L);
         given(mockMeeting.getName()).willReturn("그리디 모임");
         given(mockMeeting.getCode()).willReturn(code);
         given(mockMeeting.getTimeRangeStart()).willReturn(LocalTime.of(10, 0));
@@ -44,11 +43,10 @@ class MeetingServiceTest {
         given(meetingRepository.findByCode(code)).willReturn(Optional.of(mockMeeting));
 
         // when
-        MeetingResponse response = meetingService.get(code);
+        MeetingResponse response = meetingService.getMeeting(code);
 
         // then
         // 기본 정보 검증
-        assertThat(response.getId()).isEqualTo(1L);
         assertThat(response.getName()).isEqualTo("그리디 모임");
         assertThat(response.getCode()).isEqualTo(code);
         assertThat(response.getTimeRangeStart()).isEqualTo(LocalTime.of(10, 0));
@@ -63,7 +61,7 @@ class MeetingServiceTest {
         given(meetingRepository.findByCode(wrongCode)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> meetingService.get(wrongCode))
+        assertThatThrownBy(() -> meetingService.getMeeting(wrongCode))
                 .isInstanceOf(MeetingNotFoundException.class);
     }
 }

@@ -3,6 +3,7 @@ package com.greedy.meetlink.candidate.service;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter;
 import com.greedy.meetlink.candidate.algorithm.CandidateScorer;
+import com.greedy.meetlink.candidate.algorithm.Coordinate;
 import com.greedy.meetlink.candidate.algorithm.GeometricMedianCalculator;
 import com.greedy.meetlink.candidate.algorithm.PlaceMapper;
 import com.greedy.meetlink.candidate.algorithm.PlaceMapper.MatchedPlace;
@@ -10,9 +11,9 @@ import com.greedy.meetlink.candidate.algorithm.PolarSamplingGenerator;
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
-import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
-import com.greedy.meetlink.common.exception.PlaceRecommendationFailedException;
+import com.greedy.meetlink.common.exception.PlaceCandidateCalculationFailedException;
+import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -42,16 +43,17 @@ public class PlaceCandidateService {
     private final MeetingResultRepository meetingResultRepository;
     private final ParticipantRepository participantRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
+    private final ParticipantValidator participantValidator;
 
     @Transactional
-    public List<PlaceCandidateResponse> calculate(String code) {
+    public void calculatePlaceCandidates(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
         List<Participant> participants = participantRepository.findByMeeting(meeting);
 
         if (!isCalculationRequired(meeting, participants)) {
-            return toResponses(meeting);
+            return;
         }
 
         log.info(
@@ -64,10 +66,10 @@ public class PlaceCandidateService {
                         .map(la -> new Coordinate(la.getLatitude(), la.getLongitude()))
                         .toList();
 
-        List<MatchedPlace> matchedPlaces = computeRecommendedPlaces(coordinates);
+        List<MatchedPlace> matchedPlaces = computePlaceCandidates(coordinates);
 
         if (matchedPlaces.isEmpty()) {
-            throw new PlaceRecommendationFailedException();
+            throw new PlaceCandidateCalculationFailedException();
         }
 
         placeCandidateRepository.deleteByMeeting(meeting);
@@ -78,14 +80,11 @@ public class PlaceCandidateService {
                 "Place candidate calculation completed: meeting={}, results={}",
                 code,
                 savedCandidates.size());
-
-        return savedCandidates.stream().map(PlaceCandidateResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<PlaceCandidateResponse> list(String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+    public List<PlaceCandidateResponse> getPlaceCandidates(String code, String token) {
+        Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
         return toResponses(meeting);
     }
 
@@ -118,7 +117,7 @@ public class PlaceCandidateService {
         result.updatePlaceCandidate(topCandidate);
     }
 
-    private List<MatchedPlace> computeRecommendedPlaces(List<Coordinate> coordinates) {
+    private List<MatchedPlace> computePlaceCandidates(List<Coordinate> coordinates) {
         log.debug("[1] Participants: {} locations", coordinates.size());
 
         Coordinate center = geometricMedianCalculator.calculate(coordinates);

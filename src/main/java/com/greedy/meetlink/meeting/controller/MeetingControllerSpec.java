@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "Meeting", description = "모임 API")
 public interface MeetingControllerSpec {
@@ -29,16 +30,13 @@ public interface MeetingControllerSpec {
                                 {
                                     "status": true,
                                     "result": {
-                                        "id": 1,
                                         "name": "MeetLink 팀 회의",
                                         "code": "A1B2C3",
                                         "enableTimeRecommendation": true,
                                         "enablePlaceRecommendation": false,
                                         "timeAvailabilityType": "WEEKLY",
                                         "timeRangeStart": "09:00:00",
-                                        "timeRangeEnd": "18:00:00",
-                                        "createdAt": "2026-02-18T09:00:00",
-                                        "updatedAt": "2026-02-18T09:00:00"
+                                        "timeRangeEnd": "18:00:00"
                                     }
                                 }
                             """))),
@@ -53,12 +51,12 @@ public interface MeetingControllerSpec {
                                                         """
                             {
                                 "status": false,
-                                "code": "NOT_FOUND",
+                                "code": "MEETING_NOT_FOUND",
                                 "message": "모임을 찾을 수 없습니다."
                             }
                         """)))
     })
-    ApiResponse<MeetingResponse> get(@PathVariable String code);
+    ApiResponse<MeetingResponse> getMeeting(@PathVariable String code);
 
     @Operation(
             summary = "모임 생성",
@@ -92,16 +90,13 @@ public interface MeetingControllerSpec {
                                 {
                                     "status": true,
                                     "result": {
-                                        "id": 1,
                                         "name": "MeetLink 팀 회의",
                                         "code": "A1B2C3",
                                         "enableTimeRecommendation": true,
                                         "enablePlaceRecommendation": false,
                                         "timeAvailabilityType": "WEEKLY",
                                         "timeRangeStart": "09:00:00",
-                                        "timeRangeEnd": "18:00:00",
-                                        "createdAt": "2026-02-18T09:00:00",
-                                        "updatedAt": "2026-02-18T09:00:00"
+                                        "timeRangeEnd": "18:00:00"
                                     }
                                 }
                             """))),
@@ -136,7 +131,7 @@ public interface MeetingControllerSpec {
                                     """)
                                 }))
     })
-    ApiResponse<MeetingResponse> create(@Valid @RequestBody MeetingCreateRequest request);
+    ApiResponse<MeetingResponse> createMeeting(@Valid @RequestBody MeetingCreateRequest request);
 
     @Operation(
             summary = "모임 수정",
@@ -165,16 +160,13 @@ public interface MeetingControllerSpec {
                                 {
                                     "status": true,
                                     "result": {
-                                        "id": 1,
                                         "name": "테스트",
                                         "code": "A1B2C3",
                                         "enableTimeRecommendation": true,
                                         "enablePlaceRecommendation": false,
                                         "timeAvailabilityType": "WEEKLY",
                                         "timeRangeStart": "09:00:00",
-                                        "timeRangeEnd": "18:00:00",
-                                        "createdAt": "2026-02-18T09:00:00",
-                                        "updatedAt": "2026-02-18T09:00:00"
+                                        "timeRangeEnd": "18:00:00"
                                     }
                                 }
                             """))),
@@ -219,44 +211,13 @@ public interface MeetingControllerSpec {
                                                         """
                             {
                                 "status": false,
-                                "code": "NOT_FOUND",
+                                "code": "MEETING_NOT_FOUND",
                                 "message": "모임을 찾을 수 없습니다."
                             }
                         """)))
     })
-    ApiResponse<MeetingResponse> update(
-            @PathVariable String code, @Valid @RequestBody MeetingUpdateRequest request);
-
-    @Operation(summary = "모임 삭제")
-    @ApiResponses({
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                responseCode = "200",
-                description = "삭제 성공",
-                content =
-                        @Content(
-                                examples =
-                                        @ExampleObject(
-                                                value =
-                                                        """
-                            {
-                                "status": true
-                            }
-                        """))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                responseCode = "404",
-                description = "모임 없음",
-                content =
-                        @Content(
-                                examples =
-                                        @ExampleObject(
-                                                value =
-                                                        """
-                            {
-                                "status": false,
-                                "code": "NOT_FOUND",
-                                "message": "모임을 찾을 수 없습니다."
-                            }
-                        """)))
-    })
-    ApiResponse<Void> delete(@PathVariable String code);
+    ApiResponse<MeetingResponse> updateMeeting(
+            @PathVariable String code,
+            @RequestHeader("X-Participant-Token") String token,
+            @Valid @RequestBody MeetingUpdateRequest request);
 }

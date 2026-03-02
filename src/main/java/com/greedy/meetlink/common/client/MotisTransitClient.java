@@ -1,6 +1,5 @@
 package com.greedy.meetlink.common.client;
 
-import com.greedy.meetlink.common.Coordinate;
 import com.greedy.meetlink.common.client.dto.MotisRouteResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +23,10 @@ public class MotisTransitClient implements TransitClient {
     }
 
     @Override
-    public Double getTravelTimeSeconds(Coordinate origin, Coordinate destination) {
-        String fromPlace = origin.latitude() + "," + origin.longitude();
-        String toPlace = destination.latitude() + "," + destination.longitude();
+    public Double getTravelTimeSeconds(
+            double originLat, double originLon, double destLat, double destLon) {
+        String fromPlace = originLat + "," + originLon;
+        String toPlace = destLat + "," + destLon;
 
         try {
             MotisRouteResponse response =
@@ -44,9 +44,11 @@ public class MotisTransitClient implements TransitClient {
 
             if (response == null) {
                 log.warn(
-                        "MOTIS API returned null response: origin={}, destination={}",
-                        origin,
-                        destination);
+                        "MOTIS API returned null response: origin=({}, {}), destination=({}, {})",
+                        originLat,
+                        originLon,
+                        destLat,
+                        destLon);
                 return null;
             }
 
@@ -60,7 +62,12 @@ public class MotisTransitClient implements TransitClient {
             }
 
             if (seconds == null) {
-                log.warn("MOTIS no route found: origin={}, destination={}", origin, destination);
+                log.warn(
+                        "MOTIS no route found: origin=({}, {}), destination=({}, {})",
+                        originLat,
+                        originLon,
+                        destLat,
+                        destLon);
             }
             return seconds;
 

@@ -25,30 +25,42 @@ public class LocationAvailability {
     @JoinColumn(name = "participant_id", nullable = false, unique = true)
     private Participant participant;
 
+    private String name;
     private String address;
     private double latitude;
     private double longitude;
 
     @Builder
     private LocationAvailability(
-            Participant participant, String address, double latitude, double longitude) {
+            Participant participant,
+            String name,
+            String address,
+            double latitude,
+            double longitude) {
         this.participant = participant;
+        this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
     public static LocationAvailability create(
-            Participant participant, String address, double latitude, double longitude) {
+            Participant participant,
+            String name,
+            String address,
+            double latitude,
+            double longitude) {
         return LocationAvailability.builder()
                 .participant(participant)
+                .name(name)
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)
                 .build();
     }
 
-    public void update(String address, double latitude, double longitude) {
+    public void update(String name, String address, double latitude, double longitude) {
+        this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;

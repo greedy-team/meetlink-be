@@ -194,9 +194,10 @@ public interface AvailabilityControllerSpec {
                                                             value =
                                                                     """
                                             {
-                                                 "address": "서울 강남구",
-                                                 "latitude": 37.3,
-                                                 "longitude": 127.1
+                                                 "name": "세종대학교",
+                                                 "address": "서울 광진구 능동로 209",
+                                                 "latitude": 37.551604,
+                                                 "longitude": 127.073177
                                              }
                                             """))))
     @ApiResponses({
@@ -263,9 +264,10 @@ public interface AvailabilityControllerSpec {
                                             {
                                                  "status": true,
                                                  "result": {
-                                                     "address": "서울역",
-                                                     "latitude": 37.555946,
-                                                     "longitude": 126.972317
+                                                     "name": "세종대학교",
+                                                     "address": "서울 광진구 능동로 209",
+                                                     "latitude": 37.551604,
+                                                     "longitude": 127.073177
                                                  }
                                              }
                                             """))),

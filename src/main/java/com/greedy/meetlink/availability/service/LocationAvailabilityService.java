@@ -32,6 +32,7 @@ public class LocationAvailabilityService {
                         .map(
                                 (existing) -> {
                                     existing.update(
+                                            request.getName(),
                                             request.getAddress(),
                                             request.getLatitude(),
                                             request.getLongitude());
@@ -41,6 +42,7 @@ public class LocationAvailabilityService {
                                 () ->
                                         LocationAvailability.create(
                                                 participant,
+                                                request.getName(),
                                                 request.getAddress(),
                                                 request.getLatitude(),
                                                 request.getLongitude()));

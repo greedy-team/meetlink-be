@@ -37,4 +37,10 @@ public class TimeAvailability {
 
     @Column(nullable = false)
     private LocalTime startTime;
+
+    public TimeAvailability(Meeting meeting, Participant participant, LocalTime startTime) {
+        this.meeting = meeting;
+        this.participant = participant;
+        this.startTime = startTime;
+    }
 }

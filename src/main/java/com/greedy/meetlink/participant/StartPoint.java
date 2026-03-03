@@ -26,4 +26,11 @@ public class StartPoint {
     private String address;
     private double latitude;
     private double longitude;
+
+    public StartPoint(Participant participant, String address, double latitude, double longitude) {
+        this.participant = participant;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }

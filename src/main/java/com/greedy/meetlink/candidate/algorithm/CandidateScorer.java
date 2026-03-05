@@ -4,6 +4,7 @@ import com.greedy.meetlink.candidate.algorithm.CandidateFilter.FilteredCandidate
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.ParticipantTravelTime;
 import com.greedy.meetlink.candidate.algorithm.ScoreCalculator.ScoreResult;
 import com.greedy.meetlink.common.client.TransitClient;
+import com.greedy.meetlink.common.client.dto.RouteInfo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,14 +35,14 @@ public class CandidateScorer {
             Coordinate candidate, List<Coordinate> participants) {
         List<ParticipantTravelTime> times = new ArrayList<>();
         for (Coordinate p : participants) {
-            Double t =
-                    transitClient.getTravelTimeSeconds(
+            RouteInfo plan =
+                    transitClient.getPlan(
                             p.latitude(),
                             p.longitude(),
                             candidate.latitude(),
                             candidate.longitude());
-            if (t == null) return null;
-            times.add(new ParticipantTravelTime(p, t));
+            if (plan == null) return null;
+            times.add(new ParticipantTravelTime(p, plan.travelTime()));
         }
         return new FilteredCandidate(candidate, times);
     }

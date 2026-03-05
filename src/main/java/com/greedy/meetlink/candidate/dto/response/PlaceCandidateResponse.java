@@ -1,6 +1,8 @@
 package com.greedy.meetlink.candidate.dto.response;
 
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidateRoute;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +19,14 @@ public class PlaceCandidateResponse {
     private final Double avgTravelTime;
     private final Double maxTravelTime;
     private final Integer rank;
+    private final List<ParticipantRouteResponse> routes;
 
     public static PlaceCandidateResponse from(PlaceCandidate candidate) {
+        return from(candidate, List.of());
+    }
+
+    public static PlaceCandidateResponse from(
+            PlaceCandidate candidate, List<PlaceCandidateRoute> routes) {
         return PlaceCandidateResponse.builder()
                 .name(candidate.getName())
                 .address(candidate.getAddress())
@@ -27,6 +35,7 @@ public class PlaceCandidateResponse {
                 .avgTravelTime(candidate.getAvgTravelTime())
                 .maxTravelTime(candidate.getMaxTravelTime())
                 .rank(candidate.getRank())
+                .routes(routes.stream().map(ParticipantRouteResponse::from).toList())
                 .build();
     }
 }

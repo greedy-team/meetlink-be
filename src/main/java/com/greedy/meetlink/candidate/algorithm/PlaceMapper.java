@@ -6,6 +6,7 @@ import com.greedy.meetlink.candidate.algorithm.ScoreCalculator.ScoreResult;
 import com.greedy.meetlink.common.client.PoiClient;
 import com.greedy.meetlink.common.client.TransitClient;
 import com.greedy.meetlink.common.client.dto.PoiSearchResponse.PoiPlace;
+import com.greedy.meetlink.common.client.dto.RouteInfo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +36,7 @@ public class PlaceMapper {
             String name;
             String address;
             Coordinate poiCoord;
-            List<Double> travelTimes;
+            List<RouteInfo> routes;
 
             if (places.isEmpty()) {
                 log.debug(
@@ -52,7 +53,13 @@ public class PlaceMapper {
             poiCoord = new Coordinate(place.latitude(), place.longitude());
             log.debug("[6-{}] POI matched: {} / {}", i + 1, name, address);
 
-            travelTimes = recalculateTravelTimes(originalTimes, poiCoord);
+            routes = fetchRoutes(originalTimes, poiCoord);
+            List<Double> travelTimes = new ArrayList<>();
+            for (int j = 0; j < routes.size(); j++) {
+                RouteInfo r = routes.get(j);
+                travelTimes.add(
+                        r != null ? r.travelTime() : originalTimes.get(j).travelTimeSeconds());
+            }
 
             ScoreResult scoreResult = scoreCalculator.calculate(travelTimes);
             log.debug(
@@ -69,7 +76,8 @@ public class PlaceMapper {
                             poiCoord,
                             scoreResult.avg(),
                             scoreResult.max(),
-                            scoreResult.score()));
+                            scoreResult.score(),
+                            routes));
         }
 
         results.sort(Comparator.comparingDouble(MatchedPlace::score));
@@ -77,26 +85,26 @@ public class PlaceMapper {
         return results;
     }
 
-    private List<Double> recalculateTravelTimes(
+    private List<RouteInfo> fetchRoutes(
             List<ParticipantTravelTime> originalTimes, Coordinate poiCoord) {
-        List<Double> times = new ArrayList<>();
+        List<RouteInfo> routes = new ArrayList<>();
 
         for (ParticipantTravelTime ptt : originalTimes) {
-            Double recalcTime =
-                    transitClient.getTravelTimeSeconds(
+            RouteInfo plan =
+                    transitClient.getPlan(
                             ptt.participantCoordinate().latitude(),
                             ptt.participantCoordinate().longitude(),
                             poiCoord.latitude(),
                             poiCoord.longitude());
-            if (recalcTime == null) {
+            if (plan == null) {
                 log.warn(
                         "POI travel time recalculation failed, using original value: poi={}",
                         poiCoord);
             }
-            times.add(recalcTime != null ? recalcTime : ptt.travelTimeSeconds());
+            routes.add(plan);
         }
 
-        return times;
+        return routes;
     }
 
     public record MatchedPlace(
@@ -105,5 +113,6 @@ public class PlaceMapper {
             Coordinate coordinate,
             double avgTravelTime,
             double maxTravelTime,
-            double score) {}
+            double score,
+            List<RouteInfo> routes) {}
 }

@@ -1,6 +1,10 @@
 package com.greedy.meetlink.common.client;
 
 import com.greedy.meetlink.common.client.dto.MotisRouteResponse;
+import com.greedy.meetlink.common.client.dto.RouteInfo;
+import com.greedy.meetlink.common.client.dto.SegmentInfo;
+import com.greedy.meetlink.common.util.PolylineDecoder;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -23,8 +27,7 @@ public class MotisTransitClient implements TransitClient {
     }
 
     @Override
-    public Double getTravelTimeSeconds(
-            double originLat, double originLon, double destLat, double destLon) {
+    public RouteInfo getPlan(double originLat, double originLon, double destLat, double destLon) {
         String fromPlace = originLat + "," + originLon;
         String toPlace = destLat + "," + destLon;
 
@@ -38,6 +41,7 @@ public class MotisTransitClient implements TransitClient {
                                                     .path(PLAN_PATH)
                                                     .queryParam("fromPlace", fromPlace)
                                                     .queryParam("toPlace", toPlace)
+                                                    .queryParam("maxMatchingDistance", 250)
                                                     .build())
                             .retrieve()
                             .body(MotisRouteResponse.class);
@@ -52,24 +56,41 @@ public class MotisTransitClient implements TransitClient {
                 return null;
             }
 
-            Double seconds = null;
+            MotisRouteResponse.Itinerary itinerary = null;
             if (response.itineraries() != null && !response.itineraries().isEmpty()) {
-                Long d = response.itineraries().get(0).duration();
-                if (d != null) seconds = d.doubleValue();
+                itinerary = response.itineraries().getFirst();
             } else if (response.direct() != null && !response.direct().isEmpty()) {
-                Long d = response.direct().get(0).duration();
-                if (d != null) seconds = d.doubleValue();
+                itinerary = response.direct().getFirst();
             }
 
-            if (seconds == null) {
+            if (itinerary == null) {
                 log.warn(
                         "MOTIS no route found: origin=({}, {}), destination=({}, {})",
                         originLat,
                         originLon,
                         destLat,
                         destLon);
+                return null;
             }
-            return seconds;
+
+            double travelTime =
+                    itinerary.duration() != null ? itinerary.duration().doubleValue() : 0.0;
+            List<SegmentInfo> segments =
+                    itinerary.legs() == null
+                            ? List.of()
+                            : itinerary.legs().stream()
+                                    .map(
+                                            leg ->
+                                                    new SegmentInfo(
+                                                            leg.mode(),
+                                                            PolylineDecoder.decode(
+                                                                    leg.legGeometry() != null
+                                                                            ? leg.legGeometry()
+                                                                                    .points()
+                                                                            : null)))
+                                    .toList();
+
+            return new RouteInfo(travelTime, segments);
 
         } catch (RestClientResponseException e) {
             log.error(

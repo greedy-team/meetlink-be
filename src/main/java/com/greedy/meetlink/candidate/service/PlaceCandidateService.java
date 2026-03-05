@@ -1,5 +1,6 @@
 package com.greedy.meetlink.candidate.service;
 
+import com.greedy.meetlink.availability.entity.LocationAvailability;
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter;
 import com.greedy.meetlink.candidate.algorithm.CandidateScorer;
@@ -10,7 +11,10 @@ import com.greedy.meetlink.candidate.algorithm.PlaceMapper.MatchedPlace;
 import com.greedy.meetlink.candidate.algorithm.PolarSamplingGenerator;
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
+import com.greedy.meetlink.candidate.entity.PlaceCandidateRoute;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
+import com.greedy.meetlink.candidate.repository.PlaceCandidateRouteRepository;
+import com.greedy.meetlink.common.client.dto.RouteInfo;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.exception.PlaceCandidateCalculationFailedException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
@@ -21,6 +25,8 @@ import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,9 +43,9 @@ public class PlaceCandidateService {
     private final CandidateFilter candidateFilter;
     private final CandidateScorer candidateScorer;
     private final PlaceMapper placeMapper;
-
     private final MeetingRepository meetingRepository;
     private final PlaceCandidateRepository placeCandidateRepository;
+    private final PlaceCandidateRouteRepository placeCandidateRouteRepository;
     private final MeetingResultRepository meetingResultRepository;
     private final ParticipantRepository participantRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
@@ -61,8 +67,11 @@ public class PlaceCandidateService {
                 code,
                 participants.size());
 
+        List<LocationAvailability> locationAvailabilities =
+                locationAvailabilityRepository.findByParticipantIn(participants);
+
         List<Coordinate> coordinates =
-                locationAvailabilityRepository.findByParticipantIn(participants).stream()
+                locationAvailabilities.stream()
                         .map(la -> new Coordinate(la.getLatitude(), la.getLongitude()))
                         .toList();
 
@@ -75,6 +84,7 @@ public class PlaceCandidateService {
         placeCandidateRepository.deleteByMeeting(meeting);
         List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
         updateMeetingResult(meeting, savedCandidates.getFirst());
+        saveRoutes(savedCandidates, matchedPlaces, locationAvailabilities);
 
         log.info(
                 "Place candidate calculation completed: meeting={}, results={}",
@@ -89,9 +99,40 @@ public class PlaceCandidateService {
     }
 
     private List<PlaceCandidateResponse> toResponses(Meeting meeting) {
-        return placeCandidateRepository.findByMeetingOrderByRankAsc(meeting).stream()
-                .map(PlaceCandidateResponse::from)
+        List<PlaceCandidate> candidates =
+                placeCandidateRepository.findByMeetingOrderByRankAsc(meeting);
+        Map<Long, List<PlaceCandidateRoute>> routeMap =
+                placeCandidateRouteRepository.findByPlaceCandidateIn(candidates).stream()
+                        .collect(Collectors.groupingBy(r -> r.getPlaceCandidate().getId()));
+        return candidates.stream()
+                .map(
+                        c ->
+                                PlaceCandidateResponse.from(
+                                        c, routeMap.getOrDefault(c.getId(), List.of())))
                 .toList();
+    }
+
+    private void saveRoutes(
+            List<PlaceCandidate> candidates,
+            List<MatchedPlace> matchedPlaces,
+            List<LocationAvailability> locationAvailabilities) {
+        for (int i = 0; i < candidates.size(); i++) {
+            PlaceCandidate candidate = candidates.get(i);
+            List<RouteInfo> routes = matchedPlaces.get(i).routes();
+            for (int j = 0; j < locationAvailabilities.size(); j++) {
+                RouteInfo route = routes.get(j);
+                if (route == null) {
+                    log.warn(
+                            "Route not found: participant={}, candidate={}",
+                            locationAvailabilities.get(j).getParticipant().getNickname(),
+                            candidate.getName());
+                    continue;
+                }
+                placeCandidateRouteRepository.save(
+                        PlaceCandidateRoute.create(
+                                candidate, locationAvailabilities.get(j).getParticipant(), route));
+            }
+        }
     }
 
     private boolean isCalculationRequired(Meeting meeting, List<Participant> participants) {

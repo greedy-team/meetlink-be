@@ -10,12 +10,14 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class LocationAvailabilityResponse {
+    private final String name;
     private final String address;
     private final double latitude;
     private final double longitude;
 
     public static LocationAvailabilityResponse from(LocationAvailability availability) {
         return LocationAvailabilityResponse.builder()
+                .name(availability.getName())
                 .address(availability.getAddress())
                 .latitude(availability.getLatitude())
                 .longitude(availability.getLongitude())

@@ -58,7 +58,9 @@ public class ParticipantService {
                     meetingRepository
                             .findByCode(meetingCode)
                             .orElseThrow(MeetingNotFoundException::new);
-            return participantRepository.findByMeeting(meeting).stream()
+            return participantRepository
+                    .findByMeetingOrderByCreatedAtAscNicknameAsc(meeting)
+                    .stream()
                     .map(ParticipantResponse::of)
                     .toList();
         }
@@ -70,7 +72,8 @@ public class ParticipantService {
         boolean timeEnabled = meeting.isEnableTimeRecommendation();
         boolean placeEnabled = meeting.isEnablePlaceRecommendation();
 
-        List<Participant> participants = participantRepository.findByMeeting(meeting);
+        List<Participant> participants =
+                participantRepository.findByMeetingOrderByCreatedAtAscNicknameAsc(meeting);
 
         Set<Long> timeSubmittedIds =
                 new HashSet<>(timeAvailabilityRepository.findSubmittedParticipantIds(meeting));

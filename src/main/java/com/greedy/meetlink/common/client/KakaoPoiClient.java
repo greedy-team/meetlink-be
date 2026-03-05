@@ -16,9 +16,9 @@ import org.springframework.web.client.RestClientResponseException;
 @Component
 @Profile("!test")
 public class KakaoPoiClient implements PoiClient {
-    private static final String KEYWORD_SEARCH_PATH = "/v2/local/search/keyword.json";
+    private static final String CATEGORY_SEARCH_PATH = "/v2/local/search/category.json";
     private static final int DEFAULT_SEARCH_RADIUS_METERS = 300;
-    private static final String SEARCH_QUERY = "카페";
+    private static final String CATEGORY_GROUP_CODE = "CE7"; // 카페
     private static final int MAX_POI_COUNT = 5;
 
     private final RestClient restClient;
@@ -43,8 +43,10 @@ public class KakaoPoiClient implements PoiClient {
                             .uri(
                                     uriBuilder ->
                                             uriBuilder
-                                                    .path(KEYWORD_SEARCH_PATH)
-                                                    .queryParam("query", SEARCH_QUERY)
+                                                    .path(CATEGORY_SEARCH_PATH)
+                                                    .queryParam(
+                                                            "category_group_code",
+                                                            CATEGORY_GROUP_CODE)
                                                     .queryParam("x", longitude)
                                                     .queryParam("y", latitude)
                                                     .queryParam(

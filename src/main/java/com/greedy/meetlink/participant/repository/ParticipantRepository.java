@@ -14,6 +14,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     List<Participant> findByMeeting(Meeting meeting);
 
+    List<Participant> findByMeetingOrderByCreatedAtAscNicknameAsc(Meeting meeting);
+
     Optional<Participant> findByMeetingAndToken(Meeting meeting, String token);
 
     @Query(

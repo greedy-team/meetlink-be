@@ -136,6 +136,8 @@ public class TimeAvailabilityService {
 
     private void validateByMeetingType(Meeting meeting, TimeAvailabilityRequest request) {
         TimeAvailabilityType type = meeting.getTimeAvailabilityType();
+        LocalTime rangeStart = meeting.getTimeRangeStart();
+        LocalTime rangeEnd = meeting.getTimeRangeEnd();
 
         for (TimeAvailabilityRequest.Availability availability : request.getAvailabilities()) {
             if (type == TimeAvailabilityType.WEEKLY && availability.getDayOfWeek() == null) {
@@ -144,6 +146,15 @@ public class TimeAvailabilityService {
 
             if (type == TimeAvailabilityType.SPECIFIC_DATE && availability.getDate() == null) {
                 throw new InvalidTimeAvailabilityException("날짜 기반 모임은 날짜 기반 입력만 가능합니다.");
+            }
+
+            if (rangeStart != null && rangeEnd != null) {
+                for (LocalTime startTime : availability.getStartTimes()) {
+                    if (startTime.isBefore(rangeStart) || !startTime.isBefore(rangeEnd)) {
+                        throw new InvalidTimeAvailabilityException(
+                                "입력 시간은 모임 시간 범위(" + rangeStart + " ~ " + rangeEnd + ") 내여야 합니다.");
+                    }
+                }
             }
         }
     }

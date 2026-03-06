@@ -15,6 +15,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -30,6 +32,7 @@ public class MeetingResult extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_candidate_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private TimeCandidate timeCandidate;
 
     @OneToOne(fetch = FetchType.LAZY)

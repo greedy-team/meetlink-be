@@ -61,7 +61,9 @@ public class MeetingService {
     public MeetingResponse updateMeeting(String code, String token, MeetingUpdateRequest request) {
         Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
 
-        boolean timeRangeChanged = isTimeRangeChanged(meeting, request);
+        boolean timeAvailabilityTypeChanged = isTimeAvailabilityTypeChanged(meeting, request);
+        boolean timeRangeChanged =
+                !timeAvailabilityTypeChanged && isTimeRangeChanged(meeting, request);
 
         meeting.update(
                 request.getName(),
@@ -71,7 +73,11 @@ public class MeetingService {
                 request.getTimeRangeStart(),
                 request.getTimeRangeEnd());
 
-        if (timeRangeChanged) {
+        if (timeAvailabilityTypeChanged) {
+            timeAvailabilityRepository.deleteByMeeting(meeting);
+            participantRepository.resetTimeSubmittedIfNoAvailability(meeting);
+            timeCandidateRepository.deleteByMeeting(meeting);
+        } else if (timeRangeChanged) {
             if (meeting.getTimeRangeStart() != null) {
                 timeAvailabilityRepository.deleteBeforeRangeStart(
                         meeting, meeting.getTimeRangeStart());
@@ -86,18 +92,16 @@ public class MeetingService {
         return MeetingResponse.from(meeting);
     }
 
+    private boolean isTimeAvailabilityTypeChanged(Meeting meeting, MeetingUpdateRequest request) {
+        return request.getTimeAvailabilityType() != null
+                && !request.getTimeAvailabilityType().equals(meeting.getTimeAvailabilityType());
+    }
+
     private boolean isTimeRangeChanged(Meeting meeting, MeetingUpdateRequest request) {
         LocalTime newStart = request.getTimeRangeStart();
         LocalTime newEnd = request.getTimeRangeEnd();
         return (newStart != null && !newStart.equals(meeting.getTimeRangeStart()))
                 || (newEnd != null && !newEnd.equals(meeting.getTimeRangeEnd()));
-    }
-
-    @Transactional
-    public void deleteMeeting(String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
-        meetingRepository.deleteById(meeting.getId());
     }
 
     private String generateUniqueCode() {

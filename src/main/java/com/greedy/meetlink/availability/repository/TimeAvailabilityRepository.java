@@ -23,6 +23,9 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
     void deleteByMeetingAndParticipant(Meeting meeting, Participant participant);
 
     @Modifying
+    void deleteByMeeting(Meeting meeting);
+
+    @Modifying
     @Query(
             "DELETE FROM TimeAvailability ta WHERE ta.meeting = :meeting AND ta.startTime < :rangeStart")
     void deleteBeforeRangeStart(Meeting meeting, LocalTime rangeStart);

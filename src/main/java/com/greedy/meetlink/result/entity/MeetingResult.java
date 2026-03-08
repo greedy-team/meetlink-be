@@ -36,6 +36,7 @@ public class MeetingResult extends BaseEntity {
     private TimeCandidate timeCandidate;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "place_candidate_id")
     private PlaceCandidate placeCandidate;
 

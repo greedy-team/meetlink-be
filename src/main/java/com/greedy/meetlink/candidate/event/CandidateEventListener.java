@@ -51,4 +51,12 @@ class CandidateEventListener {
                             Instant.now().plusSeconds(DEBOUNCE_DELAY_SECONDS));
                 });
     }
+
+    @Async("candidateCalculationExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void onParticipantLeft(ParticipantLeftEvent e) {
+        log.info("ParticipantLeftEvent received: meeting={}", e.meetingCode());
+        timeCandidateService.recalculateOnLeave(e.meetingCode());
+        placeCandidateService.recalculateOnLeave(e.meetingCode());
+    }
 }

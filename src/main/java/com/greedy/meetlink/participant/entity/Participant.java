@@ -23,7 +23,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-        indexes = {@Index(name = "idx_participant_meeting", columnList = "meeting_id")},
+        indexes = {
+            @Index(name = "idx_participant_meeting", columnList = "meeting_id"),
+            @Index(
+                    name = "idx_participant_meeting_time_submitted",
+                    columnList = "meeting_id, time_submitted_at"),
+            @Index(
+                    name = "idx_participant_meeting_location_submitted",
+                    columnList = "meeting_id, location_submitted_at")
+        },
         uniqueConstraints = {
             @UniqueConstraint(columnNames = {"meeting_id", "token"}),
             @UniqueConstraint(columnNames = {"meeting_id", "nickname"})

@@ -30,7 +30,8 @@ import org.hibernate.annotations.OnDeleteAction;
             @Index(
                     name = "idx_time_meeting_participant",
                     columnList = "meeting_id, participant_id"),
-            @Index(name = "idx_time_meeting", columnList = "meeting_id")
+            @Index(name = "idx_time_meeting", columnList = "meeting_id"),
+            @Index(name = "idx_time_meeting_start_time", columnList = "meeting_id, start_time")
         },
         uniqueConstraints = {
             @UniqueConstraint(

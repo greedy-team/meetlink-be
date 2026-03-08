@@ -62,6 +62,28 @@ public class PlaceCandidateService {
             return;
         }
 
+        doCalculate(code, meeting, participants);
+    }
+
+    @Transactional
+    public void recalculateOnLeave(String code) {
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+        List<Participant> participants = participantRepository.findByMeeting(meeting);
+
+        if (participants.size() < 2) {
+            placeCandidateRepository.deleteByMeeting(meeting);
+            return;
+        }
+
+        List<Long> submittedIds =
+                locationAvailabilityRepository.findSubmittedParticipantIds(meeting);
+        if (submittedIds.size() != participants.size()) return;
+
+        doCalculate(code, meeting, participants);
+    }
+
+    private void doCalculate(String code, Meeting meeting, List<Participant> participants) {
         log.info(
                 "Place candidate calculation started: meeting={}, participants={}",
                 code,

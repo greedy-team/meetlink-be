@@ -54,6 +54,17 @@ public class TimeCandidateService {
             return;
         }
 
+        doCalculate(code, meeting);
+    }
+
+    @Transactional
+    public void recalculateOnLeave(String code) {
+        Meeting meeting =
+                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+        doCalculate(code, meeting);
+    }
+
+    private void doCalculate(String code, Meeting meeting) {
         log.info("Time candidate calculation started: meeting={}", code);
 
         timeCandidateRepository.deleteByMeeting(meeting);

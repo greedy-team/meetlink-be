@@ -2,6 +2,7 @@ package com.greedy.meetlink.participant.service;
 
 import com.greedy.meetlink.availability.repository.LocationAvailabilityRepository;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
+import com.greedy.meetlink.candidate.event.ParticipantLeftEvent;
 import com.greedy.meetlink.common.exception.DuplicateNicknameException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class ParticipantService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
     private final ParticipantValidator participantValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 모임 참여
     @Transactional
@@ -113,5 +116,6 @@ public class ParticipantService {
         Participant participant =
                 participantValidator.validateAndGetParticipant(meetingCode, token);
         participantRepository.delete(participant);
+        eventPublisher.publishEvent(new ParticipantLeftEvent(meetingCode));
     }
 }

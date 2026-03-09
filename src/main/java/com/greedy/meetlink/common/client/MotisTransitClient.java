@@ -1,6 +1,7 @@
 package com.greedy.meetlink.common.client;
 
 import com.greedy.meetlink.common.client.dto.MotisRouteResponse;
+import com.greedy.meetlink.common.client.dto.MotisRouteResponse.Itinerary;
 import com.greedy.meetlink.common.client.dto.RouteInfo;
 import com.greedy.meetlink.common.client.dto.SegmentInfo;
 import com.greedy.meetlink.common.util.PolylineDecoder;
@@ -28,7 +29,37 @@ public class MotisTransitClient implements TransitClient {
     }
 
     @Override
+    public Double getTravelTime(
+            double originLat, double originLon, double destLat, double destLon) {
+        Itinerary itinerary = fetchItinerary(originLat, originLon, destLat, destLon);
+        if (itinerary == null) return null;
+        return itinerary.duration() != null ? itinerary.duration().doubleValue() : 0.0;
+    }
+
+    @Override
     public RouteInfo getPlan(double originLat, double originLon, double destLat, double destLon) {
+        Itinerary itinerary = fetchItinerary(originLat, originLon, destLat, destLon);
+        if (itinerary == null) return null;
+
+        double travelTime = itinerary.duration() != null ? itinerary.duration().doubleValue() : 0.0;
+        List<SegmentInfo> segments =
+                itinerary.legs() == null
+                        ? List.of()
+                        : itinerary.legs().stream()
+                                .map(
+                                        leg ->
+                                                new SegmentInfo(
+                                                        leg.mode(),
+                                                        PolylineDecoder.decode(
+                                                                leg.legGeometry() != null
+                                                                        ? leg.legGeometry().points()
+                                                                        : null)))
+                                .toList();
+        return new RouteInfo(travelTime, segments);
+    }
+
+    private Itinerary fetchItinerary(
+            double originLat, double originLon, double destLat, double destLon) {
         String fromPlace = originLat + "," + originLon;
         String toPlace = destLat + "," + destLon;
 
@@ -59,41 +90,20 @@ public class MotisTransitClient implements TransitClient {
                 return null;
             }
 
-            MotisRouteResponse.Itinerary itinerary = null;
             if (response.itineraries() != null && !response.itineraries().isEmpty()) {
-                itinerary = response.itineraries().getFirst();
-            } else if (response.direct() != null && !response.direct().isEmpty()) {
-                itinerary = response.direct().getFirst();
+                return response.itineraries().getFirst();
+            }
+            if (response.direct() != null && !response.direct().isEmpty()) {
+                return response.direct().getFirst();
             }
 
-            if (itinerary == null) {
-                log.warn(
-                        "MOTIS no route found: origin=({}, {}), destination=({}, {})",
-                        originLat,
-                        originLon,
-                        destLat,
-                        destLon);
-                return null;
-            }
-
-            double travelTime =
-                    itinerary.duration() != null ? itinerary.duration().doubleValue() : 0.0;
-            List<SegmentInfo> segments =
-                    itinerary.legs() == null
-                            ? List.of()
-                            : itinerary.legs().stream()
-                                    .map(
-                                            leg ->
-                                                    new SegmentInfo(
-                                                            leg.mode(),
-                                                            PolylineDecoder.decode(
-                                                                    leg.legGeometry() != null
-                                                                            ? leg.legGeometry()
-                                                                                    .points()
-                                                                            : null)))
-                                    .toList();
-
-            return new RouteInfo(travelTime, segments);
+            log.warn(
+                    "MOTIS no route found: origin=({}, {}), destination=({}, {})",
+                    originLat,
+                    originLon,
+                    destLat,
+                    destLon);
+            return null;
 
         } catch (RestClientResponseException e) {
             log.error(

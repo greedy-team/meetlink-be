@@ -3,7 +3,6 @@ package com.greedy.meetlink.candidate.algorithm;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.FilteredCandidate;
 import com.greedy.meetlink.candidate.algorithm.CandidateFilter.ParticipantTravelTime;
 import com.greedy.meetlink.common.client.TransitClient;
-import com.greedy.meetlink.common.client.dto.RouteInfo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -47,29 +46,28 @@ public class CandidateScorer {
 
     private CompletableFuture<FilteredCandidate> fetchTravelTimesAsync(
             Coordinate candidate, List<Coordinate> participants) {
-        List<CompletableFuture<RouteInfo>> routeFutures =
+        List<CompletableFuture<Double>> travelTimeFutures =
                 participants.stream()
                         .map(
                                 p ->
                                         CompletableFuture.supplyAsync(
                                                 () ->
-                                                        transitClient.getPlan(
+                                                        transitClient.getTravelTime(
                                                                 p.latitude(), p.longitude(),
                                                                 candidate.latitude(),
                                                                         candidate.longitude()),
                                                 executor))
                         .toList();
 
-        return CompletableFuture.allOf(routeFutures.toArray(new CompletableFuture[0]))
+        return CompletableFuture.allOf(travelTimeFutures.toArray(new CompletableFuture[0]))
                 .thenApply(
                         v -> {
                             List<ParticipantTravelTime> times = new ArrayList<>();
                             for (int i = 0; i < participants.size(); i++) {
-                                RouteInfo plan = routeFutures.get(i).join();
-                                if (plan == null) return null;
+                                Double travelTime = travelTimeFutures.get(i).join();
+                                if (travelTime == null) return null;
                                 times.add(
-                                        new ParticipantTravelTime(
-                                                participants.get(i), plan.travelTime()));
+                                        new ParticipantTravelTime(participants.get(i), travelTime));
                             }
                             return new FilteredCandidate(candidate, times);
                         });

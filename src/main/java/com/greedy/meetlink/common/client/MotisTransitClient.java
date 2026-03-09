@@ -17,6 +17,7 @@ import org.springframework.web.client.RestClientResponseException;
 @Profile("!test")
 public class MotisTransitClient implements TransitClient {
     private static final String PLAN_PATH = "/api/v5/plan";
+    private static final String WEEKDAY_NOON = "2026-03-09T03:00:00.000Z"; // 월요일 12:00 (KST)
 
     private final RestClient restClient;
 
@@ -41,6 +42,7 @@ public class MotisTransitClient implements TransitClient {
                                                     .path(PLAN_PATH)
                                                     .queryParam("fromPlace", fromPlace)
                                                     .queryParam("toPlace", toPlace)
+                                                    .queryParam("time", WEEKDAY_NOON)
                                                     .queryParam("maxMatchingDistance", 250)
                                                     .build())
                             .retrieve()

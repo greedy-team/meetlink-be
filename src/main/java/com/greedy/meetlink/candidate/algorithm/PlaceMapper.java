@@ -10,18 +10,33 @@ import com.greedy.meetlink.common.client.dto.RouteInfo;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /** 후보 좌표를 카카오 POI 검색으로 실제 장소와 매칭하고, POI 좌표 기준으로 이동시간을 재계산하여 최종 순위를 확정 */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class PlaceMapper {
     private final PoiClient poiClient;
     private final TransitClient transitClient;
     private final ScoreCalculator scoreCalculator;
+    private final Executor executor;
+
+    public PlaceMapper(
+            PoiClient poiClient,
+            TransitClient transitClient,
+            ScoreCalculator scoreCalculator,
+            @Qualifier("candidateCalculationExecutor") Executor executor) {
+        this.poiClient = poiClient;
+        this.transitClient = transitClient;
+        this.scoreCalculator = scoreCalculator;
+        this.executor = executor;
+    }
 
     public List<MatchedPlace> match(List<FilteredCandidate> candidates) {
         List<MatchedPlace> results = new ArrayList<>();
@@ -32,12 +47,6 @@ public class PlaceMapper {
             List<ParticipantTravelTime> originalTimes = candidate.participantTravelTimes();
 
             List<PoiPlace> places = poiClient.searchNearby(coord.latitude(), coord.longitude());
-
-            String name;
-            String address;
-            Coordinate poiCoord;
-            List<RouteInfo> routes;
-
             if (places.isEmpty()) {
                 log.debug(
                         "[6-{}] No POI found near ({}, {}), skipping",
@@ -48,18 +57,20 @@ public class PlaceMapper {
             }
 
             PoiPlace place = places.get(0);
-            name = place.name();
-            address = place.address();
-            poiCoord = new Coordinate(place.latitude(), place.longitude());
+            String name = place.name();
+            String address = place.address();
+            Coordinate poiCoord = new Coordinate(place.latitude(), place.longitude());
             log.debug("[6-{}] POI matched: {} / {}", i + 1, name, address);
 
-            routes = fetchRoutes(originalTimes, poiCoord);
-            List<Double> travelTimes = new ArrayList<>();
-            for (int j = 0; j < routes.size(); j++) {
-                RouteInfo r = routes.get(j);
-                travelTimes.add(
-                        r != null ? r.travelTime() : originalTimes.get(j).travelTimeSeconds());
-            }
+            List<RouteInfo> routes = fetchRoutes(originalTimes, poiCoord);
+            List<Double> travelTimes =
+                    IntStream.range(0, routes.size())
+                            .mapToObj(
+                                    j ->
+                                            routes.get(j) != null
+                                                    ? routes.get(j).travelTime()
+                                                    : originalTimes.get(j).travelTimeSeconds())
+                            .toList();
 
             ScoreResult scoreResult = scoreCalculator.calculate(travelTimes);
             log.debug(
@@ -81,30 +92,41 @@ public class PlaceMapper {
         }
 
         results.sort(Comparator.comparingDouble(MatchedPlace::score));
-
         return results;
     }
 
     private List<RouteInfo> fetchRoutes(
             List<ParticipantTravelTime> originalTimes, Coordinate poiCoord) {
-        List<RouteInfo> routes = new ArrayList<>();
+        List<CompletableFuture<RouteInfo>> futures =
+                originalTimes.stream()
+                        .map(
+                                ptt ->
+                                        CompletableFuture.supplyAsync(
+                                                () ->
+                                                        transitClient.getPlan(
+                                                                ptt.participantCoordinate()
+                                                                        .latitude(),
+                                                                ptt.participantCoordinate()
+                                                                        .longitude(),
+                                                                poiCoord.latitude(),
+                                                                poiCoord.longitude()),
+                                                executor))
+                        .toList();
 
-        for (ParticipantTravelTime ptt : originalTimes) {
-            RouteInfo plan =
-                    transitClient.getPlan(
-                            ptt.participantCoordinate().latitude(),
-                            ptt.participantCoordinate().longitude(),
-                            poiCoord.latitude(),
-                            poiCoord.longitude());
-            if (plan == null) {
-                log.warn(
-                        "POI travel time recalculation failed, using original value: poi={}",
-                        poiCoord);
-            }
-            routes.add(plan);
-        }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-        return routes;
+        return futures.stream()
+                .map(
+                        f -> {
+                            RouteInfo plan = f.join();
+                            if (plan == null) {
+                                log.warn(
+                                        "POI travel time recalculation failed, using original value: poi={}",
+                                        poiCoord);
+                            }
+                            return plan;
+                        })
+                .collect(Collectors.toList());
     }
 
     public record MatchedPlace(

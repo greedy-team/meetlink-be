@@ -43,6 +43,7 @@ public class MotisTransitClient implements TransitClient {
                                                     .queryParam("fromPlace", fromPlace)
                                                     .queryParam("toPlace", toPlace)
                                                     .queryParam("time", WEEKDAY_NOON)
+                                                    .queryParam("timetableView", false)
                                                     .queryParam("maxMatchingDistance", 250)
                                                     .build())
                             .retrieve()

@@ -27,6 +27,10 @@ dependencies {
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1"
 	implementation "io.sentry:sentry-spring-boot-4:8.33.0"
 
+    // 모니터링 추가
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	compileOnly "org.projectlombok:lombok"
 	annotationProcessor "org.projectlombok:lombok"
 

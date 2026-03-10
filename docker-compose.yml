@@ -1,5 +1,10 @@
 name: meetlink
 services:
+
+  # ════════════════════════════════════════════
+  #  기존 서비스 (networks 항목만 추가됨)
+  # ════════════════════════════════════════════
+
   postgres:
     image: postgres:18-alpine
     restart: always
@@ -8,6 +13,8 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       TZ: Asia/Seoul
+    # ports:
+    #   - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/18/docker
     healthcheck:
@@ -15,6 +22,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network        # ← 추가
+
   motis-import:
     image: ghcr.io/motis-project/motis:latest
     profiles: ["import"]
@@ -23,12 +33,18 @@ services:
       - ./config/motis/config.yml:/config.yml
       - motis-data:/data
     command: /motis import
+    networks:
+      - app-network        # ← 추가
+
   motis:
     image: ghcr.io/motis-project/motis:latest
     restart: always
     volumes:
       - motis-data:/data
     command: /motis server
+    networks:
+      - app-network        # ← 추가
+
   backend:
     image: ${APP_IMAGE}
     profiles: ["deploy"]
@@ -46,16 +62,110 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_API_KEY: ${KAKAO_API_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
+    networks:
+      - app-network        # ← 추가
+
   nginx:
     image: nginx:alpine
     profiles: ["deploy"]
     restart: always
     ports:
+      - "80:80"
       - "443:443"
     volumes:
       - /srv/meetlink/nginx/certs:/etc/nginx/certs
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - backend
+      - grafana
+    networks:
+      - app-network
+      - monitoring-network
+
+  # ════════════════════════════════════════════
+  #  모니터링 서비스 (신규 추가)
+  # ════════════════════════════════════════════
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle
+    # ports:
+    #   - "9090:9090"
+    networks:
+      - app-network
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    # ports:
+    #   - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-network
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+      - monitoring-network
+
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.rootfs=/rootfs
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+    networks:
+      - monitoring-network
+
+  # ════════════════════════════════════════════
+  #  볼륨 & 네트워크
+  # ════════════════════════════════════════════
+
 volumes:
   postgres-data:
   motis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  app-network:
+    driver: bridge
+  monitoring-network:
+    driver: bridge

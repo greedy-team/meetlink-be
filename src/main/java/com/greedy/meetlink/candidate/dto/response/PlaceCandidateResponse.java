@@ -1,5 +1,6 @@
 package com.greedy.meetlink.candidate.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.entity.PlaceCandidateRoute;
 import java.util.List;
@@ -19,6 +20,8 @@ public class PlaceCandidateResponse {
     private final Double avgTravelTime;
     private final Double maxTravelTime;
     private final Integer rank;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final List<ParticipantRouteResponse> routes;
 
     public static PlaceCandidateResponse from(PlaceCandidate candidate) {

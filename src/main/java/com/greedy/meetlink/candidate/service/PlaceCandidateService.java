@@ -26,6 +26,8 @@ import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PlaceCandidateService {
     private static final int TOP_K = 3;
+
+    private final Set<String> calculatingSet = ConcurrentHashMap.newKeySet();
 
     private final GeometricMedianCalculator geometricMedianCalculator;
     private final PolarSamplingGenerator polarSamplingGenerator;
@@ -53,34 +57,44 @@ public class PlaceCandidateService {
 
     @Transactional
     public void calculatePlaceCandidates(String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+        calculatingSet.add(code);
+        try {
+            Meeting meeting =
+                    meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
 
-        List<Participant> participants = participantRepository.findByMeeting(meeting);
+            List<Participant> participants = participantRepository.findByMeeting(meeting);
 
-        if (!isCalculationRequired(meeting, participants)) {
-            return;
+            if (!isCalculationRequired(meeting, participants)) {
+                return;
+            }
+
+            doCalculate(code, meeting, participants);
+        } finally {
+            calculatingSet.remove(code);
         }
-
-        doCalculate(code, meeting, participants);
     }
 
     @Transactional
     public void recalculateOnLeave(String code) {
-        Meeting meeting =
-                meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
-        List<Participant> participants = participantRepository.findByMeeting(meeting);
+        calculatingSet.add(code);
+        try {
+            Meeting meeting =
+                    meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
+            List<Participant> participants = participantRepository.findByMeeting(meeting);
 
-        if (participants.size() < 2) {
-            placeCandidateRepository.deleteByMeeting(meeting);
-            return;
+            if (participants.size() < 2) {
+                placeCandidateRepository.deleteByMeeting(meeting);
+                return;
+            }
+
+            List<Long> submittedIds =
+                    locationAvailabilityRepository.findSubmittedParticipantIds(meeting);
+            if (submittedIds.size() != participants.size()) return;
+
+            doCalculate(code, meeting, participants);
+        } finally {
+            calculatingSet.remove(code);
         }
-
-        List<Long> submittedIds =
-                locationAvailabilityRepository.findSubmittedParticipantIds(meeting);
-        if (submittedIds.size() != participants.size()) return;
-
-        doCalculate(code, meeting, participants);
     }
 
     private void doCalculate(String code, Meeting meeting, List<Participant> participants) {
@@ -88,6 +102,7 @@ public class PlaceCandidateService {
                 "Place candidate calculation started: meeting={}, participants={}",
                 code,
                 participants.size());
+        long startMs = System.currentTimeMillis();
 
         List<LocationAvailability> locationAvailabilities =
                 locationAvailabilityRepository.findByParticipantIn(participants);
@@ -109,15 +124,20 @@ public class PlaceCandidateService {
         saveRoutes(savedCandidates, matchedPlaces, locationAvailabilities);
 
         log.info(
-                "Place candidate calculation completed: meeting={}, results={}",
+                "Place candidate calculation completed: meeting={}, results={}, elapsed={}ms",
                 code,
-                savedCandidates.size());
+                savedCandidates.size(),
+                System.currentTimeMillis() - startMs);
     }
 
     @Transactional(readOnly = true)
     public List<PlaceCandidateResponse> getPlaceCandidates(String code, String token) {
         Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
         return toResponses(meeting);
+    }
+
+    public boolean isCalculating(String meetingCode) {
+        return calculatingSet.contains(meetingCode);
     }
 
     private List<PlaceCandidateResponse> toResponses(Meeting meeting) {

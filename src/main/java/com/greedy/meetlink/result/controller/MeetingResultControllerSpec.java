@@ -27,6 +27,7 @@ public interface MeetingResultControllerSpec {
                                         "status": true,
                                         "result": {
                                             "placeCandidate": {
+                                                "calculationStatus": "DONE",
                                                 "address": "서울 서초구 동산로 3",
                                                 "avgTravelTime": 2760.0,
                                                 "latitude": 37.46906940866943,
@@ -36,6 +37,7 @@ public interface MeetingResultControllerSpec {
                                                 "rank": 1
                                             },
                                             "timeCandidate": {
+                                                "calculationStatus": "DONE",
                                                 "availableCount": 2,
                                                 "date": "2026-02-21",
                                                 "endTime": "10:00:00",

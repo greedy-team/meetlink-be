@@ -3,6 +3,7 @@ package com.greedy.meetlink.candidate.entity;
 import com.greedy.meetlink.common.client.dto.RouteInfo;
 import com.greedy.meetlink.common.client.dto.SegmentInfo;
 import com.greedy.meetlink.common.entity.BaseEntity;
+import com.greedy.meetlink.common.util.SegmentInfoListConverter;
 import com.greedy.meetlink.participant.entity.Participant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;

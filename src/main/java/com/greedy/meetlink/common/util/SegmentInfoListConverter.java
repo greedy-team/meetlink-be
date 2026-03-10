@@ -1,4 +1,4 @@
-package com.greedy.meetlink.candidate.entity;
+package com.greedy.meetlink.common.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

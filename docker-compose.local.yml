@@ -13,3 +13,15 @@ services:
       - ./motis-data:/data
     ports:
       - "3000:3000"
+  prometheus:
+    container_name: prometheus-local
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.local.yml:/etc/prometheus/prometheus.yml:ro
+  grafana:
+    container_name: grafana-local
+    ports:
+      - "3001:3000"
+  node-exporter:
+    container_name: node-exporter-local

@@ -2,7 +2,7 @@ name: meetlink
 services:
   postgres:
     image: postgres:18-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
@@ -19,13 +19,13 @@ services:
     image: ghcr.io/motis-project/motis:latest
     profiles: ["import"]
     volumes:
-      - /srv/meetlink/motis/input:/input
-      - ./config/motis/config.yml:/config.yml
+      - /srv/meetlink/motis/input:/input:ro
+      - ./config/motis/config.yml:/config.yml:ro
       - motis-data:/data
     command: /motis import
   motis:
     image: ghcr.io/motis-project/motis:latest
-    restart: always
+    restart: unless-stopped
     volumes:
       - motis-data:/data
     command: /motis server
@@ -49,13 +49,49 @@ services:
   nginx:
     image: nginx:alpine
     profiles: ["deploy"]
-    restart: always
+    restart: unless-stopped
     ports:
       - "443:443"
     volumes:
-      - /srv/meetlink/nginx/certs:/etc/nginx/certs
+      - /srv/meetlink/nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - backend
+  prometheus:
+    image: prom/prometheus:v3
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+  grafana:
+    image: grafana/grafana:12.4
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_USERNAME}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.rootfs=/rootfs
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
 volumes:
   postgres-data:
   motis-data:
+  prometheus-data:
+  grafana-data:

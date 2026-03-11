@@ -53,6 +53,9 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
 실행되는 서비스는 다음과 같습니다:
 * PostgreSQL - `localhost:5432`
 * MOTIS server - `localhost:3000`
+* Grafana - `localhost:3001`
+* Prometheus
+* node-exporter
 
 ### 6. Start Spring Boot Application
 이제 IDE에서 Spring Boot Application을 실행합니다.

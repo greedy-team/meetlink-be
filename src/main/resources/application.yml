@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: meetlink
   web:
     resources:
       add-mappings: false
@@ -34,12 +36,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus, metrics
-  endpoint:
-    prometheus:
-      enabled: true
-    health:
-      show-details: always
+        include: health, prometheus
   metrics:
     tags:
       application: ${spring.application.name}

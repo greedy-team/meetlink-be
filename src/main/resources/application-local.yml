@@ -1,23 +1,11 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/meetlink
-    username: meetlink
-    password: meetlink123
   jpa:
     hibernate:
       ddl-auto: update
-
 logging:
   level:
     org.hibernate.SQL: info
     org.hibernate.orm.jdbc.bind: debug
     com.greedy.meetlink: debug
-
 motis:
   base-url: http://localhost:3000
-
-sentry:
-  enabled: false
-
-kakao:
-  api-key: dummy

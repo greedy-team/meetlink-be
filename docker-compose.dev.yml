@@ -11,3 +11,9 @@ services:
     container_name: nginx-dev
     volumes:
       - ./config/nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf
+  prometheus:
+    container_name: prometheus-dev
+  grafana:
+    container_name: grafana-dev
+  node-exporter:
+    container_name: node-exporter-dev

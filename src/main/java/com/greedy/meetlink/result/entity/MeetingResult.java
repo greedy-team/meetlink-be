@@ -27,7 +27,7 @@ public class MeetingResult extends BaseEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_id", nullable = false)
+    @JoinColumn(name = "meeting_id", nullable = false, unique = true)
     private Meeting meeting;
 
     @OneToOne(fetch = FetchType.LAZY)

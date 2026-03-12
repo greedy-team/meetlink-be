@@ -30,7 +30,10 @@ import lombok.NoArgsConstructor;
                     columnList = "meeting_id, time_submitted_at"),
             @Index(
                     name = "idx_participant_meeting_location_submitted",
-                    columnList = "meeting_id, location_submitted_at")
+                    columnList = "meeting_id, location_submitted_at"),
+            @Index(
+                    name = "idx_participant_meeting_order",
+                    columnList = "meeting_id, created_at, nickname")
         },
         uniqueConstraints = {
             @UniqueConstraint(columnNames = {"meeting_id", "token"}),

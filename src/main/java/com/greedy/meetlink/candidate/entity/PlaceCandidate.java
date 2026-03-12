@@ -22,7 +22,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         indexes = {
-            @Index(name = "idx_place_candidate_meeting_rank", columnList = "meeting_id, rank")
+            @Index(name = "idx_place_candidate_meeting_rank", columnList = "meeting_id, rank"),
+            @Index(
+                    name = "idx_place_candidate_meeting_created_at",
+                    columnList = "meeting_id, created_at")
         })
 public class PlaceCandidate extends BaseEntity {
     @Id

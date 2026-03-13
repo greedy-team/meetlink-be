@@ -42,7 +42,7 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.canary.yml \
             --profile deploy up -d --remove-orphans
 
-          docker cp config/nginx/nginx.prod.canary.conf nginx-prod:/etc/nginx/conf.d/default.conf
+          docker exec -i nginx-prod sh -c "cat > /etc/nginx/conf.d/default.conf" < config/nginx/nginx.prod.canary.conf
           docker exec nginx-prod nginx -s reload
       - name: Wait for canary health
         id: canary-health
@@ -59,6 +59,6 @@ jobs:
       - name: Rollback on failure
         if: failure()
         run: |
-          docker cp config/nginx/nginx.prod.conf nginx-prod:/etc/nginx/conf.d/default.conf
+          docker exec -i nginx-prod sh -c "cat > /etc/nginx/conf.d/default.conf" < config/nginx/nginx.prod.conf
           docker exec nginx-prod nginx -s reload 2>/dev/null || true
           docker rm -f backend-canary-prod 2>/dev/null || true

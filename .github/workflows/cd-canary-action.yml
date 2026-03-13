@@ -34,8 +34,8 @@ jobs:
           [ -z "$CANARY_IMAGE" ] && echo "::error::No canary container found. Deploy canary first." && exit 1
           APP_IMAGE=$CANARY_IMAGE \
           CANARY_APP_IMAGE=$CANARY_IMAGE \
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.canary.yml \
-            --profile deploy up -d --remove-orphans
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --profile deploy --profile canary up -d --remove-orphans
       - name: Wait for stable health
         run: |
           for i in $(seq 1 36); do

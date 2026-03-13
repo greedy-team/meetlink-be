@@ -28,7 +28,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Deploy
+      - name: Deploy canary
         run: |
           NEW_IMAGE=ghcr.io/${{ github.repository }}:prod-${{ github.event.workflow_run.head_sha }}
           CURRENT_STABLE=$(docker inspect backend-prod --format='{{.Config.Image}}' 2>/dev/null || true)
@@ -36,15 +36,14 @@ jobs:
 
           docker pull "$NEW_IMAGE"
 
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.conf /srv/meetlink/nginx/conf/default.conf
+
           export APP_IMAGE="$CURRENT_STABLE"
           export CANARY_APP_IMAGE="$NEW_IMAGE"
 
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.canary.yml \
-            --profile deploy up -d --remove-orphans
-
-          mkdir -p /srv/meetlink/nginx/conf
-          cp config/nginx/nginx.prod.canary.conf /srv/meetlink/nginx/conf/default.conf
-          docker exec nginx-prod nginx -s reload
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --profile deploy --profile canary up -d --remove-orphans
       - name: Wait for canary health
         id: canary-health
         run: |
@@ -57,6 +56,11 @@ jobs:
           done
           echo "::error::Canary health check timed out"
           exit 1
+      - name: Switch nginx to canary
+        run: |
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.canary.conf /srv/meetlink/nginx/conf/default.conf
+          docker exec nginx-prod nginx -s reload
       - name: Rollback on failure
         if: failure()
         run: |

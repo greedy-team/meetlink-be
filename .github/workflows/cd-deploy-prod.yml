@@ -1,4 +1,4 @@
-name: CD - Deploy Canary (prod)
+name: CD - Deploy (prod)
 on:
   workflow_run:
     workflows: ["CI - Build"]
@@ -28,21 +28,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Resolve images
+      - name: Deploy
         run: |
-          NEW=ghcr.io/${{ github.repository }}:prod-${{ github.event.workflow_run.head_sha }}
-          echo "NEW_IMAGE=$NEW" >> $GITHUB_ENV
-          CURRENT=$(docker inspect backend-prod --format='{{.Config.Image}}' 2>/dev/null || echo "$NEW")
-          echo "CURRENT_STABLE=$CURRENT" >> $GITHUB_ENV
-      - name: Pull new image
-        run: docker pull ${{ env.NEW_IMAGE }}
-      - name: Deploy canary
-        env:
-          APP_IMAGE: ${{ env.CURRENT_STABLE }}
-          CANARY_APP_IMAGE: ${{ env.NEW_IMAGE }}
-        run: |
+          NEW_IMAGE=ghcr.io/${{ github.repository }}:prod-${{ github.event.workflow_run.head_sha }}
+          CURRENT_STABLE=$(docker inspect backend-prod --format='{{.Config.Image}}' 2>/dev/null || echo "$NEW_IMAGE")
+
+          docker pull $NEW_IMAGE
+
+          APP_IMAGE=$CURRENT_STABLE \
+          CANARY_APP_IMAGE=$NEW_IMAGE \
           docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.canary.yml \
             --profile deploy up -d --remove-orphans
+
           docker cp config/nginx/nginx.prod.canary.conf nginx-prod:/etc/nginx/conf.d/default.conf
           docker exec nginx-prod nginx -s reload
       - name: Wait for canary health

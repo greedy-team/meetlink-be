@@ -33,10 +33,13 @@ jobs:
           NEW_IMAGE=ghcr.io/${{ github.repository }}:prod-${{ github.event.workflow_run.head_sha }}
           CURRENT_STABLE=$(docker inspect backend-prod --format='{{.Config.Image}}' 2>/dev/null || echo "$NEW_IMAGE")
 
-          docker pull $NEW_IMAGE
+          docker pull "$NEW_IMAGE"
 
-          APP_IMAGE=$CURRENT_STABLE \
-          CANARY_APP_IMAGE=$NEW_IMAGE \
+          export APP_IMAGE="$CURRENT_STABLE"
+          export CANARY_APP_IMAGE="$NEW_IMAGE"
+          echo "APP_IMAGE=$APP_IMAGE"
+          echo "CANARY_APP_IMAGE=$CANARY_APP_IMAGE"
+
           docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.canary.yml \
             --profile deploy up -d --remove-orphans
 

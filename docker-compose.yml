@@ -46,6 +46,35 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_API_KEY: ${KAKAO_API_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+  backend-canary:
+    image: ${CANARY_APP_IMAGE}
+    profiles: ["canary"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      motis:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAKAO_API_KEY: ${KAKAO_API_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
   nginx:
     image: nginx:alpine
     profiles: ["deploy"]

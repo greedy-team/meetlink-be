@@ -5,6 +5,8 @@ services:
     container_name: motis-prod
   backend:
     container_name: backend-prod
+  backend-canary:
+    container_name: backend-canary-prod
   nginx:
     container_name: nginx-prod
     volumes:

@@ -17,12 +17,11 @@ spring:
           batch_size: 100
         order_inserts: true
         order_updates: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 server:
   forward-headers-strategy: framework
   shutdown: graceful
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 30s
 cors:
   allowed-origins: >
     http://localhost:5173

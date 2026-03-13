@@ -19,6 +19,10 @@ spring:
         order_updates: true
 server:
   forward-headers-strategy: framework
+  shutdown: graceful
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 cors:
   allowed-origins: >
     http://localhost:5173
@@ -32,6 +36,8 @@ sentry:
   logs:
     enabled: true
   send-default-pii: true
+  tags:
+    deployment: ${DEPLOYMENT_TYPE}
 management:
   endpoints:
     web:
@@ -40,3 +46,4 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+      deployment: ${DEPLOYMENT_TYPE}

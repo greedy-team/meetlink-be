@@ -10,7 +10,7 @@ services:
   nginx:
     container_name: nginx-prod
     volumes:
-      - ./config/nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf
+      - /srv/meetlink/nginx/conf:/etc/nginx/conf.d:ro
   prometheus:
     container_name: prometheus-prod
   grafana:

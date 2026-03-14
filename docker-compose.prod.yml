@@ -17,3 +17,5 @@ services:
     container_name: grafana-prod
   node-exporter:
     container_name: node-exporter-prod
+  cadvisor:
+    container_name: cadvisor-prod

@@ -1,0 +1,68 @@
+name: CD - Canary Action (prod)
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Canary action"
+        required: true
+        type: choice
+        options:
+          - promote
+          - rollback
+jobs:
+  promote:
+    if: ${{ inputs.action == 'promote' }}
+    runs-on: [self-hosted, prod]
+    environment: prod
+    env:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      SPRING_PROFILES_ACTIVE: prod
+      KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      GF_USERNAME: ${{ secrets.GF_USERNAME }}
+      GF_PASSWORD: ${{ secrets.GF_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Promote canary to stable
+        run: |
+          CANARY_IMAGE=$(docker inspect backend-canary-prod --format='{{.Config.Image}}' 2>/dev/null)
+          [ -z "$CANARY_IMAGE" ] && echo "::error::No canary container found. Deploy canary first." && exit 1
+          APP_IMAGE=$CANARY_IMAGE \
+          CANARY_APP_IMAGE=$CANARY_IMAGE \
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --profile deploy --profile canary up -d --remove-orphans
+      - name: Wait for stable health
+        run: |
+          for i in $(seq 1 36); do
+            STATUS=$(docker inspect backend-prod --format='{{.State.Health.Status}}' 2>/dev/null || echo "starting")
+            [ "$STATUS" = "healthy" ] && echo "Stable is healthy" && exit 0
+            [ "$STATUS" = "unhealthy" ] && echo "::error::Stable is unhealthy" && exit 1
+            echo "[$i/36] status=$STATUS"
+            sleep 5
+          done
+          echo "::error::Stable health check timed out"
+          exit 1
+      - name: Remove canary, restore prod nginx
+        run: |
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.conf /srv/meetlink/nginx/conf/default.conf
+          docker exec nginx-prod nginx -s reload
+          docker rm -f backend-canary-prod 2>/dev/null || true
+  rollback:
+    if: ${{ inputs.action == 'rollback' }}
+    runs-on: [self-hosted, prod]
+    environment: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Remove canary, restore prod nginx
+        run: |
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.conf /srv/meetlink/nginx/conf/default.conf
+          docker exec nginx-prod nginx -s reload
+          docker rm -f backend-canary-prod 2>/dev/null || true

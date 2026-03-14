@@ -8,6 +8,17 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'release/') }}
     runs-on: [self-hosted, prod]
     environment: prod
+    env:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      SPRING_PROFILES_ACTIVE: prod
+      KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      GF_USERNAME: ${{ secrets.GF_USERNAME }}
+      GF_PASSWORD: ${{ secrets.GF_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,19 +28,43 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Deploy
-        env:
-          DB_HOST: postgres
-          DB_PORT: 5432
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          SPRING_PROFILES_ACTIVE: prod
-          APP_IMAGE: ghcr.io/${{ github.repository }}:prod-latest
-          KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          GF_USERNAME: ${{ secrets.GF_USERNAME }}
-          GF_PASSWORD: ${{ secrets.GF_PASSWORD }}
-        run:
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile deploy up -d --pull always --remove-orphans
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml restart nginx
+      - name: Deploy canary
+        run: |
+          NEW_IMAGE=ghcr.io/${{ github.repository }}:prod-${{ github.event.workflow_run.head_sha }}
+          CURRENT_STABLE=$(docker inspect backend-prod --format='{{.Config.Image}}' 2>/dev/null || true)
+          [ -z "$CURRENT_STABLE" ] && CURRENT_STABLE="$NEW_IMAGE"
+
+          docker pull "$NEW_IMAGE"
+
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.conf /srv/meetlink/nginx/conf/default.conf
+
+          export APP_IMAGE="$CURRENT_STABLE"
+          export CANARY_APP_IMAGE="$NEW_IMAGE"
+
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --profile deploy --profile canary up -d --remove-orphans
+      - name: Wait for canary health
+        id: canary-health
+        run: |
+          for i in $(seq 1 36); do
+            STATUS=$(docker inspect backend-canary-prod --format='{{.State.Health.Status}}' 2>/dev/null || echo "starting")
+            [ "$STATUS" = "healthy" ] && echo "Canary is healthy" && exit 0
+            [ "$STATUS" = "unhealthy" ] && echo "::error::Canary is unhealthy" && exit 1
+            echo "[$i/36] status=$STATUS"
+            sleep 5
+          done
+          echo "::error::Canary health check timed out"
+          exit 1
+      - name: Switch nginx to canary
+        run: |
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.canary.conf /srv/meetlink/nginx/conf/default.conf
+          docker exec nginx-prod nginx -s reload
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          mkdir -p /srv/meetlink/nginx/conf
+          cp config/nginx/nginx.prod.conf /srv/meetlink/nginx/conf/default.conf
+          docker exec nginx-prod nginx -s reload 2>/dev/null || true
+          docker rm -f backend-canary-prod 2>/dev/null || true

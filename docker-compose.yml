@@ -46,6 +46,37 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_API_KEY: ${KAKAO_API_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
+      DEPLOYMENT_TYPE: stable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+  backend-canary:
+    image: ${CANARY_APP_IMAGE}
+    profiles: ["canary"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      motis:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAKAO_API_KEY: ${KAKAO_API_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      DEPLOYMENT_TYPE: canary
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
   nginx:
     image: nginx:alpine
     profiles: ["deploy"]
@@ -55,7 +86,8 @@ services:
     volumes:
       - /srv/meetlink/nginx/certs:/etc/nginx/certs:ro
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
   prometheus:
     image: prom/prometheus:v3
     restart: unless-stopped
@@ -90,6 +122,20 @@ services:
       - --path.rootfs=/rootfs
       - --path.sysfs=/host/sys
       - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
 volumes:
   postgres-data:
   motis-data:

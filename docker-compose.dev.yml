@@ -17,3 +17,6 @@ services:
     container_name: grafana-dev
   node-exporter:
     container_name: node-exporter-dev
+  cadvisor:
+    container_name: cadvisor_dev
+

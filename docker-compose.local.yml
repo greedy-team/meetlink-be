@@ -26,4 +26,4 @@ services:
   node-exporter:
     container_name: node-exporter-local
   cadvisor:
-    container_name: cadvisor_local
+    container_name: cadvisor-local

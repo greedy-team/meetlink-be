@@ -18,5 +18,4 @@ services:
   node-exporter:
     container_name: node-exporter-dev
   cadvisor:
-    container_name: cadvisor_dev
-
+    container_name: cadvisor-dev

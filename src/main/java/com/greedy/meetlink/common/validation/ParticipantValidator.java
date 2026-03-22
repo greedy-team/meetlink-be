@@ -1,5 +1,6 @@
 package com.greedy.meetlink.common.validation;
 
+import com.greedy.meetlink.common.exception.InsufficientPermissionException;
 import com.greedy.meetlink.common.exception.InvalidParticipantTokenException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.meeting.entity.Meeting;
@@ -24,5 +25,12 @@ public class ParticipantValidator {
         return participantRepository
                 .findByMeetingAndToken(meeting, token)
                 .orElseThrow(InvalidParticipantTokenException::new);
+    }
+
+    public Participant validateHostAndGetParticipant(String meetingCode, String token) {
+        Participant participant = validateAndGetParticipant(meetingCode, token);
+        if (!participant.isHost()) throw new InsufficientPermissionException();
+
+        return participant;
     }
 }

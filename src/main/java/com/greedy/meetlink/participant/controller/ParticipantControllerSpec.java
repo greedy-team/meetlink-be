@@ -1,6 +1,7 @@
 package com.greedy.meetlink.participant.controller;
 
 import com.greedy.meetlink.common.ApiResponse;
+import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
@@ -199,4 +200,55 @@ public interface ParticipantControllerSpec {
     })
     ApiResponse<Void> leave(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
+
+    @Operation(summary = "모임장 양도")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "양도 성공",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": true
+                }
+            """))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "403",
+                description = "권한 없음",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": false,
+                    "code": "INSUFFICIENT_PERMISSION",
+                    "message": "권한이 없습니다."
+                }
+            """))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "대상 참여자 없음",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": false,
+                    "code": "PARTICIPANT_NOT_FOUND",
+                    "message": "참여자를 찾을 수 없습니다."
+                }
+            """)))
+    })
+    ApiResponse<Void> transferHost(
+            @PathVariable String code,
+            @RequestHeader("X-Participant-Token") String token,
+            @RequestBody HostTransferRequest request);
 }

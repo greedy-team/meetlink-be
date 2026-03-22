@@ -11,6 +11,7 @@ import lombok.Getter;
 public class ParticipantResponse {
     private final String nickname;
     private final String token;
+    private final Boolean isHost;
     private final Boolean isTimeSubmitted;
     private final Boolean isPlaceSubmitted;
 
@@ -18,6 +19,7 @@ public class ParticipantResponse {
         return ParticipantResponse.builder()
                 .nickname(participant.getNickname())
                 .token(participant.getToken())
+                .isHost(participant.isHost())
                 .build();
     }
 
@@ -25,6 +27,7 @@ public class ParticipantResponse {
             Participant participant, boolean isTimeSubmitted, boolean isPlaceSubmitted) {
         return ParticipantResponse.builder()
                 .nickname(participant.getNickname())
+                .isHost(participant.isHost())
                 .isTimeSubmitted(isTimeSubmitted)
                 .isPlaceSubmitted(isPlaceSubmitted)
                 .build();

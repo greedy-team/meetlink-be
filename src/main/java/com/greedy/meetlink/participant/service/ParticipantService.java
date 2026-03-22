@@ -5,9 +5,11 @@ import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.event.ParticipantLeftEvent;
 import com.greedy.meetlink.common.exception.DuplicateNicknameException;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
+import com.greedy.meetlink.common.exception.ParticipantNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
+import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
@@ -46,8 +48,10 @@ public class ParticipantService {
 
         String generatedToken = java.util.UUID.randomUUID().toString();
 
+        boolean isFirstParticipant = !participantRepository.existsByMeeting(meeting);
         Participant participant =
                 Participant.create(meeting, request.getNickname(), generatedToken);
+        if (isFirstParticipant) participant.promoteToHost();
 
         participantRepository.save(participant);
 
@@ -115,7 +119,33 @@ public class ParticipantService {
     public void leave(String meetingCode, String token) {
         Participant participant =
                 participantValidator.validateAndGetParticipant(meetingCode, token);
+        boolean wasHost = participant.isHost();
+        Meeting meeting = participant.getMeeting();
+
         participantRepository.delete(participant);
+
+        if (wasHost) {
+            participantRepository
+                    .findFirstByMeetingAndIsHostFalseOrderByCreatedAtAscNicknameAsc(meeting)
+                    .ifPresent(Participant::promoteToHost);
+        }
+
         eventPublisher.publishEvent(new ParticipantLeftEvent(meetingCode));
+    }
+
+    // 모임장 양도
+    @Transactional
+    public void transferHost(String meetingCode, String token, HostTransferRequest request) {
+        Participant currentHost =
+                participantValidator.validateHostAndGetParticipant(meetingCode, token);
+        Meeting meeting = currentHost.getMeeting();
+
+        Participant newHost =
+                participantRepository
+                        .findByMeetingAndNickname(meeting, request.getNickname())
+                        .orElseThrow(ParticipantNotFoundException::new);
+
+        currentHost.demoteFromHost();
+        newHost.promoteToHost();
     }
 }

@@ -1,6 +1,8 @@
 services:
   postgres:
     container_name: postgres-prod
+    ports:
+      - "5432:5432"
   motis:
     container_name: motis-prod
   backend:

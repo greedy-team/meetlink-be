@@ -118,6 +118,18 @@ public class PlaceCandidateService {
             throw new PlaceCandidateCalculationFailedException();
         }
 
+        Set<Long> currentIds =
+                participantRepository.findByMeeting(meeting).stream()
+                        .map(Participant::getId)
+                        .collect(Collectors.toSet());
+        Set<Long> originalIds =
+                participants.stream().map(Participant::getId).collect(Collectors.toSet());
+
+        if (!currentIds.equals(originalIds)) {
+            log.warn("Participants changed during calculation for meeting {}, aborting", code);
+            return;
+        }
+
         placeCandidateRepository.deleteByMeeting(meeting);
         List<PlaceCandidate> savedCandidates = saveCandidates(meeting, matchedPlaces);
         updateMeetingResult(meeting, savedCandidates.getFirst());

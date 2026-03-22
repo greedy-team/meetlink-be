@@ -22,6 +22,8 @@ public enum ResponseCode {
     LOCATION_NOT_SUBMITTED(HttpStatus.NOT_FOUND, "아직 장소를 입력하지 않았습니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     INVALID_PARTICIPANT_TOKEN(HttpStatus.FORBIDDEN, "유효하지 않은 참여자 토큰입니다."),
+    INSUFFICIENT_PERMISSION(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, "참여자를 찾을 수 없습니다."),
     INVALID_TIME_AVAILABILITY(HttpStatus.BAD_REQUEST, "시간 입력이 올바르지 않습니다."),
     PLACE_CANDIDATE_CALCULATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "추천 가능한 장소가 없습니다.");
 

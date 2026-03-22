@@ -54,6 +54,9 @@ public class Participant extends BaseEntity {
     @Column(nullable = false)
     private String token;
 
+    @Column(nullable = false)
+    private boolean isHost = false;
+
     private LocalDateTime timeSubmittedAt;
     private LocalDateTime locationSubmittedAt;
 
@@ -73,6 +76,14 @@ public class Participant extends BaseEntity {
 
     public static Participant create(Meeting meeting, String nickname, String token) {
         return Participant.builder().meeting(meeting).nickname(nickname).token(token).build();
+    }
+
+    public void promoteToHost() {
+        this.isHost = true;
+    }
+
+    public void demoteFromHost() {
+        this.isHost = false;
     }
 
     public void markTimeSubmitted() {

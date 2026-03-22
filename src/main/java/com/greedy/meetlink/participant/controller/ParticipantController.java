@@ -1,6 +1,7 @@
 package com.greedy.meetlink.participant.controller;
 
 import com.greedy.meetlink.common.ApiResponse;
+import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
@@ -50,6 +51,16 @@ public class ParticipantController implements ParticipantControllerSpec {
     public ApiResponse<Void> leave(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         participantService.leave(code, token);
+        return ApiResponse.success();
+    }
+
+    // 모임장 양도
+    @PostMapping("/host")
+    public ApiResponse<Void> transferHost(
+            @PathVariable String code,
+            @RequestHeader("X-Participant-Token") String token,
+            @Valid @RequestBody HostTransferRequest request) {
+        participantService.transferHost(code, token, request);
         return ApiResponse.success();
     }
 }

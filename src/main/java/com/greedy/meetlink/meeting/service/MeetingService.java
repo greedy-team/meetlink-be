@@ -59,7 +59,8 @@ public class MeetingService {
 
     @Transactional
     public MeetingResponse updateMeeting(String code, String token, MeetingUpdateRequest request) {
-        Meeting meeting = participantValidator.validateAndGetParticipant(code, token).getMeeting();
+        Meeting meeting =
+                participantValidator.validateHostAndGetParticipant(code, token).getMeeting();
 
         boolean timeAvailabilityTypeChanged = isTimeAvailabilityTypeChanged(meeting, request);
         boolean timeRangeChanged =

@@ -12,11 +12,18 @@ import org.springframework.data.jpa.repository.Query;
 public interface ParticipantRepository extends JpaRepository<Participant, Long> {
     boolean existsByMeetingAndNickname(Meeting meeting, String nickname);
 
+    boolean existsByMeeting(Meeting meeting);
+
     List<Participant> findByMeeting(Meeting meeting);
 
     List<Participant> findByMeetingOrderByCreatedAtAscNicknameAsc(Meeting meeting);
 
     Optional<Participant> findByMeetingAndToken(Meeting meeting, String token);
+
+    Optional<Participant> findByMeetingAndNickname(Meeting meeting, String nickname);
+
+    Optional<Participant> findFirstByMeetingAndIsHostFalseOrderByCreatedAtAscNicknameAsc(
+            Meeting meeting);
 
     @Query(
             """

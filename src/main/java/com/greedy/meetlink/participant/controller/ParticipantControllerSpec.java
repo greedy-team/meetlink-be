@@ -115,17 +115,20 @@ public interface ParticipantControllerSpec {
                                                     {
                                                         "nickname": "테스트1",
                                                         "isPlaceSubmitted": true,
-                                                        "isTimeSubmitted": true
+                                                        "isTimeSubmitted": true,
+                                                        "isHost": true
                                                     },
                                                     {
                                                         "nickname": "테스트2",
                                                         "isPlaceSubmitted": true,
-                                                        "isTimeSubmitted": false
+                                                        "isTimeSubmitted": false,
+                                                        "isHost": false
                                                     },
                                                     {
                                                         "nickname": "테스트3",
                                                         "isPlaceSubmitted": false,
-                                                        "isTimeSubmitted": false
+                                                        "isTimeSubmitted": false,
+                                                        "isHost": false
                                                     }
                                                 ]
                                             }
@@ -139,15 +142,18 @@ public interface ParticipantControllerSpec {
                                                 "result": [
                                                     {
                                                         "nickname": "테스트1",
-                                                        "token": "1915086f-f1dc-4d32-8311-9ed9b7c38507"
+                                                        "token": "1915086f-f1dc-4d32-8311-9ed9b7c38507",
+                                                        "isHost": true
                                                     },
                                                     {
                                                         "nickname": "테스트2",
-                                                        "token": "2a3b4c5d-e6f7-8901-abcd-ef1234567890"
+                                                        "token": "2a3b4c5d-e6f7-8901-abcd-ef1234567890",
+                                                        "isHost": false
                                                     },
                                                     {
                                                         "nickname": "테스트3",
-                                                        "token": "3c4d5e6f-7890-1234-bcde-f01234567891"
+                                                        "token": "3c4d5e6f-7890-1234-bcde-f01234567891",
+                                                        "isHost": false
                                                     }
                                                 ]
                                             }
@@ -174,7 +180,8 @@ public interface ParticipantControllerSpec {
                                                 "result": {
                                                     "nickname": "테스트1",
                                                     "isPlaceSubmitted": true,
-                                                    "isTimeSubmitted": true
+                                                    "isTimeSubmitted": true,
+                                                    "isHost": true
                                                 }
                                             }
                                             """)))

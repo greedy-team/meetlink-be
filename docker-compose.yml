@@ -137,6 +137,8 @@ services:
     privileged: true
     devices:
       - /dev/kmsg
+    command:
+      - --docker_only=true
 volumes:
   postgres-data:
   motis-data:

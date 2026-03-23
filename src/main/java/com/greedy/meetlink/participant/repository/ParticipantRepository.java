@@ -42,6 +42,10 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     """)
     Optional<LocalDateTime> findLastLocationSubmission(Meeting meeting);
 
+    long countByTimeSubmittedAtIsNotNull();
+
+    long countByLocationSubmittedAtIsNotNull();
+
     @Modifying
     @Query(
             """

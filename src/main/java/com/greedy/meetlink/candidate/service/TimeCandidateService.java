@@ -92,7 +92,14 @@ public class TimeCandidateService {
     }
 
     private List<TimeCandidateResponse> toResponses(Meeting meeting) {
+        LocalDateTime now = LocalDateTime.now();
+
         return timeCandidateRepository.findByMeetingOrderByRankAsc(meeting).stream()
+                .filter(
+                        c ->
+                                c.getDate() == null
+                                        || LocalDateTime.of(c.getDate(), c.getStartTime())
+                                                .isAfter(now))
                 .map(TimeCandidateResponse::from)
                 .toList();
     }

@@ -7,4 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MeetingResultRepository extends JpaRepository<MeetingResult, Long> {
     Optional<MeetingResult> findByMeeting(Meeting meeting);
+
+    long countByTimeCandidateIsNotNull();
+
+    long countByPlaceCandidateIsNotNull();
 }

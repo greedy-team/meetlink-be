@@ -3,7 +3,7 @@ providers:
   - name: meetlink
     orgId: 1
     type: file
-    disableDeletion: true
+    disableDeletion: false
     updateIntervalSeconds: 30
     allowUiUpdates: false
     options:

@@ -152,6 +152,10 @@ public class PlaceCandidateService {
         return calculatingSet.contains(meetingCode);
     }
 
+    public int getCalculatingCount() {
+        return calculatingSet.size();
+    }
+
     private List<PlaceCandidateResponse> toResponses(Meeting meeting) {
         List<PlaceCandidate> candidates =
                 placeCandidateRepository.findByMeetingOrderByRankAsc(meeting);

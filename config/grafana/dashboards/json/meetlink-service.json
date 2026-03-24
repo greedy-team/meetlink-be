@@ -47,7 +47,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_count",
+          "expr": "max(meetlink_meetings_count)",
           "legendFormat": "",
           "instant": true
         }
@@ -87,7 +87,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_orphan",
+          "expr": "max(meetlink_meetings_orphan)",
           "legendFormat": "",
           "instant": true
         }
@@ -119,7 +119,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_participants_count",
+          "expr": "max(meetlink_participants_count)",
           "legendFormat": "",
           "instant": true
         }
@@ -159,7 +159,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_place_calculating",
+          "expr": "sum(meetlink_meetings_place_calculating)",
           "legendFormat": "",
           "instant": true
         }
@@ -191,7 +191,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_time_recommendation_enabled",
+          "expr": "max(meetlink_meetings_time_recommendation_enabled)",
           "legendFormat": "",
           "instant": true
         }
@@ -223,7 +223,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_place_recommendation_enabled",
+          "expr": "max(meetlink_meetings_place_recommendation_enabled)",
           "legendFormat": "",
           "instant": true
         }
@@ -255,7 +255,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_time_confirmed",
+          "expr": "max(meetlink_meetings_time_confirmed)",
           "legendFormat": "",
           "instant": true
         }
@@ -287,7 +287,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_place_confirmed",
+          "expr": "max(meetlink_meetings_place_confirmed)",
           "legendFormat": "",
           "instant": true
         }
@@ -329,21 +329,21 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_participants_count",
+          "expr": "max(meetlink_participants_count)",
           "legendFormat": "Total",
           "instant": false
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_participants_time_submitted",
+          "expr": "max(meetlink_participants_time_submitted)",
           "legendFormat": "Time Submitted",
           "instant": false
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_participants_location_submitted",
+          "expr": "max(meetlink_participants_location_submitted)",
           "legendFormat": "Location Submitted",
           "instant": false
         }
@@ -379,14 +379,14 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_participants_time_submitted / clamp_min(meetlink_participants_count, 1) * 100",
+          "expr": "max(meetlink_participants_time_submitted) / clamp_min(max(meetlink_participants_count), 1) * 100",
           "legendFormat": "Time Submission Rate",
           "instant": false
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_participants_location_submitted / clamp_min(meetlink_participants_count, 1) * 100",
+          "expr": "max(meetlink_participants_location_submitted) / clamp_min(max(meetlink_participants_count), 1) * 100",
           "legendFormat": "Location Submission Rate",
           "instant": false
         }
@@ -412,14 +412,14 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_availability_type{type=\"weekly\"}",
+          "expr": "max(meetlink_meetings_availability_type{type=\"weekly\"})",
           "legendFormat": "Weekly",
           "instant": true
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "meetlink_meetings_availability_type{type=\"specific_date\"}",
+          "expr": "max(meetlink_meetings_availability_type{type=\"specific_date\"})",
           "legendFormat": "Specific Date",
           "instant": true
         }

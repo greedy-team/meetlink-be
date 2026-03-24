@@ -48,3 +48,6 @@ management:
     tags:
       application: ${spring.application.name}
       deployment: ${DEPLOYMENT_TYPE}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true

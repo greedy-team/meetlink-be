@@ -1,6 +1,7 @@
 package com.greedy.meetlink.meeting.service;
 
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
+import com.greedy.meetlink.availability.service.TimeAvailabilityService;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
@@ -25,6 +26,7 @@ public class MeetingService {
     private final MeetingRepository meetingRepository;
     private final MeetingResultRepository meetingResultRepository;
     private final TimeAvailabilityRepository timeAvailabilityRepository;
+    private final TimeAvailabilityService timeAvailabilityService;
     private final TimeCandidateRepository timeCandidateRepository;
     private final ParticipantRepository participantRepository;
     private final ParticipantValidator participantValidator;
@@ -75,7 +77,8 @@ public class MeetingService {
                 request.getTimeRangeEnd());
 
         if (timeAvailabilityTypeChanged) {
-            timeAvailabilityRepository.deleteByMeeting(meeting);
+            timeAvailabilityService.switchMeetingTypeData(
+                    meeting, request.getTimeAvailabilityType());
             participantRepository.resetTimeSubmittedIfNoAvailability(meeting);
             timeCandidateRepository.deleteByMeeting(meeting);
         } else if (timeRangeChanged) {

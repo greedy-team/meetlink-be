@@ -158,4 +158,15 @@ public class TimeAvailabilityService {
             }
         }
     }
+
+    @Transactional
+    public void switchMeetingTypeData(Meeting meeting, TimeAvailabilityType newType) {
+        timeAvailabilityRepository.deleteByMeeting(meeting);
+
+        if (newType == TimeAvailabilityType.WEEKLY) {
+            timeAvailabilityRepository.restoreWeeklyDataByMeeting(meeting.getId());
+        } else if (newType == TimeAvailabilityType.SPECIFIC_DATE) {
+            timeAvailabilityRepository.restoreSpecificDateDataByMeeting(meeting.getId());
+        }
+    }
 }

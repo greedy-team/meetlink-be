@@ -12,7 +12,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
@@ -21,27 +20,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE time_availability SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 @Table(
+        name = "time_availability",
         indexes = {
             @Index(
                     name = "idx_time_meeting_participant",
                     columnList = "meeting_id, participant_id"),
             @Index(name = "idx_time_meeting", columnList = "meeting_id"),
             @Index(name = "idx_time_meeting_start_time", columnList = "meeting_id, start_time")
-        },
-        uniqueConstraints = {
-            @UniqueConstraint(
-                    columnNames = {
-                        "meeting_id",
-                        "participant_id",
-                        "date",
-                        "day_of_week",
-                        "start_time"
-                    })
         })
 public class TimeAvailability {
     @Id
@@ -62,6 +56,9 @@ public class TimeAvailability {
 
     @Column(nullable = false)
     private LocalTime startTime;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
 
     @Builder
     private TimeAvailability(

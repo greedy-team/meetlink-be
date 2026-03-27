@@ -22,7 +22,7 @@ public interface TimeAvailabilityRepository extends JpaRepository<TimeAvailabili
 
     @Modifying(clearAutomatically = true)
     @Query(
-            "UPDATE TimeAvailability ta SET ta.isDeleted = true WHERE ta.meeting = :meeting AND ta.participant = :participant")
+            "DELETE FROM TimeAvailability ta WHERE ta.meeting = :meeting AND ta.participant = :participant")
     void deleteByMeetingAndParticipant(Meeting meeting, Participant participant);
 
     @Modifying(clearAutomatically = true)

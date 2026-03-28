@@ -76,6 +76,8 @@ public class MeetingService {
                 request.getTimeRangeStart(),
                 request.getTimeRangeEnd());
 
+        meetingRepository.flush();
+
         if (timeAvailabilityTypeChanged) {
             timeAvailabilityService.switchMeetingTypeData(
                     meeting, request.getTimeAvailabilityType());

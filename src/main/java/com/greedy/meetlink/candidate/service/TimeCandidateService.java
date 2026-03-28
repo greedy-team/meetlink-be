@@ -58,7 +58,7 @@ public class TimeCandidateService {
     }
 
     @Transactional
-    public void recalculateOnLeave(String code) {
+    public void recalculate(String code) {
         Meeting meeting =
                 meetingRepository.findByCode(code).orElseThrow(MeetingNotFoundException::new);
         doCalculate(code, meeting);

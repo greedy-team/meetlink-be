@@ -6,6 +6,7 @@ import com.greedy.meetlink.availability.dto.response.TimeAvailabilityResponse;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
+import com.greedy.meetlink.candidate.event.TimeAvailabilityClearedEvent;
 import com.greedy.meetlink.candidate.event.TimeAvailabilitySubmittedEvent;
 import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
@@ -38,7 +39,7 @@ public class TimeAvailabilityService {
         if (request.getAvailabilities() == null || request.getAvailabilities().isEmpty()) {
             timeAvailabilityRepository.deleteByMeetingAndParticipant(meeting, participant);
             participant.unmarkTimeSubmitted();
-            eventPublisher.publishEvent(new TimeAvailabilitySubmittedEvent(meetingCode));
+            eventPublisher.publishEvent(new TimeAvailabilityClearedEvent(meetingCode));
             return;
         }
 

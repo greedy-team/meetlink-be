@@ -34,6 +34,14 @@ public class TimeAvailabilityService {
                 participantValidator.validateAndGetParticipant(meetingCode, token);
         Meeting meeting = participant.getMeeting();
 
+        // 빈 요청이면 기존 데이터 삭제 후 제출 상태 초기화
+        if (request.getAvailabilities() == null || request.getAvailabilities().isEmpty()) {
+            timeAvailabilityRepository.deleteByMeetingAndParticipant(meeting, participant);
+            participant.unmarkTimeSubmitted();
+            eventPublisher.publishEvent(new TimeAvailabilitySubmittedEvent(meetingCode));
+            return;
+        }
+
         // 모임 타입 검증
         validateByMeetingType(meeting, request);
 

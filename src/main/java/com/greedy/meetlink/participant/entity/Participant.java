@@ -90,6 +90,10 @@ public class Participant extends BaseEntity {
         this.timeSubmittedAt = LocalDateTime.now();
     }
 
+    public void unmarkTimeSubmitted() {
+        this.timeSubmittedAt = null;
+    }
+
     public void markLocationSubmitted() {
         this.locationSubmittedAt = LocalDateTime.now();
     }

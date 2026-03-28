@@ -29,7 +29,6 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE time_availability SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 @Table(
-        name = "time_availability",
         indexes = {
             @Index(
                     name = "idx_time_meeting_participant",

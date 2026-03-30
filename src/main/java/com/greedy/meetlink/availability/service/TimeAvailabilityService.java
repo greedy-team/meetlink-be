@@ -6,6 +6,7 @@ import com.greedy.meetlink.availability.dto.response.TimeAvailabilityResponse;
 import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.entity.TimeAvailabilityType;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
+import com.greedy.meetlink.candidate.event.TimeAvailabilityClearedEvent;
 import com.greedy.meetlink.candidate.event.TimeAvailabilitySubmittedEvent;
 import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
@@ -33,6 +34,14 @@ public class TimeAvailabilityService {
         Participant participant =
                 participantValidator.validateAndGetParticipant(meetingCode, token);
         Meeting meeting = participant.getMeeting();
+
+        // 빈 요청이면 기존 데이터 삭제 후 제출 상태 초기화
+        if (request.getAvailabilities() == null || request.getAvailabilities().isEmpty()) {
+            timeAvailabilityRepository.deleteByMeetingAndParticipant(meeting, participant);
+            participant.unmarkTimeSubmitted();
+            eventPublisher.publishEvent(new TimeAvailabilityClearedEvent(meetingCode));
+            return;
+        }
 
         // 모임 타입 검증
         validateByMeetingType(meeting, request);

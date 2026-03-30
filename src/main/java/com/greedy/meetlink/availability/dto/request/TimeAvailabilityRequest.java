@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class TimeAvailabilityRequest {
-    @NotEmpty(message = "시간 선택은 최소 1개 이상이어야 합니다.")
     private List<Availability> availabilities;
 
     @Getter

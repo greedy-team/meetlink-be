@@ -54,9 +54,16 @@ class CandidateEventListener {
 
     @Async("candidateCalculationExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void onTimeCleared(TimeAvailabilityClearedEvent e) {
+        log.info("TimeAvailabilityClearedEvent received: meeting={}", e.meetingCode());
+        timeCandidateService.recalculate(e.meetingCode());
+    }
+
+    @Async("candidateCalculationExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void onParticipantLeft(ParticipantLeftEvent e) {
         log.info("ParticipantLeftEvent received: meeting={}", e.meetingCode());
-        timeCandidateService.recalculateOnLeave(e.meetingCode());
+        timeCandidateService.recalculate(e.meetingCode());
         placeCandidateService.recalculateOnLeave(e.meetingCode());
     }
 }

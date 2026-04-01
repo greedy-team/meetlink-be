@@ -28,6 +28,7 @@ jobs:
           APP_IMAGE: ghcr.io/${{ github.repository }}:dev-latest
           KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           GF_USERNAME: ${{ secrets.GF_USERNAME }}
           GF_PASSWORD: ${{ secrets.GF_PASSWORD }}
         run: |

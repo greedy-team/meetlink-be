@@ -46,6 +46,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_API_KEY: ${KAKAO_API_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}
       DEPLOYMENT_TYPE: stable
     healthcheck:
       test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
@@ -70,6 +71,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       KAKAO_API_KEY: ${KAKAO_API_KEY}
       SENTRY_DSN: ${SENTRY_DSN}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}
       DEPLOYMENT_TYPE: canary
     healthcheck:
       test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]

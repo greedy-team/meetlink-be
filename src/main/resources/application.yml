@@ -39,6 +39,8 @@ sentry:
   send-default-pii: true
   tags:
     deployment: ${DEPLOYMENT_TYPE}
+firebase:
+  service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON:}
 management:
   endpoints:
     web:

@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,7 +18,6 @@ public class FirebaseConfig {
     private String serviceAccountJson;
 
     @Bean
-    @ConditionalOnMissingBean(FirebaseApp.class)
     public FirebaseApp firebaseApp() throws IOException {
         if (serviceAccountJson == null || serviceAccountJson.isBlank()) {
             log.info("Firebase credentials not configured, push notifications disabled");
@@ -32,6 +30,7 @@ public class FirebaseConfig {
                                 serviceAccountJson.getBytes(StandardCharsets.UTF_8)));
 
         FirebaseOptions options = FirebaseOptions.builder().setCredentials(credentials).build();
+
         return FirebaseApp.initializeApp(options);
     }
 }

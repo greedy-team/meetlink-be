@@ -9,6 +9,7 @@ import com.greedy.meetlink.meeting.dto.request.MeetingCreateRequest;
 import com.greedy.meetlink.meeting.dto.request.MeetingUpdateRequest;
 import com.greedy.meetlink.meeting.dto.response.MeetingResponse;
 import com.greedy.meetlink.meeting.entity.Meeting;
+import com.greedy.meetlink.meeting.event.MeetingUpdatedEvent;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.meeting.util.MeetingCodeGenerator;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
@@ -16,6 +17,7 @@ import com.greedy.meetlink.result.entity.MeetingResult;
 import com.greedy.meetlink.result.repository.MeetingResultRepository;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class MeetingService {
     private final TimeCandidateRepository timeCandidateRepository;
     private final ParticipantRepository participantRepository;
     private final ParticipantValidator participantValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public MeetingResponse getMeeting(String code) {
@@ -94,6 +97,8 @@ public class MeetingService {
             participantRepository.resetTimeSubmittedIfNoAvailability(meeting);
             timeCandidateRepository.deleteByMeeting(meeting);
         }
+
+        eventPublisher.publishEvent(new MeetingUpdatedEvent(code));
 
         return MeetingResponse.from(meeting);
     }

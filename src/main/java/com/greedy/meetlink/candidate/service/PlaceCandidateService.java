@@ -12,6 +12,7 @@ import com.greedy.meetlink.candidate.algorithm.PolarSamplingGenerator;
 import com.greedy.meetlink.candidate.dto.response.PlaceCandidateResponse;
 import com.greedy.meetlink.candidate.entity.PlaceCandidate;
 import com.greedy.meetlink.candidate.entity.PlaceCandidateRoute;
+import com.greedy.meetlink.candidate.event.PlaceRecommendationReadyEvent;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRepository;
 import com.greedy.meetlink.candidate.repository.PlaceCandidateRouteRepository;
 import com.greedy.meetlink.common.client.dto.RouteInfo;
@@ -31,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +56,7 @@ public class PlaceCandidateService {
     private final ParticipantRepository participantRepository;
     private final LocationAvailabilityRepository locationAvailabilityRepository;
     private final ParticipantValidator participantValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void calculatePlaceCandidates(String code) {
@@ -140,6 +143,8 @@ public class PlaceCandidateService {
                 code,
                 savedCandidates.size(),
                 System.currentTimeMillis() - startMs);
+
+        eventPublisher.publishEvent(new PlaceRecommendationReadyEvent(code));
     }
 
     @Transactional(readOnly = true)

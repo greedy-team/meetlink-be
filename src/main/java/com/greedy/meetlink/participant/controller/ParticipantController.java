@@ -3,6 +3,7 @@ package com.greedy.meetlink.participant.controller;
 import com.greedy.meetlink.common.ApiResponse;
 import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
+import com.greedy.meetlink.participant.dto.request.PushTokenRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import com.greedy.meetlink.participant.service.ParticipantService;
@@ -51,6 +52,16 @@ public class ParticipantController implements ParticipantControllerSpec {
     public ApiResponse<Void> leave(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
         participantService.leave(code, token);
+        return ApiResponse.success();
+    }
+
+    // 푸시 토큰 등록
+    @PostMapping("/me/push-token")
+    public ApiResponse<Void> registerPushToken(
+            @PathVariable String code,
+            @RequestHeader("X-Participant-Token") String token,
+            @Valid @RequestBody PushTokenRequest request) {
+        participantService.savePushToken(code, token, request);
         return ApiResponse.success();
     }
 

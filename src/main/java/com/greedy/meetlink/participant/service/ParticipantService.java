@@ -11,9 +11,11 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
+import com.greedy.meetlink.participant.dto.request.PushTokenRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import com.greedy.meetlink.participant.entity.Participant;
+import com.greedy.meetlink.participant.event.HostTransferredEvent;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import java.util.HashSet;
 import java.util.List;
@@ -133,6 +135,14 @@ public class ParticipantService {
         eventPublisher.publishEvent(new ParticipantLeftEvent(meetingCode));
     }
 
+    // 푸시 토큰 등록
+    @Transactional
+    public void savePushToken(String meetingCode, String token, PushTokenRequest request) {
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
+        participant.updatePushToken(request.getToken());
+    }
+
     // 모임장 양도
     @Transactional
     public void transferHost(String meetingCode, String token, HostTransferRequest request) {
@@ -147,5 +157,7 @@ public class ParticipantService {
 
         currentHost.demoteFromHost();
         newHost.promoteToHost();
+
+        eventPublisher.publishEvent(new HostTransferredEvent(meetingCode, newHost.getNickname()));
     }
 }

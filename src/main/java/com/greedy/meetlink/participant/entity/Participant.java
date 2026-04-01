@@ -60,6 +60,8 @@ public class Participant extends BaseEntity {
     private LocalDateTime timeSubmittedAt;
     private LocalDateTime locationSubmittedAt;
 
+    private String fcmToken;
+
     @Builder
     private Participant(
             Meeting meeting,
@@ -96,5 +98,9 @@ public class Participant extends BaseEntity {
 
     public void markLocationSubmitted() {
         this.locationSubmittedAt = LocalDateTime.now();
+    }
+
+    public void updatePushToken(String token) {
+        this.fcmToken = token;
     }
 }

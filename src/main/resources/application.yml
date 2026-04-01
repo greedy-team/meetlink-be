@@ -32,13 +32,15 @@ motis:
 kakao:
   api-key: ${KAKAO_API_KEY}
 sentry:
-  dsn: ${SENTRY_DSN}
-  environment: ${SPRING_PROFILES_ACTIVE}
+  dsn: ${SENTRY_DSN:}
+  environment: ${SPRING_PROFILES_ACTIVE:}
   logs:
     enabled: true
   send-default-pii: true
   tags:
-    deployment: ${DEPLOYMENT_TYPE}
+    deployment: ${DEPLOYMENT_TYPE:}
+firebase:
+  service-account-json: ${FIREBASE_SERVICE_ACCOUNT_JSON:}
 management:
   endpoints:
     web:
@@ -47,7 +49,7 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
-      deployment: ${DEPLOYMENT_TYPE}
+      deployment: ${DEPLOYMENT_TYPE:}
     distribution:
       percentiles-histogram:
         http.server.requests: true

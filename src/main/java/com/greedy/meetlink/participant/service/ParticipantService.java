@@ -15,6 +15,7 @@ import com.greedy.meetlink.participant.dto.request.PushTokenRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import com.greedy.meetlink.participant.entity.Participant;
+import com.greedy.meetlink.participant.event.HostTransferredEvent;
 import com.greedy.meetlink.participant.repository.ParticipantRepository;
 import java.util.HashSet;
 import java.util.List;
@@ -156,5 +157,7 @@ public class ParticipantService {
 
         currentHost.demoteFromHost();
         newHost.promoteToHost();
+
+        eventPublisher.publishEvent(new HostTransferredEvent(meetingCode, newHost.getNickname()));
     }
 }

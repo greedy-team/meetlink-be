@@ -25,6 +25,12 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     Optional<Participant> findFirstByMeetingAndIsHostFalseOrderByCreatedAtAscNicknameAsc(
             Meeting meeting);
 
+    Optional<Participant> findByMeetingAndIsHostTrue(Meeting meeting);
+
+    List<Participant> findByMeetingAndFcmTokenIsNotNull(Meeting meeting);
+
+    List<Participant> findByMeetingAndIsHostFalseAndFcmTokenIsNotNull(Meeting meeting);
+
     @Query(
             """
         SELECT MAX(p.timeSubmittedAt)

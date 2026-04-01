@@ -4,6 +4,7 @@ import com.greedy.meetlink.availability.entity.TimeAvailability;
 import com.greedy.meetlink.availability.repository.TimeAvailabilityRepository;
 import com.greedy.meetlink.candidate.dto.response.TimeCandidateResponse;
 import com.greedy.meetlink.candidate.entity.TimeCandidate;
+import com.greedy.meetlink.candidate.event.TimeRecommendationReadyEvent;
 import com.greedy.meetlink.candidate.repository.TimeCandidateRepository;
 import com.greedy.meetlink.common.exception.MeetingNotFoundException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ public class TimeCandidateService {
     private final MeetingRepository meetingRepository;
     private final MeetingResultRepository meetingResultRepository;
     private final ParticipantValidator participantValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void calculateTimeCandidates(String code) {
@@ -83,6 +86,8 @@ public class TimeCandidateService {
                 "Time candidate calculation completed: meeting={}, results={}",
                 code,
                 candidates.size());
+
+        eventPublisher.publishEvent(new TimeRecommendationReadyEvent(code));
     }
 
     @Transactional(readOnly = true)

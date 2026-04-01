@@ -11,6 +11,7 @@ import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.meeting.repository.MeetingRepository;
 import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
+import com.greedy.meetlink.participant.dto.request.PushTokenRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import com.greedy.meetlink.participant.entity.Participant;
@@ -131,6 +132,14 @@ public class ParticipantService {
         }
 
         eventPublisher.publishEvent(new ParticipantLeftEvent(meetingCode));
+    }
+
+    // 푸시 토큰 등록
+    @Transactional
+    public void savePushToken(String meetingCode, String token, PushTokenRequest request) {
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
+        participant.updatePushToken(request.getToken());
     }
 
     // 모임장 양도

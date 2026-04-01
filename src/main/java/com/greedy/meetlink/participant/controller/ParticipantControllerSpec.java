@@ -3,6 +3,7 @@ package com.greedy.meetlink.participant.controller;
 import com.greedy.meetlink.common.ApiResponse;
 import com.greedy.meetlink.participant.dto.request.HostTransferRequest;
 import com.greedy.meetlink.participant.dto.request.ParticipantJoinRequest;
+import com.greedy.meetlink.participant.dto.request.PushTokenRequest;
 import com.greedy.meetlink.participant.dto.response.ParticipantJoinResponse;
 import com.greedy.meetlink.participant.dto.response.ParticipantResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -207,6 +208,42 @@ public interface ParticipantControllerSpec {
     })
     ApiResponse<Void> leave(
             @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
+
+    @Operation(summary = "푸시 토큰 등록")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "토큰 등록 성공",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": true
+                }
+            """))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "403",
+                description = "유효하지 않은 참여자 토큰",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": false,
+                    "code": "INVALID_PARTICIPANT_TOKEN",
+                    "message": "유효하지 않은 참여자 토큰입니다."
+                }
+            """)))
+    })
+    ApiResponse<Void> registerPushToken(
+            @PathVariable String code,
+            @RequestHeader("X-Participant-Token") String token,
+            @RequestBody PushTokenRequest request);
 
     @Operation(summary = "모임장 양도")
     @ApiResponses({

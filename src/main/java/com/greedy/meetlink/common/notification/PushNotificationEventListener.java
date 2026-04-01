@@ -64,14 +64,14 @@ class PushNotificationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void onPlaceRecommendationReady(PlaceRecommendationReadyEvent event) {
         log.debug("PlaceRecommendationReadyEvent: meeting={}", event.meetingCode());
-        notifyAllWithToken(event.meetingCode(), "추천 장소 생성 완료", "추천 장소가 생성되었어요!");
+        notifyAllWithToken(event.meetingCode(), "추천 장소 업데이트", "추천 장소가 업데이트되었어요");
     }
 
     @Async("candidateCalculationExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void onTimeRecommendationReady(TimeRecommendationReadyEvent event) {
         log.debug("TimeRecommendationReadyEvent: meeting={}", event.meetingCode());
-        notifyAllWithToken(event.meetingCode(), "시간 후보 업데이트", "시간 후보가 업데이트되었어요!");
+        notifyAllWithToken(event.meetingCode(), "추천 시간 업데이트", "추천 시간이 업데이트되었어요");
     }
 
     private void notifyAllWithToken(String meetingCode, String title, String body) {

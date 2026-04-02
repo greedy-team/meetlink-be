@@ -143,6 +143,15 @@ public class ParticipantService {
         participant.updatePushToken(request.getToken());
     }
 
+    // 푸시 토큰 삭제
+    @Transactional
+    public void deletePushToken(String meetingCode, String token) {
+        Participant participant =
+                participantValidator.validateAndGetParticipant(meetingCode, token);
+
+        participant.clearPushToken();
+    }
+
     // 모임장 양도
     @Transactional
     public void transferHost(String meetingCode, String token, HostTransferRequest request) {

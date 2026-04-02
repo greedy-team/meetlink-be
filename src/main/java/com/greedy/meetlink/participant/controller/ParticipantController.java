@@ -65,6 +65,15 @@ public class ParticipantController implements ParticipantControllerSpec {
         return ApiResponse.success();
     }
 
+    // 푸시 토큰 삭제
+    @DeleteMapping("/me/push-token")
+    public ApiResponse<Void> deletePushToken(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token) {
+        participantService.deletePushToken(code, token);
+
+        return ApiResponse.success();
+    }
+
     // 모임장 양도
     @PostMapping("/host")
     public ApiResponse<Void> transferHost(

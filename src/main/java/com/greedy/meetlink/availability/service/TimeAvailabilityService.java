@@ -12,6 +12,7 @@ import com.greedy.meetlink.common.exception.InvalidTimeAvailabilityException;
 import com.greedy.meetlink.common.validation.ParticipantValidator;
 import com.greedy.meetlink.meeting.entity.Meeting;
 import com.greedy.meetlink.participant.entity.Participant;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -28,6 +29,7 @@ public class TimeAvailabilityService {
     private final TimeAvailabilityRepository timeAvailabilityRepository;
     private final ParticipantValidator participantValidator;
     private final ApplicationEventPublisher eventPublisher;
+    private final EntityManager entityManager;
 
     @Transactional
     public void submit(String meetingCode, String token, TimeAvailabilityRequest request) {
@@ -37,14 +39,20 @@ public class TimeAvailabilityService {
 
         // 빈 요청이면 기존 데이터 삭제 후 제출 상태 초기화
         if (request.getAvailabilities() == null || request.getAvailabilities().isEmpty()) {
-            timeAvailabilityRepository.deleteByMeetingAndParticipant(meeting, participant);
             participant.unmarkTimeSubmitted();
+            entityManager.flush(); // 명시적으로 변경 사항 flush
+
+            timeAvailabilityRepository.deleteByMeetingAndParticipant(meeting, participant);
             eventPublisher.publishEvent(new TimeAvailabilityClearedEvent(meetingCode));
             return;
         }
 
         // 모임 타입 검증
         validateByMeetingType(meeting, request);
+
+        // 시간 제출 여부 체크
+        participant.markTimeSubmitted();
+        entityManager.flush(); // 명시적으로 변경 사항 flush
 
         // 기존 데이터 제거
         timeAvailabilityRepository.deleteByMeetingAndParticipant(meeting, participant);
@@ -66,9 +74,6 @@ public class TimeAvailabilityService {
                         .toList();
 
         timeAvailabilityRepository.saveAll(entities);
-
-        // 시간 제출 여부 체크
-        participant.markTimeSubmitted();
 
         eventPublisher.publishEvent(new TimeAvailabilitySubmittedEvent(meetingCode));
     }

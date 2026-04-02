@@ -245,6 +245,40 @@ public interface ParticipantControllerSpec {
             @RequestHeader("X-Participant-Token") String token,
             @RequestBody PushTokenRequest request);
 
+    @Operation(summary = "푸시 토큰 삭제")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "토큰 삭제 성공",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": true
+                }
+            """))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "403",
+                description = "유효하지 않은 참여자 토큰",
+                content =
+                        @Content(
+                                examples =
+                                        @ExampleObject(
+                                                value =
+                                                        """
+                {
+                    "status": false,
+                    "code": "INVALID_PARTICIPANT_TOKEN",
+                    "message": "유효하지 않은 참여자 토큰입니다."
+                }
+            """)))
+    })
+    ApiResponse<Void> deletePushToken(
+            @PathVariable String code, @RequestHeader("X-Participant-Token") String token);
+
     @Operation(summary = "모임장 양도")
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(

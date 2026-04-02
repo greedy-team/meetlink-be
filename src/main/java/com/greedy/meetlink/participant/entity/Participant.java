@@ -103,4 +103,8 @@ public class Participant extends BaseEntity {
     public void updatePushToken(String token) {
         this.fcmToken = token;
     }
+
+    public void clearPushToken() {
+        this.fcmToken = null;
+    }
 }
